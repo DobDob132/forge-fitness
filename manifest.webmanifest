@@ -1,0 +1,11 @@
+{
+ "id":"./", "name":"FORGE – Build. Train. Progress.", "short_name":"FORGE",
+ "start_url":"./index.html", "scope":"./", "display":"standalone",
+ "background_color":"#090b10", "theme_color":"#090b10", "lang":"de",
+ "description":"Dein Training und Fortschritt – privat und auch offline.",
+ "icons":[
+  {"src":"assets/icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+  {"src":"assets/icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+  {"src":"assets/icons/icon-maskable.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+ ]
+}

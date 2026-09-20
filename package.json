@@ -1,0 +1,8 @@
+{
+  "name": "forge-fitness",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FORGE – installierbare Fitness-App",
+  "scripts": {"build": "node scripts/build.cjs", "test": "node --test tests/*.test.cjs"},
+  "dependencies": {"@supabase/supabase-js": "2.116.0", "chart.js": "4.5.1"}
+}

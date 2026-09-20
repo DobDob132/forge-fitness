@@ -1,0 +1,45 @@
+function show(id,btn){
+  document.querySelectorAll("section").forEach(x=>x.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  if(btn){document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));btn.classList.add("active")}
+  if(id!=="workout") releaseWakeLock();
+  if(id==="home") renderHome();
+  if(id==="plan") renderPlan();
+  if(id==="plans"){renderPlansList();ForgeSocial.refreshShares();}
+  if(id==="progress") renderProgress();
+  if(id==="trophies") renderTrophies();
+}
+
+function renderHome(){
+    renderXP();
+    let d=today(); let days = getActiveDays();
+    document.getElementById("todayLabel").textContent=d.name+" · "+new Date().toLocaleDateString("de-AT",{day:"2-digit",month:"2-digit",year:"numeric"});
+    document.getElementById("todayTitle").textContent=d.focus;
+    document.getElementById("todaySub").textContent=d.ex.length?`${d.ex.reduce((a,e)=>a+(Number(e[1])||1),0)} Sätze`:"Regenerationstag - Erhalte deinen Streak automatisch aufrecht!";
+    document.getElementById("streak").textContent=streak();
+    document.getElementById("sessions").textContent=data.logs.length;
+    document.getElementById("sets").textContent=data.logs.reduce((a,l)=>a+(l.sets||0),0);
+    document.getElementById("minutes").textContent=Math.round(data.logs.reduce((a,l)=>a+(l.minutes||0),0));
+    document.getElementById("records").textContent=countRecords();
+    const goal=Math.max(1,Number(data.settings.weeklyGoal)||3),done=weeklyWorkoutCount(),percent=Math.min(100,Math.round(done/goal*100));
+    document.getElementById("weeklyGoalText").textContent=`${done} von ${goal} Trainings`;
+    document.getElementById("weeklyGoalPercent").textContent=`${percent}%`;
+    document.getElementById("weeklyGoalBar").style.width=percent+'%';
+    const resume=document.getElementById("resumeWorkoutCard");resume.classList.toggle("hidden",!data.activeWorkout);
+    if(data.activeWorkout)document.getElementById("resumeWorkoutText").textContent=`${data.activeWorkout.dayName} · Übung ${data.activeWorkout.exercise+1}`;
+    
+    let nextD = days.find((x, i) => i > todayIndex() && x.ex.length > 0) || days.find(x => x.ex.length > 0) || days[0];
+    document.getElementById("next").textContent=nextD.name.slice(0,2);
+    
+    document.getElementById("weekList").innerHTML=days.map((x,i)=>`<div class="day"><div class="badge ${escapeHtml(x.color)}">${escapeHtml(x.name.slice(0,2))}</div><div><b>${escapeHtml(x.focus)}</b><small>${x.ex.length?` · ${x.ex.length} Übungen`:" · Pause"}</small></div><span class="tag">${i===todayIndex()?"HEUTE":escapeHtml(x.name)}</span></div>`).join("");
+
+    let lastBody = data.bodyData.length ? new Date(data.bodyData[data.bodyData.length-1].date) : new Date(0);
+    let daysSince = (new Date() - lastBody) / (1000 * 60 * 60 * 24);
+    if(daysSince > 3 && data.logs.length > 0) {
+        setTimeout(()=>toast("⏳ Zeit für ein Körperdaten-Update!"), 1500);
+    }
+}
+
+function showHome(){show("home")}
+
+ForgeCloud.boot();

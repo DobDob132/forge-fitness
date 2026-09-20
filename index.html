@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+<meta name="theme-color" content="#090b10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FORGE">
+<title>FORGE — Build. Train. Progress.</title>
+<script src="vendor/chart.umd.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/account.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body class="auth-locked">
+<div class="app">
+<header class="top">
+    <div class="brand">FORGE<small>BUILD. TRAIN. PROGRESS.</small></div>
+    <div style="display:flex; gap:8px;">
+        <span class="cloud-state" id="cloudStatus" role="status">Konto wird geladen …</span>
+        <button class="icon" id="accountButton" aria-label="Konto und Freunde" title="Konto und Freunde">👤</button>
+        <button class="icon" onclick="open1RM()">🏋️</button>
+        <button class="icon" onclick="openSettings()">⚙️</button>
+    </div>
+</header>
+<nav class="nav" id="nav">
+<button class="active" onclick="show('home',this)">🏠 Home</button>
+<button onclick="show('plan',this)">📅 Woche</button>
+<button onclick="show('plans',this)">📚 Pläne</button>
+<button onclick="show('progress',this)">📈 Statistik</button>
+<button onclick="show('trophies',this)">🏆 Trophäen</button>
+</nav>
+
+<!-- HOME -->
+<section id="home">
+<div class="xp-banner">
+    <div class="lvl-badge" id="levelBadge">1</div>
+    <div style="flex-grow:1;">
+        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px;">
+            <span>Level <span id="levelText">1</span></span>
+            <span style="color:var(--accent2);"><span id="xpText">0</span> / <span id="nextXpText">1000</span> XP</span>
+        </div>
+        <div class="xp-bar-bg"><div class="xp-bar-fill" id="xpBarFill"></div></div>
+    </div>
+</div>
+
+<div class="card resume-card hidden" id="resumeWorkoutCard">
+    <div><div class="eyebrow">Gespeichertes Training</div><b id="resumeWorkoutText">Training fortsetzen</b></div>
+    <div class="row"><button class="btn" onclick="resumeWorkout()">FORTSETZEN</button><button class="btn secondary" onclick="discardWorkout()">Verwerfen</button></div>
+</div>
+
+<div class="card weekly-goal" id="weeklyGoalCard">
+    <div class="row between"><div><div class="eyebrow">Wochenziel</div><b id="weeklyGoalText">0 von 3 Trainings</b></div><span class="goal-percent" id="weeklyGoalPercent">0%</span></div>
+    <div class="progressbar"><i id="weeklyGoalBar"></i></div>
+</div>
+
+<div class="grid">
+<div class="card hero">
+    <div><div class="eyebrow" id="todayLabel"></div><div class="flame">🔥</div><div class="title" id="todayTitle"></div><div class="sub" id="todaySub"></div></div>
+    <div class="row"><button class="btn" onclick="startWorkoutFlow()" style="width:100%">TRAINING STARTEN</button></div>
+</div>
+<div class="card"><div class="eyebrow">Dein Überblick</div><div class="stats" style="margin-top:14px"><div class="stat"><b id="streak">0</b><span>🔥 Streak</span></div><div class="stat"><b id="sessions">0</b><span>Trainings</span></div><div class="stat"><b id="sets">0</b><span>Sätze</span></div><div class="stat"><b id="minutes">0</b><span>Minuten</span></div><div class="stat"><b id="records">0</b><span>Rekorde</span></div><div class="stat"><b id="next">—</b><span>Nächstes</span></div></div></div>
+<div class="card week"><div class="section-title">Diese Woche</div><div id="weekList"></div></div>
+</div>
+</section>
+
+<!-- WOCHE (AKTUELLER PLAN) -->
+<section id="plan" class="hidden"><div class="card">
+    <div class="row between"><div class="section-title" style="margin:0;">Aktueller Plan</div><button class="btn secondary" style="padding:6px 12px; font-size:12px;" onclick="openPlanEditor(data.activePlanId)">✏️ Bearbeiten</button></div>
+    <div class="tag" id="activePlanNameTag" style="display:inline-block; margin:10px 0 15px;"></div>
+    <div id="fullPlan"></div>
+</div></section>
+
+<!-- PLÄNE VERWALTEN -->
+<section id="plans" class="hidden"><div class="card">
+    <div class="plan-tabs">
+        <button class="active" id="tabMyPlans" onclick="switchPlanTab('my')">Meine Pläne</button>
+        <button id="tabCommunity" onclick="switchPlanTab('com')">🌐 Entdecken</button>
+        <button id="tabShared" onclick="switchPlanTab('shared')">👥 Freunde</button>
+    </div>
+    
+    <div id="myPlansList">
+        <div class="row" style="margin-bottom:15px; gap:8px;">
+            <button class="btn" style="flex:1;" onclick="createNewPlan()">➕ Neuer Plan</button>
+            <button class="btn" style="flex:1; background:linear-gradient(135deg, #a058ff, #58a6ff);" onclick="openKiModal()">🤖 KI-Plan erstellen</button>
+        </div>
+        <div id="plansContainer"></div>
+    </div>
+    
+    <div id="communityList" class="hidden">
+        <div class="sub" style="margin-bottom:15px;">Entdecke Pläne aus der Community. Klicke auf <b>Vorschau</b>, um den Plan anzusehen.</div>
+        <div class="record"><div><b>Arnold's Split</b><small style="display:block; color:var(--muted)">6 Tage · Fokus: Volumen</small></div><button class="btn secondary" style="padding:6px 12px; font-size:12px;" onclick="previewCommunityPlan(0)">Vorschau</button></div>
+        <div class="record"><div><b>Home Workout Essentials</b><small style="display:block; color:var(--muted)">3 Tage · Körpergewicht</small></div><button class="btn secondary" style="padding:6px 12px; font-size:12px;" onclick="previewCommunityPlan(1)">Vorschau</button></div>
+        <div class="record"><div><b>Ruder-Cardio Hybrid</b><small style="display:block; color:var(--muted)">4 Tage · Fokus: Ausdauer</small></div><button class="btn secondary" style="padding:6px 12px; font-size:12px;" onclick="previewCommunityPlan(2)">Vorschau</button></div>
+    </div>
+    <div id="sharedPlansList" class="hidden"><div class="sub">Melde dich an, um geteilte Pläne zu sehen.</div></div>
+</div></section>
+
+<!-- STATISTIK / FORTSCHRITT -->
+<section id="progress" class="hidden">
+<div class="grid">
+<div class="card">
+    <div class="section-title">
+        <span>📊 Übungs-Verlauf</span>
+        <select class="input" id="chartExSelect" style="width:auto; padding:6px; font-size:12px;" onchange="updateExerciseChart()">
+            <option value="">Wähle Übung...</option>
+        </select>
+    </div>
+    <div class="sub" style="margin-bottom:10px;">Verfolge dein Volumen & Maximalgewicht pro Übung.</div>
+    <div class="chart-container"><canvas id="exChart"></canvas></div>
+</div>
+<div class="card">
+    <div class="section-title">
+        <span>⚖️ Körperdaten</span>
+        <select class="input" id="chartBodySelect" style="width:auto; padding:6px; font-size:12px;" onchange="updateBodyChart()">
+            <option value="weight">Gewicht (kg)</option>
+            <option value="bodyfat">Körperfett (%)</option>
+            <option value="chest">Brust (cm)</option>
+            <option value="waist">Bauch (cm)</option>
+            <option value="arms">Arme (cm)</option>
+            <option value="thighs">Beine (cm)</option>
+        </select>
+    </div>
+    <div class="chart-container"><canvas id="bodyChart"></canvas></div>
+    <button class="btn" style="width:100%; margin-top:15px;" onclick="openBodyModal()">+ Messung eintragen</button>
+</div>
+</div>
+<div class="card" style="margin-top:18px">
+<div class="section-title">📜 Trainings-Historie</div>
+<div class="sub" style="margin-bottom:10px;">Klicke auf ein Training für Details.</div>
+<div id="historyList"></div>
+</div>
+</section>
+
+<!-- TROPHÄEN & XP -->
+<section id="trophies" class="hidden">
+<div class="grid">
+<div class="card">
+    <div class="section-title">
+        <span>🔥 Meilensteine</span>
+        <button class="icon" style="padding:4px 8px; font-size:14px; border-radius:50%;" onclick="showInfoModal('Meilensteine', 'Verdiene XP und schalte Meilensteine frei, indem du regelmäßig trainierst, deinen Streak hältst oder viel Gewicht bewegst. Cardio-Übungen zählen zur Trainingsanzahl dazu!')">i</button>
+    </div>
+    <div class="sub">Erreiche Ziele, um Bonus-XP zu sammeln!</div>
+    <div class="ms-grid" id="milestonesList"></div>
+</div>
+<div class="card">
+    <div class="section-title">
+        <span>⭐ XP Protokoll</span>
+        <button class="icon" style="padding:4px 8px; font-size:14px; border-radius:50%;" onclick="showInfoModal('Wie bekomme ich XP?', '• Satz abgeschlossen: +10 XP<br>• Cardio/Eigenübung: +10 XP pro Satz/Eintrag<br>• Training beendet: +50 XP<br>• Persönlicher Rekord: +25 XP<br>• Meilensteine: 100 - 5000 XP')">i</button>
+    </div>
+    <div class="sub" style="margin-bottom:15px;">Deine zuletzt verdienten Erfahrungspunkte.</div>
+    <div id="xpHistoryList" style="max-height:500px; overflow-y:auto; padding-right:10px;"></div>
+</div>
+</div>
+</section>
+
+<!-- WORKOUT -->
+<section id="workout" class="hidden">
+<div class="card bigexercise">
+<div class="eyebrow" id="workDay"></div>
+<div class="progressbar"><i id="workProgress"></i></div>
+
+<div id="warmupPhase" class="hidden">
+    <div class="timer">
+        <div class="eyebrow">Aufwärmen vor dem Training</div>
+        <div class="time" id="warmupMethodText" style="font-size:35px; margin:20px 0;">Rudern</div>
+        <button class="btn" style="margin-top:15px; width:100%;" onclick="finishWarmup()">AUFWÄRMEN BEENDEN & WEITER</button>
+    </div>
+</div>
+
+<div id="activePhase">
+    <div class="eyebrow" id="workStep"></div>
+    <div>
+        <h1 id="workName"></h1>
+        <button class="icon" id="workInfoBtn" style="padding:4px 8px; font-size:14px; border-radius:50%; display:inline-block; vertical-align:middle; margin-left:10px; margin-bottom:10px;" onclick="showExerciseInfo()">i</button>
+    </div>
+    <div class="sub" id="workTarget"></div>
+    <div class="weight" id="workWeight"></div>
+    <div class="work-suggestion hidden" id="workSuggestion"></div>
+    <div class="exercise-note hidden" id="workNote"></div>
+    <div id="setInputs"></div>
+    <div class="controls">
+    <button class="btn" id="finishSetBtn" onclick="finishSet()">SATZ ABSCHLIESSEN</button>
+    <button class="btn secondary" onclick="skipSet()">ÜBERSPRINGEN</button>
+    <button class="btn secondary" id="undoBtn" style="display:none; background:#3a1b1c; border-color:#ff7272;" onclick="undoLastSet()">↩️ Zurück</button>
+    </div>
+</div>
+
+<div id="pausePhase" class="hidden">
+    <div class="timer">
+        <div class="eyebrow">Pause</div>
+        <div class="controls" id="pauseQuickBtns" style="margin:8px 0 4px; gap:4px"></div>
+        <div class="time" id="pauseTime">01:15</div>
+        <div class="timerbar"><i id="timerBar"></i></div>
+        <div class="controls"><button class="btn secondary" onclick="adjustTimer(-15)">−15s</button><button class="btn secondary" onclick="toggleTimer()" id="timerBtn">Start</button><button class="btn secondary" onclick="adjustTimer(15)">+15s</button></div>
+        <button class="btn" style="margin-top:15px; width:100%;" onclick="endPauseEarly()">PAUSE BEENDEN & WEITER</button>
+    </div>
+</div>
+<div class="row" style="justify-content:center; margin-top:20px;"><button class="btn secondary" onclick="saveAndExit()">Beenden & speichern</button><button class="btn secondary" id="fullscreenBtn" onclick="toggleFullscreen()">⛶ Vollbild</button></div>
+</div>
+</section>
+
+<!-- COMPLETE -->
+<section id="complete" class="hidden"><div class="card bigexercise" style="padding-bottom:20px;">
+    <div class="flame">🏆</div>
+    <h1>TRAINING COMPLETE</h1>
+    <div class="sub" id="completeText"></div>
+    <div class="stats" id="completeStats" style="margin:22px 0"></div>
+    <div class="chart-container" style="height:200px; margin-bottom:20px;">
+        <canvas id="workoutSummaryChart"></canvas>
+    </div>
+    <button class="btn" onclick="showHome()">ZURÜCK ZU FORGE</button>
+</div></section>
+</div>
+
+<!-- MODALS -->
+
+<!-- 1RM Calculator Modal -->
+<div class="modal" id="onermModal"><div class="card">
+    <div class="row between"><div class="section-title" style="margin:0;">🏋️ 1RM Rechner</div><button class="icon" onclick="document.getElementById('onermModal').style.display='none'">✕</button></div>
+    <div class="sub" style="margin-bottom:15px;">Berechne dein geschätztes One Rep Max.</div>
+    <div class="inputs">
+        <div><label id="rmWeightLabel">Gewicht (kg)</label><input class="input" type="number" step="0.5" id="rm_weight" oninput="calc1RM()"></div>
+        <div><label>Wiederholungen</label><input class="input" type="number" id="rm_reps" oninput="calc1RM()"></div>
+    </div>
+    <div style="margin-top:20px; text-align:center;">
+        <div class="sub">Dein geschätztes 1 Rep Max:</div>
+        <div style="font-size:36px; font-weight:900; color:var(--accent);" id="rm_result">0 kg</div>
+    </div>
+    <div class="stats" style="margin-top:15px;" id="rm_percentages">
+        <!-- Prozente werden hier generiert -->
+    </div>
+</div></div>
+
+<!-- Plan Editor Modal -->
+<div class="modal" id="planEditModal"><div class="card">
+    <div class="row between"><div class="section-title">✏️ Plan bearbeiten</div><button class="icon" onclick="closePlanEditor()">✕</button></div>
+    <label>Plan Name</label>
+    <input class="input" id="editPlanName" style="margin-bottom:15px;">
+    
+    <div class="plan-tabs" style="margin-bottom:10px;">
+        <button onclick="switchEditDay(0)" class="edit-tab-btn active">Mo</button>
+        <button onclick="switchEditDay(1)" class="edit-tab-btn">Di</button>
+        <button onclick="switchEditDay(2)" class="edit-tab-btn">Mi</button>
+        <button onclick="switchEditDay(3)" class="edit-tab-btn">Do</button>
+        <button onclick="switchEditDay(4)" class="edit-tab-btn">Fr</button>
+        <button onclick="switchEditDay(5)" class="edit-tab-btn">Sa</button>
+        <button onclick="switchEditDay(6)" class="edit-tab-btn">So</button>
+    </div>
+    
+    <div id="editDayContainer"></div>
+    <button class="btn secondary" style="width:100%; margin-top:15px; border-style:dashed;" onclick="addExerciseToEdit()">+ Übung / Cardio hinzufügen</button>
+    
+    <div class="controls" style="margin-top:25px;">
+        <button class="btn" onclick="savePlanEdit()">PLAN SPEICHERN</button>
+        <button class="btn secondary" onclick="closePlanEditor()">Abbrechen</button>
+    </div>
+</div></div>
+
+<!-- KI Plan Generator Modal -->
+<div class="modal" id="kiModal"><div class="card">
+    <div class="row between"><div class="section-title">🤖 KI Plan erstellen</div><button class="icon" onclick="document.getElementById('kiModal').style.display='none'">✕</button></div>
+    
+    <div id="kiStep1" style="max-height: 70vh; overflow-y: auto; padding-right: 5px;">
+        <div class="sub" style="margin-bottom:15px;">Beantworte diese Fragen, um einen perfekten KI-Prompt für z.B. ChatGPT zu generieren.</div>
+        
+        <label>1. Grunddaten (Alter, Geschlecht, Gewicht, Größe)</label>
+        <input class="input" id="ki_q1" placeholder="z.B. 25 Jahre, m, 80kg, 180cm" style="margin-bottom:8px;">
+        
+        <label>2. Haupt-Trainingsziel</label>
+        <input class="input" id="ki_q2" placeholder="z.B. Muskelaufbau, Fettabbau" style="margin-bottom:8px;">
+        
+        <label>3. Fitnesslevel & Erfahrung</label>
+        <input class="input" id="ki_q3" placeholder="z.B. Anfänger, 2 Jahre Erfahrung" style="margin-bottom:8px;">
+        
+        <label>4. Verfügbares Equipment</label>
+        <input class="input" id="ki_q4" placeholder="z.B. Fitnessstudio, Kurzhanteln" style="margin-bottom:8px;">
+        
+        <label>5. Trainingstage pro Woche</label>
+        <input class="input" id="ki_q5" placeholder="z.B. 4 Tage" style="margin-bottom:8px;">
+        
+        <label>6. Max. Dauer pro Training</label>
+        <input class="input" id="ki_q6" placeholder="z.B. 60 Minuten" style="margin-bottom:8px;">
+        
+        <label>7. Bevorzugter Split</label>
+        <input class="input" id="ki_q7" placeholder="z.B. Push/Pull/Legs, Egal" style="margin-bottom:8px;">
+        
+        <label>8. Verletzungen / Einschränkungen</label>
+        <input class="input" id="ki_q8" placeholder="z.B. Knieschmerzen, keine" style="margin-bottom:8px;">
+        
+        <label>9. Lieblingsübungen</label>
+        <input class="input" id="ki_q9" placeholder="z.B. Bankdrücken, Klimmzüge" style="margin-bottom:8px;">
+        
+        <label>10. Hassübungen (vermeiden)</label>
+        <input class="input" id="ki_q10" placeholder="z.B. Burpees, Kreuzheben" style="margin-bottom:8px;">
+        
+        <label>11. Fokus-Muskelgruppen</label>
+        <input class="input" id="ki_q11" placeholder="z.B. Breiter Rücken, Beine" style="margin-bottom:8px;">
+        
+        <label>12. Cardio-Präferenzen</label>
+        <input class="input" id="ki_q12" placeholder="z.B. 10 Min Warmup, gar keins" style="margin-bottom:8px;">
+        
+        <label>13. Berufsalltag / Aktivitätslevel</label>
+        <input class="input" id="ki_q13" placeholder="z.B. Bürojob (sitzend)" style="margin-bottom:8px;">
+        
+        <label>14. Schlaf & Regeneration</label>
+        <input class="input" id="ki_q14" placeholder="z.B. 7-8 Stunden, guter Schlaf" style="margin-bottom:8px;">
+        
+        <label>15. Aktuelle Ernährung</label>
+        <input class="input" id="ki_q15" placeholder="z.B. Kalorienüberschuss, Diät" style="margin-bottom:15px;">
+        
+        <button class="btn" style="width:100%; margin-top:5px; margin-bottom:10px;" onclick="generateKiPrompt()">PROMPT GENERIEREN</button>
+    </div>
+    
+    <div id="kiStep2" class="hidden">
+        <div class="sub" style="margin-bottom:10px;">1. Kopiere diesen Text und füge ihn in eine KI (z.B. ChatGPT) ein.</div>
+        <textarea class="input" id="kiPromptOut" readonly style="height:120px; font-size:11px; margin-bottom:10px;"></textarea>
+        <button class="btn secondary" style="width:100%; margin-bottom:15px;" onclick="copyKiPrompt()">📋 Prompt kopieren</button>
+        
+        <div class="sub" style="margin-bottom:10px;">2. Füge hier den generierten JSON-Code der KI ein:</div>
+        <textarea class="input" id="kiJsonIn" style="height:120px; font-size:11px; margin-bottom:10px;" placeholder='{"name": "...", "days": [...]}'></textarea>
+        <button class="btn" style="width:100%;" onclick="saveKiPlan()">PLAN ERSTELLEN</button>
+        <button class="btn secondary" style="width:100%; margin-top:8px;" onclick="document.getElementById('kiModal').style.display='none'">Abbrechen</button>
+    </div>
+</div></div>
+
+<!-- Preview Modal -->
+<div class="modal" id="previewModal"><div class="card">
+    <div class="row between"><div class="section-title">Plan Vorschau</div><button class="icon" onclick="document.getElementById('previewModal').style.display='none'">✕</button></div>
+    <div id="previewModalBody" style="margin-top:10px; max-height: 60vh; overflow-y:auto; padding-right:5px;"></div>
+</div></div>
+
+<!-- Body Data Modal -->
+<div class="modal" id="bodyModal"><div class="card">
+    <div class="row between"><div class="section-title" style="margin:0;">⚖️ Körperdaten messen</div><button class="icon" onclick="document.getElementById('bodyModal').style.display='none'">✕</button></div>
+    <div class="sub" style="margin-bottom:15px;">Trage deine aktuellen Werte ein. Lass leere Felder frei, wenn du sie nicht erfassen möchtest.</div>
+    <div class="inputs" style="grid-template-columns: 1fr 1fr; gap:12px;">
+        <div><label id="bodyWeightLabel">Gewicht (kg)</label><input class="input" type="number" step="0.1" id="bd_weight"></div>
+        <div><label>Körperfett (%)</label><input class="input" type="number" step="0.1" id="bd_bodyfat"></div>
+        <div><label>Brust (cm)</label><input class="input" type="number" step="0.1" id="bd_chest"></div>
+        <div><label>Bauch (cm)</label><input class="input" type="number" step="0.1" id="bd_waist"></div>
+        <div><label>Arme (cm)</label><input class="input" type="number" step="0.1" id="bd_arms"></div>
+        <div><label>Beine (cm)</label><input class="input" type="number" step="0.1" id="bd_thighs"></div>
+    </div>
+    <button class="btn" style="width:100%; margin-top:20px;" onclick="saveBodyData()">SPEICHERN</button>
+</div></div>
+
+<!-- Info Modal -->
+<div class="modal" id="infoModal"><div class="card"><div class="row between"><div class="section-title" id="infoTitle">Info</div><button class="icon" onclick="document.getElementById('infoModal').style.display='none'">✕</button></div><div style="font-size: 14px; line-height: 1.6; color:var(--muted);" id="infoText"></div><button class="btn" style="margin-top:20px; width:100%;" onclick="document.getElementById('infoModal').style.display='none'">Verstanden</button></div></div>
+
+<!-- History Details -->
+<div class="modal" id="historyModal"><div class="card"><div class="row between"><div class="section-title" id="histTitle">Training</div><button class="icon" onclick="document.getElementById('historyModal').style.display='none'">✕</button></div><div id="histDetails" style="margin-top:10px;"></div><div id="histActions" style="margin-top:20px;"></div></div></div>
+
+<!-- Settings -->
+<div class="modal" id="settingsModal"><div class="card">
+<div class="row between"><div class="section-title">⚙️ Einstellungen</div><button class="icon" onclick="closeSettings()">✕</button></div>
+<div class="setting-group-title">Training</div>
+<div class="setting"><label>Gewichtseinheit</label><select class="input" id="unitSetting"><option value="kg">Kilogramm (kg)</option><option value="lb">Pfund (lb)</option></select></div>
+<div class="setting"><label>Trainingsziel pro Woche</label><input class="input" id="weeklyGoalSetting" type="number" min="1" max="14" step="1"></div>
+<div class="setting"><label>Standard-Pause (Sekunden)</label><input class="input" id="pauseSetting" type="number" min="0" step="5"></div>
+<div class="setting"><label>Pausen Quick-Buttons (Kommagetrennt in Sek.)</label><input class="input" id="customPauses" type="text" placeholder="z.B. 30, 60, 90, 120"></div>
+
+<div class="setting">
+    <label>Vor dem Training aufwärmen?</label>
+    <select class="input" id="warmupSetting" onchange="document.getElementById('warmupTypeSetting').style.display = this.value === 'ja' ? 'block' : 'none'">
+        <option value="nein">Nein</option>
+        <option value="ja">Ja</option>
+    </select>
+</div>
+<div class="setting" id="warmupTypeSetting" style="display:none;">
+    <label>Welches Aufwärmen?</label>
+    <select class="input" id="warmupType">
+        <option value="Rudern">Rudern</option>
+        <option value="Standard Aufwärmen mit Timer">Standard Aufwärmen mit Timer</option>
+        <option value="Dynamisches Dehnen">Dynamisches Dehnen</option>
+        <option value="Seilspringen">Seilspringen</option>
+    </select>
+</div>
+
+<div class="setting-group-title">Während des Trainings</div>
+<div class="setting setting-toggle"><div><b>Display aktiv halten</b><small>Verhindert nach Möglichkeit, dass der Bildschirm ausgeht.</small></div><input type="checkbox" id="wakeLockSetting"></div>
+<div class="setting setting-toggle"><div><b>Bei Pausenende vibrieren</b><small>Funktioniert auf unterstützten Smartphones.</small></div><input type="checkbox" id="vibrationSetting"></div>
+<div class="setting setting-toggle"><div><b>Signalton bei Pausenende</b><small>Spielt einen kurzen, dezenten Ton ab.</small></div><input type="checkbox" id="soundSetting"></div>
+
+<div class="controls"><button class="btn" onclick="saveSettings()">SPEICHERN</button><button class="btn secondary" onclick="exportData()">💾 Export</button><button class="btn secondary" onclick="importData()">📥 Import</button><button class="btn secondary" onclick="resetData()">Daten löschen</button></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+
+<div id="accountGate" class="account-gate">
+ <div class="card account-panel">
+  <div class="brand">FORGE<small>BUILD. TRAIN. PROGRESS.</small></div>
+  <h1 id="authTitle">Willkommen bei FORGE</h1>
+  <p class="sub">Dein Training. Dein Fortschritt. Auf deinen Geräten.</p>
+  <div class="account-tabs" role="tablist" aria-label="Konto">
+   <button type="button" data-auth-mode="login" aria-selected="true">Anmelden</button>
+   <button type="button" data-auth-mode="signup" aria-selected="false">Registrieren</button>
+  </div>
+  <form id="authForm">
+   <input type="hidden" id="authMode" value="login">
+   <div id="signupNameWrap" class="hidden"><label for="authName">Anzeigename (für Freunde sichtbar)</label><input class="input" id="authName" maxlength="40" autocomplete="nickname"></div>
+   <div id="authEmailWrap"><label for="authEmail">E-Mail-Adresse</label><input class="input" id="authEmail" type="email" autocomplete="email" required></div>
+   <div id="authPasswordWrap"><label for="authPassword">Passwort</label><input class="input" id="authPassword" type="password" autocomplete="current-password" required></div>
+   <div id="authOtpWrap" class="hidden"><label for="authOtp">Bestätigungscode</label><input class="input auth-otp" id="authOtp" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="000000"><p class="account-note">Gib den sechsstelligen Code aus der FORGE-E-Mail ein. Du bleibst dafür direkt in der App.</p></div>
+   <p class="account-note">Mit Konto werden deine Pläne, Trainings, Körperdaten und Einstellungen privat in Supabase (Frankfurt) gespeichert. Freunde sehen nur deinen Anzeigenamen. Auf diesem Gerät bleibt eine Offline-Kopie.</p>
+   <button class="btn" type="submit" id="authSubmit">ANMELDEN</button>
+  </form>
+  <div id="accountMessage" class="account-status" role="status" aria-live="polite"></div>
+  <button class="btn secondary hidden" type="button" id="resendCodeButton">CODE ERNEUT SENDEN</button>
+  <button class="btn secondary" type="button" data-auth-mode="reset">Passwort vergessen?</button>
+  <button class="btn secondary" type="button" id="guestButton">OHNE KONTO LOKAL TRAINIEREN</button>
+  <p class="account-note">Vorhandene Daten aus deiner bisherigen FORGE-Version kannst du nach dem Anmelden über Einstellungen → Import übernehmen.</p>
+  <button class="btn secondary install-button" type="button">📲 App installieren</button>
+ </div>
+</div>
+<div class="modal account-modal" id="accountModal" role="dialog" aria-modal="true" aria-labelledby="accountTitle"><div class="card">
+ <div class="row between"><div class="section-title" id="accountTitle">👤 Konto & Freunde</div><button class="icon" id="accountClose" aria-label="Schließen">✕</button></div>
+ <div id="accountSignedIn"><p class="sub" id="accountEmail"></p>
+ <div class="account-buttons"><button class="btn secondary" id="syncButton">Jetzt synchronisieren</button><button class="btn secondary" id="importGuestButton">Lokale Gastdaten übernehmen</button><button class="btn secondary" id="logoutButton">Abmelden</button></div>
+ <div id="syncConflict" class="hidden"><b>Zwei verschiedene Datenstände</b><p class="account-note">Ein anderes Gerät hat ebenfalls Änderungen gespeichert. Deine lokale Version bleibt erhalten, bis du auswählst. Vor dem Übernehmen werden beide Stände lokal gesichert.</p><div class="account-buttons"><button class="btn" id="useCloud">Cloud-Stand übernehmen</button><button class="btn secondary" id="useLocal">Diesen Gerätestand verwenden</button></div></div>
+ <label class="account-label" for="profileName">Dein Anzeigename</label><div class="row"><input class="input" id="profileName" maxlength="40"><button class="btn secondary" id="saveProfile">Speichern</button></div>
+ <h3>Dein Freundescode</h3><p class="account-note">Teile diesen Code nur mit Personen, die dich hinzufügen dürfen.</p><code class="friend-code" id="friendCode"></code><button class="btn secondary" id="copyFriendCode" style="margin-top:8px">Code kopieren</button>
+ <h3>Freunde</h3><p class="account-note">Kontakte sehen nur deinen Anzeigenamen. Trainings- und Körperdaten werden nicht geteilt.</p>
+ <label for="friendInput">Freundescode einfügen</label><div class="row"><input class="input" id="friendInput" autocomplete="off" placeholder="Freundescode"><button class="btn" id="friendAdd">Anfragen</button></div>
+ <div id="friendsList" style="margin-top:12px"></div><button class="btn secondary" id="friendRefresh" style="margin-top:12px">Aktualisieren</button>
+ <h3>Wochen-Challenges</h3><p class="account-note">Teile nur den Fortschritt dieser Challenge, keine Trainingsdetails.</p>
+ <div class="challenge-form"><select class="input" id="challengeFriend"></select><input class="input" id="challengeTarget" type="number" min="1" max="14" value="3" aria-label="Zieltrainings"><button class="btn" id="challengeCreate">Starten</button></div>
+ <div id="challengesList" style="margin-top:12px"></div>
+ <p id="accountDetailsMessage" role="status" class="account-status"></p>
+ </div><button class="btn secondary install-button" type="button">📲 App installieren</button>
+</div></div>
+
+<div class="modal" id="sharePlanModal"><div class="card">
+ <div class="row between"><div class="section-title">👥 Plan teilen</div><button class="icon" onclick="ForgeSocial.closeShare()">✕</button></div>
+ <p class="sub" id="sharePlanName"></p><label for="shareFriendSelect">Freund auswählen</label><select class="input" id="shareFriendSelect"></select>
+ <p class="account-note">Der Empfänger erhält eine unabhängige Kopie. Spätere Änderungen werden nicht automatisch geteilt.</p>
+ <button class="btn" id="sharePlanSend" style="width:100%">PLAN SENDEN</button>
+</div></div>
+
+<script src="vendor/supabase.js"></script>
+<script src="js/config.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/xp.js"></script>
+<script src="js/plans.js"></script>
+<script src="js/workout.js"></script>
+<script src="js/timer.js"></script>
+<script src="js/progress.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/community.js"></script>
+<script src="js/cloud.js"></script>
+<script src="js/social.js"></script>
+<script src="js/app.js"></script>
+<script src="js/install.js"></script>
+</body>
+</html>

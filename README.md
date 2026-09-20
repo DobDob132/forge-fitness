@@ -1,6 +1,6 @@
 # FORGE – installierbare Fitness-App
 
-App-Adresse: https://forge-fitness-felix.felix-dober740007.chatgpt.site
+App-Adresse: https://dobdob132.github.io/forge-fitness/
 
 Die bisherige Trainings-App wurde um Supabase-Konten, private Cloud-Speicherung, Freunde und Installation auf Android/iPhone ergänzt. Die ursprüngliche FORGE.html bleibt unverändert.
 
@@ -49,4 +49,3 @@ Eigene Trainingspläne lassen sich an angenommene Freunde senden. Der Empfänger
 Zur Entwicklung einen HTTP-Server verwenden. Abhängigkeiten mit pnpm installieren, dann pnpm build und pnpm test. Der Build liegt in dist/. Niemals einen service_role-Schlüssel in die App schreiben; der vorhandene veröffentlichbare Schlüssel ist absichtlich öffentlich und durch Datenbankregeln abgesichert.
 
 Electron ist für diese Handy-App nicht erforderlich. App-Store-Veröffentlichung und native Push-Erinnerungen sind nicht enthalten.
-
