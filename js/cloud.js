@@ -1,7 +1,7 @@
 const ForgeCloud = (() => {
   const $ = id => document.getElementById(id);
   let client, user = null, version = 0, ready = false, syncing = false;
-  let syncTimer, generation = 0, connecting = null, conflict = null, recovering = false, pendingEmail = sessionStorage.getItem('forgePendingEmail') || '';
+  let syncTimer, generation = 0, connecting = null, conflict = null;
   const clone = value => JSON.parse(JSON.stringify(value));
   const status = message => { $('cloudStatus').textContent = message; };
   function message(text, error = false) {
@@ -147,7 +147,7 @@ const ForgeCloud = (() => {
     if(connecting)return connecting;
     connecting=(async()=>{
       const epoch=++generation;
-      user=session.user;ForgeStore.select(user.id);ready=false;version=0;conflict=null;pendingEmail='';sessionStorage.removeItem('forgePendingEmail');
+      user=session.user;ForgeStore.select(user.id);ready=false;version=0;conflict=null;
       $('syncConflict').classList.add('hidden');
       gate(true);message('Deine Trainingsdaten werden geladen …');
       const cached=ForgeStore.envelope();
@@ -195,17 +195,16 @@ const ForgeCloud = (() => {
     $('accountSignedIn').classList.add('hidden');status('Abgemeldet');
   }
   function mode(name) {
+    if(name!=='login'&&name!=='signup')name='login';
     $('authMode').value=name;
     $('signupNameWrap').classList.toggle('hidden',name!=='signup');
-    $('authPasswordWrap').classList.toggle('hidden',name==='reset'||name==='verify');
-    $('authEmailWrap').classList.toggle('hidden',name==='recovery'||name==='verify');
-    $('authOtpWrap').classList.toggle('hidden',name!=='verify');
-    $('resendCodeButton').classList.toggle('hidden',name!=='verify');
-    $('authEmail').required=name!=='recovery'&&name!=='verify';$('authPassword').required=name!=='reset'&&name!=='verify';$('authOtp').required=name==='verify';
+    $('authPasswordWrap').classList.remove('hidden');
+    $('authEmailWrap').classList.remove('hidden');
+    $('authEmail').required=true;$('authPassword').required=true;
     $('authPassword').minLength=name==='login'?1:8;
     $('authPassword').autocomplete=name==='login'?'current-password':'new-password';
-    $('authSubmit').textContent={login:'ANMELDEN',signup:'KONTO ERSTELLEN',verify:'CODE BESTÄTIGEN',reset:'RESET-LINK SENDEN',recovery:'NEUES PASSWORT SPEICHERN'}[name];
-    $('authTitle').textContent={login:'Willkommen bei FORGE',signup:'Dein FORGE-Konto',verify:'Fast geschafft',reset:'Passwort vergessen?',recovery:'Neues Passwort'}[name];
+    $('authSubmit').textContent={login:'ANMELDEN',signup:'KONTO ERSTELLEN'}[name];
+    $('authTitle').textContent={login:'Willkommen bei FORGE',signup:'Dein FORGE-Konto'}[name];
     document.querySelectorAll('[data-auth-mode]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.authMode===name)));
     message('');
   }
@@ -214,29 +213,14 @@ const ForgeCloud = (() => {
     const email=$('authEmail').value.trim(),password=$('authPassword').value,name=$('authMode').value;
     try {
       message('Bitte warten …');let response;
-      const redirect=new URL('index.html',location.href).href.split('#')[0].split('?')[0];
       if(name==='login') {
         response=await client.auth.signInWithPassword({email,password});
         if(response.error)throw response.error;await connect(response.data.session);
       } else if(name==='signup') {
-        response=await client.auth.signUp({email,password,options:{emailRedirectTo:redirect,data:{display_name:$('authName').value.trim().slice(0,40)||'FORGE Athlet'}}});
+        response=await client.auth.signUp({email,password,options:{data:{display_name:$('authName').value.trim().slice(0,40)||'FORGE Athlet'}}});
         if(response.error)throw response.error;
         if(response.data.session)await connect(response.data.session);
-        else {pendingEmail=email;sessionStorage.setItem('forgePendingEmail',email);mode('verify');message(`Wir haben einen sechsstelligen Code an ${email} gesendet.`);$('authOtp').focus({preventScroll:true});$('accountGate').scrollTo({top:0});}
-      } else if(name==='verify') {
-        if(!pendingEmail)throw Error('Bitte starte die Registrierung erneut.');
-        response=await client.auth.verifyOtp({email:pendingEmail,token:$('authOtp').value.trim(),type:'email'});
-        if(response.error)throw response.error;
-        $('authOtp').value='';await connect(response.data.session);
-      } else if(name==='reset') {
-        response=await client.auth.resetPasswordForEmail(email,{redirectTo:redirect});
-        if(response.error)throw response.error;
-        message('Wenn ein Konto existiert, erhältst du eine E-Mail zum Zurücksetzen.');
-      } else {
-        response=await client.auth.updateUser({password});
-        if(response.error)throw response.error;
-        recovering=false;await connect((await client.auth.getSession()).data.session);
-        toast('Passwort geändert.');
+        else throw Error('Das Konto konnte nicht direkt geöffnet werden. Bitte versuche es erneut.');
       }
       $('authPassword').value='';
     } catch(error){message(explain(error),true);}
@@ -290,17 +274,10 @@ const ForgeCloud = (() => {
     if(response.error)throw response.error;return response.data;
   }
   async function boot() {
-    recovering=new URLSearchParams(location.hash.slice(1)).get('type')==='recovery';
-    client=forgeSupabase.createClient(FORGE_CONFIG.supabaseUrl,FORGE_CONFIG.supabaseKey,{auth:{storageKey:'forgeAuth',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true},global:{fetch:(url,options={})=>fetch(url,{...options,signal:options.signal || AbortSignal.timeout(15000)})}});
+    client=forgeSupabase.createClient(FORGE_CONFIG.supabaseUrl,FORGE_CONFIG.supabaseKey,{auth:{storageKey:'forgeAuth',persistSession:true,autoRefreshToken:true,detectSessionInUrl:false},global:{fetch:(url,options={})=>fetch(url,{...options,signal:options.signal || AbortSignal.timeout(15000)})}});
     $('authForm').addEventListener('submit',submit);
     document.querySelectorAll('[data-auth-mode]').forEach(b=>b.addEventListener('click',()=>mode(b.dataset.authMode)));
     $('guestButton').onclick=guest;$('accountButton').onclick=open;
-    $('resendCodeButton').onclick=async()=>{
-      if(!pendingEmail){mode('signup');return;}
-      $('resendCodeButton').disabled=true;
-      try{const response=await client.auth.resend({type:'signup',email:pendingEmail});if(response.error)throw response.error;message('Ein neuer Code wurde gesendet.');}
-      catch(error){message(explain(error),true);}finally{$('resendCodeButton').disabled=false;}
-    };
     $('accountClose').onclick=()=>$('accountModal').style.display='none';
     $('logoutButton').onclick=logout;$('syncButton').onclick=async()=>{if(await syncNow())toast('Synchronisiert.');else toast('Noch nicht synchronisiert. Prüfe Verbindung oder Versionskonflikt.');};
     $('importGuestButton').onclick=()=>importGuest().catch(e=>toast(explain(e)));
@@ -311,15 +288,13 @@ const ForgeCloud = (() => {
     $('copyFriendCode').onclick=async()=>{try{await navigator.clipboard.writeText($('friendCode').textContent);toast('Freundescode kopiert.');}catch{toast('Halte den Code gedrückt, um ihn zu kopieren.');}};
     ForgeSocial.init();
     client.auth.onAuthStateChange((event,session)=>{
-      if(event==='PASSWORD_RECOVERY'){recovering=true;setTimeout(()=>{gate(true);mode('recovery');},0);}
       if(event==='SIGNED_OUT'&&user){generation++;user=null;ready=false;ForgeStore.select(null);setTimeout(()=>{renderData(ForgeStore.guest()||defaults());gate(true);mode('login');},0);}
-      if(event==='SIGNED_IN'&&session&&!recovering&&!connecting&&session.user.id!==user?.id)setTimeout(()=>connect(session),0);
+      if(event==='SIGNED_IN'&&session&&!connecting&&session.user.id!==user?.id)setTimeout(()=>connect(session),0);
     });
     try{
       const r=await client.auth.getSession();if(r.error)throw r.error;
-      if(recovering&&r.data.session){gate(true);mode('recovery');}
-      else if(r.data.session)await connect(r.data.session);
-      else{mode(pendingEmail?'verify':'login');gate(true);if(pendingEmail)message(`Gib den Code ein, den wir an ${pendingEmail} gesendet haben.`);status('Lokal · ohne Konto');}
+      if(r.data.session)await connect(r.data.session);
+      else{mode('login');gate(true);status('Lokal · ohne Konto');}
     }catch(error){gate(true);message(explain(error),true);}
     window.addEventListener('online',()=>flush());
     window.addEventListener('offline',()=>status(user?'Offline · lokal gespeichert':'Nur auf diesem Gerät'));

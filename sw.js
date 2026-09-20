@@ -1,4 +1,4 @@
-const CACHE='forge-shell-45f6bc4158db9abd';
+const CACHE='forge-shell-96933faa30881e66';
 const ASSETS=["./index.html","./manifest.webmanifest","./css/account.css","./css/style.css","./js/app.js","./js/cloud.js","./js/community.js","./js/config.js","./js/data.js","./js/install.js","./js/plans.js","./js/progress.js","./js/settings.js","./js/social.js","./js/storage.js","./js/timer.js","./js/utils.js","./js/workout.js","./js/xp.js","./vendor/chart.umd.js","./vendor/supabase.js","./assets/icons/icon-192.png","./assets/icons/icon-512.png","./assets/icons/icon-maskable.png"];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('forge-shell-')&&k!==CACHE).map(k=>caches.delete(k))))));

@@ -1,6 +1,6 @@
 # Mailversand kostenlos vorbereiten
 
-Stand: 20. September 2026. Neues Supabase-Projekt FORGE, Organisation Fitness App, Frankfurt. Login, private Trainingsdaten, Planfreigaben und Freunde-Challenges sind eingerichtet. Echte Bestätigungs-/Reset-Mails sind noch nicht eingerichtet.
+Stand: 20. September 2026. Neues Supabase-Projekt FORGE, Organisation Fitness App, Frankfurt. Login, private Trainingsdaten, Planfreigaben und Freunde-Challenges sind eingerichtet. Die E-Mail-Bestätigung und das Passwort-Zurücksetzen sind auf Wunsch vorerst deaktiviert. Die folgenden Schritte sind für die spätere Aktivierung vorbereitet.
 
 ## Brevo Free vorbereiten
 
@@ -30,7 +30,7 @@ Authentication → E-Mail/SMTP → eigenen SMTP-Server aktivieren:
 | Username | SMTP-Login aus Brevo |
 | Password | SMTP-Schlüssel aus Brevo, kein API-Schlüssel |
 
-E-Mail-Bestätigung aktiviert lassen. Supabases eingebauter Testversand ist auf autorisierte Team-Adressen und ein sehr kleines Kontingent begrenzt und ungeeignet für Freunde. Nach SMTP-Einrichtung auch Supabases Versandlimit prüfen und innerhalb der kostenlosen Kontingente belassen.
+Erst nach vollständig getestetem SMTP-Versand die E-Mail-Bestätigung wieder aktivieren. Supabases eingebauter Testversand ist auf autorisierte Team-Adressen und ein sehr kleines Kontingent begrenzt und ungeeignet für Freunde. Nach SMTP-Einrichtung auch Supabases Versandlimit prüfen und innerhalb der kostenlosen Kontingente belassen.
 
 Quelle: https://supabase.com/docs/guides/auth/auth-smtp
 
@@ -43,9 +43,9 @@ In Authentication → Email Templates → Confirm signup den Inhalt durch die Da
 Authentication → URL Configuration:
 
 - Site URL: https://dobdob132.github.io/forge-fitness/
-- Erlaubte Redirect URL: https://dobdob132.github.io/forge-fitness/index.html
+- Erlaubte Redirect URL: https://dobdob132.github.io/forge-fitness/
 
-Diese Einstellungen sind noch nicht automatisch gesetzt worden. Bei eigener Domain später beide Werte anpassen.
+Diese Einstellungen sind für die veröffentlichte GitHub-Seite gesetzt. Bei eigener Domain später beide Werte anpassen.
 
 ## Abschließender Mailtest
 

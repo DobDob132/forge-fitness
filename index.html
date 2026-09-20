@@ -91,10 +91,10 @@
     </div>
     
     <div id="communityList" class="hidden">
-        <div class="sub" style="margin-bottom:15px;">Entdecke Pläne aus der Community. Klicke auf <b>Vorschau</b>, um den Plan anzusehen.</div>
-        <div class="record"><div><b>Arnold's Split</b><small style="display:block; color:var(--muted)">6 Tage · Fokus: Volumen</small></div><button class="btn secondary" style="padding:6px 12px; font-size:12px;" onclick="previewCommunityPlan(0)">Vorschau</button></div>
-        <div class="record"><div><b>Home Workout Essentials</b><small style="display:block; color:var(--muted)">3 Tage · Körpergewicht</small></div><button class="btn secondary" style="padding:6px 12px; font-size:12px;" onclick="previewCommunityPlan(1)">Vorschau</button></div>
-        <div class="record"><div><b>Ruder-Cardio Hybrid</b><small style="display:block; color:var(--muted)">4 Tage · Fokus: Ausdauer</small></div><button class="btn secondary" style="padding:6px 12px; font-size:12px;" onclick="previewCommunityPlan(2)">Vorschau</button></div>
+        <div class="sub" style="margin-bottom:15px;">Entdecke veröffentlichte Pläne. Du kannst sie ansehen oder als eigene Kopie auswählen und sofort damit trainieren.</div>
+        <div class="record"><div><b>Arnold's Split</b><small style="display:block; color:var(--muted)">6 Tage · Fokus: Volumen</small></div><div class="plan-actions"><button class="btn secondary" onclick="previewCommunityPlan(0)">Vorschau</button><button class="btn" onclick="useCommunityPlan(0)">Auswählen</button></div></div>
+        <div class="record"><div><b>Home Workout Essentials</b><small style="display:block; color:var(--muted)">3 Tage · Körpergewicht</small></div><div class="plan-actions"><button class="btn secondary" onclick="previewCommunityPlan(1)">Vorschau</button><button class="btn" onclick="useCommunityPlan(1)">Auswählen</button></div></div>
+        <div class="record"><div><b>Ruder-Cardio Hybrid</b><small style="display:block; color:var(--muted)">5 Tage · Fokus: Ausdauer</small></div><div class="plan-actions"><button class="btn secondary" onclick="previewCommunityPlan(2)">Vorschau</button><button class="btn" onclick="useCommunityPlan(2)">Auswählen</button></div></div>
     </div>
     <div id="sharedPlansList" class="hidden"><div class="sub">Melde dich an, um geteilte Pläne zu sehen.</div></div>
 </div></section>
@@ -333,6 +333,13 @@
     <div id="previewModalBody" style="margin-top:10px; max-height: 60vh; overflow-y:auto; padding-right:5px;"></div>
 </div></div>
 
+<!-- Install Modal -->
+<div class="modal" id="installModal"><div class="card">
+    <div class="row between"><div class="section-title">📲 FORGE installieren</div><button class="icon" id="installClose" aria-label="Schließen">✕</button></div>
+    <div id="installSteps" class="install-steps"></div>
+    <div class="controls"><button class="btn" id="installCopyLink">LINK KOPIEREN</button><button class="btn secondary" id="installDone">FERTIG</button></div>
+</div></div>
+
 <!-- Body Data Modal -->
 <div class="modal" id="bodyModal"><div class="card">
     <div class="row between"><div class="section-title" style="margin:0;">⚖️ Körperdaten messen</div><button class="icon" onclick="document.getElementById('bodyModal').style.display='none'">✕</button></div>
@@ -405,13 +412,10 @@
    <div id="signupNameWrap" class="hidden"><label for="authName">Anzeigename (für Freunde sichtbar)</label><input class="input" id="authName" maxlength="40" autocomplete="nickname"></div>
    <div id="authEmailWrap"><label for="authEmail">E-Mail-Adresse</label><input class="input" id="authEmail" type="email" autocomplete="email" required></div>
    <div id="authPasswordWrap"><label for="authPassword">Passwort</label><input class="input" id="authPassword" type="password" autocomplete="current-password" required></div>
-   <div id="authOtpWrap" class="hidden"><label for="authOtp">Bestätigungscode</label><input class="input auth-otp" id="authOtp" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="000000"><p class="account-note">Gib den sechsstelligen Code aus der FORGE-E-Mail ein. Du bleibst dafür direkt in der App.</p></div>
-   <p class="account-note">Mit Konto werden deine Pläne, Trainings, Körperdaten und Einstellungen privat in Supabase (Frankfurt) gespeichert. Freunde sehen nur deinen Anzeigenamen. Auf diesem Gerät bleibt eine Offline-Kopie.</p>
+   <p class="account-note">Mit Konto werden deine Pläne, Trainings, Körperdaten und Einstellungen privat in Supabase (Frankfurt) gespeichert. Freunde sehen nur deinen Anzeigenamen. Eine E-Mail-Bestätigung ist derzeit nicht nötig. Auf diesem Gerät bleibt eine Offline-Kopie.</p>
    <button class="btn" type="submit" id="authSubmit">ANMELDEN</button>
   </form>
   <div id="accountMessage" class="account-status" role="status" aria-live="polite"></div>
-  <button class="btn secondary hidden" type="button" id="resendCodeButton">CODE ERNEUT SENDEN</button>
-  <button class="btn secondary" type="button" data-auth-mode="reset">Passwort vergessen?</button>
   <button class="btn secondary" type="button" id="guestButton">OHNE KONTO LOKAL TRAINIEREN</button>
   <p class="account-note">Vorhandene Daten aus deiner bisherigen FORGE-Version kannst du nach dem Anmelden über Einstellungen → Import übernehmen.</p>
   <button class="btn secondary install-button" type="button">📲 App installieren</button>

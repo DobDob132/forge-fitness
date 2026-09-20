@@ -11,7 +11,7 @@ Die bisherige Trainings-App wurde um Supabase-Konten, private Cloud-Speicherung,
 - Ohne Konto fortfahren: Daten bleiben lokal im Browser.
 - Mit Konto: Anmeldung über das Profilsymbol; Trainingsdaten werden privat synchronisiert.
 
-WICHTIG: Für Registrierungsbestätigung und Passwort-Reset fehlt noch der eigene Mailanbieter. Die kostenlose Vorbereitung steht in EINRICHTUNG.md. Neue Konten bestätigen sich danach mit einem sechsstelligen Code direkt in FORGE. Erst nach Einrichtung und echtem Mailtest die Registrierung an Freunde weitergeben.
+Neue Konten können vorerst ohne E-Mail-Bestätigung sofort verwendet werden. Passwort-Zurücksetzen ist deshalb ebenfalls vorerst ausgeblendet. Die spätere Einrichtung eines eigenen Mailanbieters ist in EINRICHTUNG.md vorbereitet.
 
 ## Bisherige Daten
 
@@ -25,7 +25,7 @@ Browserdaten löschen entfernt Gastdaten und lokale Sicherungen. Abgemeldete Kon
 
 ## Freunde
 
-Im Profil den privaten Freundescode teilen oder erhaltenen Code eingeben. Anfragen können angenommen/abgelehnt und Kontakte entfernt werden. Freunde sehen nur Anzeigenamen und Beziehungsstatus, keine E-Mail-, Körper- oder Trainingsdaten. Die bisherige Community-Demo bleibt Demo.
+Im Profil den privaten Freundescode teilen oder erhaltenen Code eingeben. Anfragen können angenommen/abgelehnt und Kontakte entfernt werden. Freunde sehen nur Anzeigenamen und Beziehungsstatus, keine E-Mail-, Körper- oder Trainingsdaten. Veröffentlichte Pläne unter „Entdecken“ lassen sich ansehen, als eigene Kopie übernehmen und direkt als aktiver Trainingsplan verwenden.
 
 Eigene Trainingspläne lassen sich an angenommene Freunde senden. Der Empfänger übernimmt sie als unabhängige Kopie und kann sie ändern, ohne den Plan des Absenders zu verändern. Im Profil können Freunde außerdem eine Wochen-Challenge mit einem Ziel von 1 bis 14 Trainings starten. Sichtbar sind nur der Challenge-Fortschritt und Anzeigenamen; Trainingsdetails bleiben privat.
 
