@@ -8,6 +8,7 @@ function show(id,btn){
   if(id==="plans"){renderPlansList();ForgeSocial.refreshShares();}
   if(id==="progress") renderProgress();
   if(id==="trophies") renderTrophies();
+  if(id==="friends") ForgeSocial.refreshFriendsPage();
 }
 
 function renderHome(){
@@ -43,5 +44,4 @@ function renderHome(){
 function showHome(){show("home")}
 
 ForgeCloud.boot();
-window.addEventListener('forge-language-change',()=>renderHome());
-
+window.addEventListener('forge-language-change',()=>{renderHome();if(!document.getElementById('trophies').classList.contains('hidden'))renderTrophies();});

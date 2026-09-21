@@ -21,7 +21,7 @@
     <div class="brand">FORGE<small>BUILD. TRAIN. PROGRESS.</small></div>
     <div style="display:flex; gap:8px;">
         <span class="cloud-state" id="cloudStatus" role="status">Konto wird geladen …</span>
-        <button class="icon" id="accountButton" aria-label="Konto und Freunde" title="Konto und Freunde">👤</button>
+        <button class="icon" id="accountButton" aria-label="Konto" title="Konto">👤</button>
         <button class="icon" onclick="open1RM()">🏋️</button>
         <button class="icon" onclick="openSettings()">⚙️</button>
     </div>
@@ -32,6 +32,7 @@
 <button onclick="show('plans',this)">📚 Pläne</button>
 <button onclick="show('progress',this)">📈 Statistik</button>
 <button onclick="show('trophies',this)">🏆 Trophäen</button>
+<button onclick="show('friends',this)">👥 Freunde</button>
 </nav>
 
 <!-- HOME -->
@@ -67,6 +68,32 @@
 </div>
 </section>
 
+<!-- FREUNDE & CHALLENGES -->
+<section id="friends" class="hidden">
+ <div id="friendsSignedOut" class="card hidden"><div class="section-title">👥 Freunde</div><p class="sub">Melde dich an, um Freunde hinzuzufügen und Challenges zu starten.</p><button class="btn" onclick="ForgeCloud.open()">ANMELDEN</button></div>
+ <div id="friendsSignedIn" class="grid">
+  <div class="card">
+   <div class="section-title">👥 Freunde</div>
+   <p class="account-note">Kontakte sehen nur deinen Benutzernamen. Trainings- und Körperdaten werden nicht geteilt.</p>
+   <h3>Dein Freundescode</h3><p class="account-note">Teile diesen Code nur mit Personen, die dich hinzufügen dürfen.</p><code class="friend-code" id="friendCode"></code><button class="btn secondary" id="copyFriendCode" style="margin-top:8px">Code kopieren</button>
+   <h3>Freund hinzufügen</h3><label for="friendInput">Freundescode einfügen</label><div class="row"><input class="input" id="friendInput" autocomplete="off" placeholder="Freundescode"><button class="btn" id="friendAdd">Anfragen</button></div>
+   <div id="friendsList" style="margin-top:12px"></div><button class="btn secondary" id="friendRefresh" style="margin-top:12px">Aktualisieren</button>
+  </div>
+  <div class="card">
+   <div class="section-title">⚔️ Challenges</div>
+   <p class="account-note">Fordere einen Freund über 7, 14 oder 30 Tage heraus. Geteilt wird nur der Fortschritt, niemals einzelne Übungen oder Körperdaten.</p>
+   <div class="challenge-form">
+    <label><span>Freund</span><select class="input" id="challengeFriend"></select></label>
+    <label><span>Zielart</span><select class="input" id="challengeMetric"><option value="workouts">Trainings</option><option value="sets">Sätze</option><option value="minutes">Trainingsminuten</option><option value="volume">Bewegtes Gewicht</option></select></label>
+    <label><span>Laufzeit</span><select class="input" id="challengeDuration"><option value="7">7 Tage</option><option value="14">14 Tage</option><option value="30">30 Tage</option></select></label>
+    <label><span>Ziel</span><input class="input" id="challengeTarget" type="number" min="1" max="1000000000" value="3" aria-label="Challenge-Ziel"></label>
+    <button class="btn" id="challengeCreate">CHALLENGE SENDEN</button>
+   </div>
+   <div id="challengesList" style="margin-top:16px"></div>
+  </div>
+ </div>
+</section>
+
 <!-- WOCHE (AKTUELLER PLAN) -->
 <section id="plan" class="hidden"><div class="card">
     <div class="row between"><div class="section-title" style="margin:0;">Aktueller Plan</div><button class="btn secondary" style="padding:6px 12px; font-size:12px;" onclick="openPlanEditor(data.activePlanId)">✏️ Bearbeiten</button></div>
@@ -79,7 +106,7 @@
     <div class="plan-tabs">
         <button class="active" id="tabMyPlans" onclick="switchPlanTab('my')">Meine Pläne</button>
         <button id="tabCommunity" onclick="switchPlanTab('com')">🌐 Entdecken</button>
-        <button id="tabShared" onclick="switchPlanTab('shared')">👥 Freunde</button>
+        <button id="tabShared" onclick="switchPlanTab('shared')">👥 Geteilte Pläne</button>
     </div>
     
     <div id="myPlansList">
@@ -424,18 +451,11 @@
  </div>
 </div>
 <div class="modal account-modal" id="accountModal" role="dialog" aria-modal="true" aria-labelledby="accountTitle"><div class="card">
- <div class="row between"><div class="section-title" id="accountTitle">👤 Konto & Freunde</div><button class="icon" id="accountClose" aria-label="Schließen">✕</button></div>
+ <div class="row between"><div class="section-title" id="accountTitle">👤 Konto</div><button class="icon" id="accountClose" aria-label="Schließen">✕</button></div>
  <div id="accountSignedIn"><p class="sub" id="accountEmail"></p>
  <div class="account-buttons"><button class="btn secondary" id="syncButton">Jetzt synchronisieren</button><button class="btn secondary" id="importGuestButton">Lokale Gastdaten übernehmen</button><button class="btn secondary" id="logoutButton">Abmelden</button></div>
  <div id="syncConflict" class="hidden"><b>Zwei verschiedene Datenstände</b><p class="account-note">Ein anderes Gerät hat ebenfalls Änderungen gespeichert. Deine lokale Version bleibt erhalten, bis du auswählst. Vor dem Übernehmen werden beide Stände lokal gesichert.</p><div class="account-buttons"><button class="btn" id="useCloud">Cloud-Stand übernehmen</button><button class="btn secondary" id="useLocal">Diesen Gerätestand verwenden</button></div></div>
- <label class="account-label" for="profileName">Dein Anzeigename</label><div class="row"><input class="input" id="profileName" maxlength="40"><button class="btn secondary" id="saveProfile">Speichern</button></div>
- <h3>Dein Freundescode</h3><p class="account-note">Teile diesen Code nur mit Personen, die dich hinzufügen dürfen.</p><code class="friend-code" id="friendCode"></code><button class="btn secondary" id="copyFriendCode" style="margin-top:8px">Code kopieren</button>
- <h3>Freunde</h3><p class="account-note">Kontakte sehen nur deinen Anzeigenamen. Trainings- und Körperdaten werden nicht geteilt.</p>
- <label for="friendInput">Freundescode einfügen</label><div class="row"><input class="input" id="friendInput" autocomplete="off" placeholder="Freundescode"><button class="btn" id="friendAdd">Anfragen</button></div>
- <div id="friendsList" style="margin-top:12px"></div><button class="btn secondary" id="friendRefresh" style="margin-top:12px">Aktualisieren</button>
- <h3>Wochen-Challenges</h3><p class="account-note">Teile nur den Fortschritt dieser Challenge, keine Trainingsdetails.</p>
- <div class="challenge-form"><select class="input" id="challengeFriend"></select><input class="input" id="challengeTarget" type="number" min="1" max="14" value="3" aria-label="Zieltrainings"><button class="btn" id="challengeCreate">Starten</button></div>
- <div id="challengesList" style="margin-top:12px"></div>
+ <label class="account-label" for="profileName">Dein Benutzername</label><div class="row"><input class="input" id="profileName" maxlength="40"><button class="btn secondary" id="saveProfile">Speichern</button></div>
  <div class="danger-zone"><h3>Konto löschen</h3><p class="account-note">Dein Konto und alle damit gespeicherten Daten werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.</p><button class="btn danger" id="deleteAccountButton">KONTO DAUERHAFT LÖSCHEN</button></div>
  <p id="accountDetailsMessage" role="status" class="account-status"></p>
  </div><button class="btn secondary install-button" type="button">📲 App installieren</button>
@@ -467,4 +487,3 @@
 <script src="js/install.js"></script>
 </body>
 </html>
-

@@ -259,8 +259,8 @@ const ForgeCloud = (() => {
     try{
       if(action==='remove'&&!confirm('Diesen Kontakt oder diese Anfrage entfernen?'))return;
       const r=await client.rpc('forge_friends',{p_action:action,p_id:id,p_code:action==='request'?$('friendInput').value.trim():null});
-      if(r.error)throw r.error;$('friendInput').value='';await friends();$('accountDetailsMessage').textContent='Gespeichert.';
-    }catch(error){$('accountDetailsMessage').textContent=explain(error);}
+      if(r.error)throw r.error;$('friendInput').value='';await friends();await ForgeSocial.refreshFriendsPage();$('accountDetailsMessage').textContent='Gespeichert.';toast('Gespeichert.');
+    }catch(error){$('accountDetailsMessage').textContent=explain(error);toast(explain(error));}
   }
   async function importPayload(payload) {
     if(user&&!ready)throw Error('Bitte warte, bis dein Konto geladen ist.');
@@ -328,7 +328,6 @@ const ForgeCloud = (() => {
     window.addEventListener('offline',()=>status(user?'Offline · lokal gespeichert':'Nur auf diesem Gerät'));
     setInterval(()=>flush(),30000);
   }
-  return {boot,save,flush,syncNow,open,guest,logout,importPayload,reset,normalize,defaults,resolveConflict,social,isSignedIn:()=>!!user&&ready,
+  return {boot,save,flush,syncNow,open,guest,logout,importPayload,reset,normalize,defaults,resolveConflict,social,refreshFriends:async()=>{await profile();await friends();},isSignedIn:()=>!!user&&ready,
     diagnostics:()=>({userId:user?.id || null,ready,version,syncing,conflict:!!conflict})};
 })();
-

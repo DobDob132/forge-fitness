@@ -8,7 +8,7 @@ function addXP(amount, reason) {
     let newLevel = Math.floor(Math.pow(data.xp / 100, 0.5)) + 1;
     if(newLevel > data.level) {
         data.level = newLevel;
-        toast(`🎉 LEVEL UP! Du bist jetzt Level ${newLevel}!`);
+        toast(I18n.translate(`🎉 LEVEL UP! Du bist jetzt Level ${newLevel}!`));
     }
     saveData();
 }
@@ -42,7 +42,7 @@ function checkMilestones() {
             if (current >= m.req) {
                 data.claimedMilestones.push(m.id);
                 addXP(m.xp, `Meilenstein: ${m.title}`);
-                toast(`🏆 Meilenstein erreicht: ${m.title}!`);
+                toast(`${I18n.translate('🏆 Meilenstein erreicht:')} ${I18n.translate(m.title)}!`);
                 earned = true;
             }
         }
@@ -65,10 +65,10 @@ function renderTrophies() {
             <div class="ms-icon">${unlocked ? '🏆' : '🔒'}</div>
             <div class="ms-info">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div class="ms-title">${m.title}</div>
+                    <div class="ms-title">${escapeHtml(I18n.translate(m.title))}</div>
                     <div class="ms-reward">+${m.xp} XP</div>
                 </div>
-                <div class="ms-desc">${m.desc}</div>
+                <div class="ms-desc">${escapeHtml(I18n.translate(m.desc))}</div>
                 <div class="ms-progress-bg"><div class="ms-progress-fill" style="width:${perc}%"></div></div>
                 <div style="font-size:10px; color:var(--muted); text-align:right; margin-top:3px;">${Math.round(current)} / ${m.req}</div>
             </div>
@@ -77,10 +77,9 @@ function renderTrophies() {
     document.getElementById("milestonesList").innerHTML = html;
     
     let histHtml = data.xpHistory.map(h => {
-        let d = new Date(h.date).toLocaleDateString("de-AT", {day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit"});
-        return `<div class="record"><div><b>${escapeHtml(h.reason)}</b><small style="display:block; color:var(--muted)">${d}</small></div><span class="tag" style="color:var(--gold); font-weight:bold;">+${escapeHtml(h.amount)}</span></div>`;
+        let d = new Date(h.date).toLocaleDateString(I18n.locale(), {day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit"});
+        return `<div class="record"><div><b>${escapeHtml(I18n.translate(h.reason))}</b><small style="display:block; color:var(--muted)">${d}</small></div><span class="tag" style="color:var(--gold); font-weight:bold;">+${escapeHtml(h.amount)}</span></div>`;
     }).join("");
-    if(!histHtml) histHtml = "<div class='sub'>Noch keine XP gesammelt.</div>";
+    if(!histHtml) histHtml = `<div class='sub'>${I18n.translate('Noch keine XP gesammelt.')}</div>`;
     document.getElementById("xpHistoryList").innerHTML = histHtml;
 }
-
