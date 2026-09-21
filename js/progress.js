@@ -58,7 +58,7 @@ function streak(){
     return s;
 }
 
-function countRecords(){let m={};data.logs.flatMap(l=>l.entries||[]).forEach(x=>{m[x.name]=Math.max(m[x.name]||0,x.weight||0)});return Object.keys(m).length}
+function countRecords(){let m={};data.logs.flatMap(l=>l.entries||[]).forEach(x=>{if(Number(x.weight)>0)m[x.name]=Math.max(m[x.name]||0,x.weight)});return Object.keys(m).length}
 
 function renderSummaryChart() {
     let ctx = document.getElementById("workoutSummaryChart");
@@ -103,7 +103,7 @@ function renderProgress(){
   let exMap = new Set();
   const weightOption=document.querySelector('#chartBodySelect option[value="weight"]');
   if(weightOption)weightOption.textContent=`Gewicht (${weightUnit()})`;
-  data.logs.flatMap(l=>l.entries||[]).forEach(e=>exMap.add(e.name));
+  data.logs.flatMap(l=>l.entries||[]).forEach(e=>{if(Number(e.weight)>0)exMap.add(e.name)});
   let sel = document.getElementById("chartExSelect");
   sel.innerHTML = '<option value="">Wähle Übung...</option>' + Array.from(exMap).sort().map(e=>`<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join("");
   
@@ -113,19 +113,19 @@ function renderProgress(){
   }
   updateBodyChart();
 
-  let html = [...data.logs].reverse().map((l,i)=>`<div class="record" onclick="showHistoryDetail(${data.logs.length-1-i})"><div><b>${new Date(l.date).toLocaleDateString("de-AT",{day:"2-digit",month:"2-digit",year:"numeric"})} · ${escapeHtml(l.plan)}</b><small style="display:block; color:var(--muted)">${escapeHtml(l.sets)} Sätze · ${Math.round(l.minutes)} Min.</small></div><button class="btn secondary" style="padding:4px 10px; font-size:12px;">Ansicht</button></div>`).join("");
+  let html = [...data.logs].reverse().map((l,i)=>`<div class="record" onclick="showHistoryDetail(${data.logs.length-1-i})"><div><b>${new Date(l.date).toLocaleDateString(I18n.locale(),{day:"2-digit",month:"2-digit",year:"numeric"})} · ${escapeHtml(I18n.translate(l.plan))}</b><small style="display:block; color:var(--muted)">${l.type==='activity'?`${Math.round(l.minutes)} ${I18n.translate('Minuten')}${l.distance?` · ${escapeHtml(l.distance)} km`:''}`:`${escapeHtml(l.sets)} ${I18n.translate('Sätze')} · ${Math.round(l.minutes)} Min.`} · ${Math.round(l.calories||0)} kcal</small></div><button class="btn secondary" style="padding:4px 10px; font-size:12px;">${I18n.translate('Ansicht')}</button></div>`).join("");
   document.getElementById("historyList").innerHTML = html || "<div class='sub'>Noch keine Trainings absolviert.</div>";
 }
 
 function showHistoryDetail(idx){
   let l = data.logs[idx];
-  let d = new Date(l.date).toLocaleDateString("de-AT",{day:"2-digit",month:"2-digit",year:"numeric", hour:"2-digit", minute:"2-digit"});
-  document.getElementById("histTitle").textContent = l.plan + " (" + l.focus + ")";
+  let d = new Date(l.date).toLocaleDateString(I18n.locale(),{day:"2-digit",month:"2-digit",year:"numeric", hour:"2-digit", minute:"2-digit"});
+  document.getElementById("histTitle").textContent = `${I18n.translate(l.plan)} (${I18n.translate(l.focus)})`;
   
   let map = {};
   (l.entries||[]).forEach(e => { if(!map[e.name]) map[e.name]=[]; map[e.name].push(e); });
   
-  let html = `<div class="sub" style="margin-bottom:15px;">Absolviert am ${d}<br>${escapeHtml(l.sets)} Sätze in ${Math.round(l.minutes)} Minuten.</div>`;
+  let html = `<div class="history-summary"><div><b>${Math.round(l.minutes)}</b><span>${I18n.translate('Minuten')}</span></div><div><b>${Math.round(l.calories||0)}</b><span>${I18n.translate('kcal geschätzt')}</span></div>${l.distance?`<div><b>${escapeHtml(l.distance)} km</b><span>${I18n.translate('Distanz')}</span></div>`:`<div><b>${escapeHtml(l.sets)}</b><span>${I18n.translate('Sätze')}</span></div>`}</div><div class="sub" style="margin:12px 0;">${I18n.translate('Absolviert am')} ${d}${l.note?`<br>📝 ${escapeHtml(l.note)}`:''}</div>`;
   html += `<div style="background:#11151d; padding:12px; border-radius:10px; border:1px solid var(--line);">`;
   
   for(let exName in map) {
@@ -134,8 +134,8 @@ function showHistoryDetail(idx){
       map[exName].forEach((set, i) => {
           let vol = (set.weight > 0 && !isNaN(set.reps)) ? ` <span style="color:var(--muted); font-size:11px;">(Vol: ${toDisplayWeight(set.weight * Number(set.reps))} ${weightUnit()})</span>` : "";
           html += `<div class="history-detail-item">
-              <span style="color:var(--muted); font-size:13px;">Satz ${i+1}</span>
-              <span style="font-weight:bold; font-size:13px;">${set.weight > 0 ? escapeHtml(formatWeight(set.weight)) + " × " : ""}${escapeHtml(set.reps)}${vol}</span>
+              <span style="color:var(--muted); font-size:13px;">${l.type==='activity'?I18n.translate('Einheit'):`${I18n.translate('Satz')} ${i+1}`}</span>
+              <span style="font-weight:bold; font-size:13px;">${set.weight > 0 ? escapeHtml(formatWeight(set.weight)) + " × " : ""}${escapeHtml(set.reps)}${vol}${set.calories!=null?` <small>· ${Math.round(set.calories)} kcal</small>`:''}</span>
           </div>`;
       });
       html += `</div></div>`;
@@ -245,6 +245,7 @@ function saveBodyData() {
         let val = parseFloat(document.getElementById("bd_" + m).value);if(m==='weight')val=fromDisplayWeight(val);
         if(!isNaN(val) && val > 0) {
             data.bodyData.push({ date, metric: m, value: val });
+            if(m==='weight')data.settings.calorieProfile={...calorieProfile(),weight:val};
             added = true;
         }
     });

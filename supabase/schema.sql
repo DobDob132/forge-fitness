@@ -140,7 +140,7 @@ create table public.forge_challenges (
  opponent uuid not null references public.forge_profiles(user_id) on delete cascade,
  week_start date not null,
  ends_on date not null,
- metric text not null default 'workouts' check(metric in ('workouts','sets','minutes','volume')),
+ metric text not null default 'workouts' check(metric in ('workouts','sets','minutes','calories','volume')),
  target bigint not null check(target between 1 and 1000000000),
  creator_progress bigint not null default 0 check(creator_progress between 0 and 1000000000),
  opponent_progress bigint not null default 0 check(opponent_progress between 0 and 1000000000),
@@ -220,7 +220,7 @@ begin
   select * into row_share from public.forge_plan_shares where id=p_id and recipient=uid for update;if row_share.id is null then raise exception 'Geteilter Plan nicht gefunden' using errcode='42501'; end if;delete from public.forge_plan_shares where id=p_id;return case when p_action='take_plan' then row_share.plan else jsonb_build_object('ok',true) end;
  elsif p_action='create_challenge' then
   challenge_metric:=coalesce(p_payload->>'metric','workouts');challenge_days:=coalesce((p_payload->>'days')::integer,7);challenge_target:=p_value;
-  if challenge_metric not in ('workouts','sets','minutes','volume') or challenge_days not in (7,14,30) or challenge_target is null or challenge_target not between 1 and 1000000000 then raise exception 'Ungültige Challenge' using errcode='22023'; end if;
+  if challenge_metric not in ('workouts','sets','minutes','calories','volume') or challenge_days not in (7,14,30) or challenge_target is null or challenge_target not between 1 and 1000000000 then raise exception 'Ungültige Challenge' using errcode='22023'; end if;
   if not exists(select 1 from public.forge_friendships where status='accepted' and ((requester=uid and recipient=p_friend) or (recipient=uid and requester=p_friend))) then raise exception 'Nur mit Freunden möglich' using errcode='42501'; end if;
   insert into public.forge_challenges(creator,opponent,week_start,ends_on,metric,target) values(uid,p_friend,current_date,current_date+(challenge_days-1),challenge_metric,challenge_target);return jsonb_build_object('ok',true);
  elsif p_action='challenges' then

@@ -21,6 +21,7 @@ function renderHome(){
     document.getElementById("sessions").textContent=data.logs.length;
     document.getElementById("sets").textContent=data.logs.reduce((a,l)=>a+(l.sets||0),0);
     document.getElementById("minutes").textContent=Math.round(data.logs.reduce((a,l)=>a+(l.minutes||0),0));
+    document.getElementById("calories").textContent=Math.round(data.logs.reduce((a,l)=>a+(l.calories||0),0));
     document.getElementById("records").textContent=countRecords();
     const goal=Math.max(1,Number(data.settings.weeklyGoal)||3),done=weeklyWorkoutCount(),percent=Math.min(100,Math.round(done/goal*100));
     document.getElementById("weeklyGoalText").textContent=I18n.translate(`${done} von ${goal} Trainings`);
@@ -28,9 +29,6 @@ function renderHome(){
     document.getElementById("weeklyGoalBar").style.width=percent+'%';
     const resume=document.getElementById("resumeWorkoutCard");resume.classList.toggle("hidden",!data.activeWorkout);
     if(data.activeWorkout)document.getElementById("resumeWorkoutText").textContent=I18n.translate(`${data.activeWorkout.dayName} · Übung ${data.activeWorkout.exercise+1}`);
-    
-    let nextD = days.find((x, i) => i > todayIndex() && x.ex.length > 0) || days.find(x => x.ex.length > 0) || days[0];
-    document.getElementById("next").textContent=I18n.translate(nextD.name).slice(0,2);
     
     document.getElementById("weekList").innerHTML=days.map((x,i)=>{const day=I18n.translate(x.name);return `<div class="day"><div class="badge ${escapeHtml(x.color)}">${escapeHtml(day.slice(0,2))}</div><div><b>${escapeHtml(I18n.translate(x.focus))}</b><small>${escapeHtml(I18n.translate(x.ex.length?` · ${x.ex.length} Übungen`:" · Pause"))}</small></div><span class="tag">${i===todayIndex()?I18n.translate("HEUTE"):escapeHtml(day)}</span></div>`}).join("");
 

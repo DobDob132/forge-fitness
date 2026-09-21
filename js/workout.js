@@ -1,8 +1,9 @@
 function startWorkoutFlow() {
   if(data.activeWorkout){resumeWorkout();return;}
+  preparePauseSignals();
   let d = today();
   if (!d.ex.length) { toast("Heute ist Regeneration 💛"); return; }
-  state = { day: d, exercise: 0, set: 0, setsDone: 0, started: Date.now(), timer: data.settings.pause, timerMax: data.settings.pause, interval: null, paused: false };
+  state = { day: d, exercise: 0, set: 0, setsDone: 0, started: Date.now(), timer: data.settings.pause, timerMax: data.settings.pause, timerEndsAt:0, interval: null, paused: false, finishing:false };
   data.current=[];
   lastSetBackup = null;
   document.getElementById("undoBtn").style.display="none";
@@ -44,9 +45,10 @@ function snapshotWorkout(phase='lifting'){
 function saveWorkoutDraftInputs(){snapshotWorkout('lifting')}
 function resumeWorkout(){
   const saved=data.activeWorkout;if(!saved)return startWorkoutFlow();
+  preparePauseSignals();
   const plan=data.allPlans.find(p=>p.id===saved.planId)||data.allPlans.find(p=>p.id===data.activePlanId),day=plan?.days.find(d=>d.id===saved.dayId);
   if(!day){discardWorkout(true);toast('Der gespeicherte Plan ist nicht mehr vorhanden.');return;}
-  state={day:JSON.parse(JSON.stringify(day)),exercise:saved.exercise||0,set:saved.set||0,setsDone:saved.setsDone||0,started:saved.started||Date.now(),timer:data.settings.pause,timerMax:data.settings.pause,interval:null,paused:false};
+  state={day:JSON.parse(JSON.stringify(day)),exercise:saved.exercise||0,set:saved.set||0,setsDone:saved.setsDone||0,started:saved.started||Date.now(),timer:data.settings.pause,timerMax:data.settings.pause,timerEndsAt:0,interval:null,paused:false,finishing:false};
   show('workout');if(data.settings.keepAwake!==false)requestWakeLock();
   if(saved.phase==='warmup'){document.getElementById('activePhase').classList.add('hidden');document.getElementById('pausePhase').classList.add('hidden');document.getElementById('warmupPhase').classList.remove('hidden');document.getElementById('warmupMethodText').textContent=data.settings.warmupType;}
   else{document.getElementById('warmupPhase').classList.add('hidden');beginLifting();if(saved.draftWeight!=='')document.getElementById('weightInput').value=saved.draftWeight;if(saved.draftReps)document.getElementById('repInput').value=saved.draftReps;}
@@ -54,7 +56,7 @@ function resumeWorkout(){
 }
 function discardWorkout(silent=false){
   if(!silent&&!confirm('Gespeichertes Training wirklich verwerfen?'))return;
-  clearInterval(state.interval);data.activeWorkout=null;data.current=[];state.day=null;saveData();renderHome();
+  clearInterval(state.interval);data.activeWorkout=null;data.current=[];state.day=null;state.finishing=false;saveData();renderHome();
 }
 
 function getSmartWeight(name, startWeight) {
@@ -127,10 +129,11 @@ async function finishSet(){
   let isExerciseDone = false;
   if(state.set>=e[1]){state.set=0; state.exercise++; isExerciseDone = true;}
   
-  snapshotWorkout('lifting');await saveData();
+  const completed=state.exercise>=state.day.ex.length;
+  if(!completed){snapshotWorkout('lifting');await saveData();}
   document.getElementById("undoBtn").style.display="inline-block";
-  if(state.exercise>=state.day.ex.length){ finishWorkout(); }
-  else{ startPause(isExerciseDone ? data.settings.pause + 30 : data.settings.pause); }
+  if(completed){ await finishWorkout(); }
+  else{ preparePauseSignals();startPause(isExerciseDone ? data.settings.pause + 30 : data.settings.pause); }
 }
 
 async function undoLastSet(){
@@ -140,34 +143,36 @@ async function undoLastSet(){
   lastSetBackup=null;
   document.getElementById("undoBtn").style.display="none";
   renderWorkout();
-  snapshotWorkout('lifting');
+  if(state.exercise<state.day.ex.length)snapshotWorkout('lifting');
 }
 
 function skipSet(){
   lastSetBackup={ exercise: state.exercise, set: state.set, setsDone: state.setsDone };
   state.set++;
   if(state.set>=state.day.ex[state.exercise][1]){state.set=0; state.exercise++;}
-  snapshotWorkout('lifting');
+  if(state.exercise<state.day.ex.length)snapshotWorkout('lifting');
   document.getElementById("undoBtn").style.display="inline-block";
   if(state.exercise>=state.day.ex.length) finishWorkout(); else renderWorkout();
 }
 
 async function finishWorkout(){
-  let mins=(Date.now()-state.started)/60000;
-  if(data.current && data.current.length>0){
-    data.logs.push({date:new Date().toISOString(), plan:state.day.name, focus:state.day.focus, sets:state.setsDone, minutes:mins, entries:data.current});
+  if(state.finishing)return;state.finishing=true;clearInterval(state.interval);
+  const finishedDay=state.day,mins=Math.max(1,(Date.now()-state.started)/60000),calories=(data.current||[]).length?estimateCalories({activity:'strength',intensity:data.settings.strengthIntensity||'moderate',minutes:mins}):0,entries=distributeCalories(data.current||[],calories);
+  data.activeWorkout=null;
+  if(entries.length>0){
+    data.logs.push({date:new Date().toISOString(),type:'strength',plan:finishedDay.name,focus:finishedDay.focus,sets:state.setsDone,minutes:mins,calories,entries});
     addXP(50, "Training beendet!");
   }
-  data.current=[];data.activeWorkout=null; await saveData();
+  data.current=[];await saveData();
   ForgeSocial.syncProgress();
   checkMilestones();
   releaseWakeLock();
   if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
   
-  document.getElementById("activePhase").classList.add("hidden");
-  document.getElementById("complete").classList.remove("hidden");
-  document.getElementById("completeText").textContent=`${state.day.name} · ${state.day.focus}`;
-  document.getElementById("completeStats").innerHTML=`<div class="stat"><b>${state.setsDone}</b><span>Sätze</span></div><div class="stat"><b>${Math.round(mins)}</b><span>Minuten</span></div><div class="stat"><b>+${(state.setsDone*10)+50}</b><span>XP</span></div>`;
+  show('complete');
+  document.getElementById("completeText").textContent=`${finishedDay.name} · ${finishedDay.focus}`;
+  document.getElementById("completeStats").innerHTML=`<div class="stat"><b>${state.setsDone}</b><span>Sätze</span></div><div class="stat"><b>${Math.round(mins)}</b><span>Minuten</span></div><div class="stat"><b>${calories}</b><span>kcal geschätzt</span></div><div class="stat"><b>+${(state.setsDone*10)+50}</b><span>XP</span></div>`;
+  state.day=null;state.finishing=false;
   
   setTimeout(renderSummaryChart, 100);
 }

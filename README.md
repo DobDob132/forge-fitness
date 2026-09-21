@@ -25,13 +25,17 @@ Browserdaten löschen entfernt Gastdaten und lokale Sicherungen. Abgemeldete Kon
 
 ## Freunde
 
-Im Profil den privaten Freundescode teilen oder erhaltenen Code eingeben. Anfragen können angenommen/abgelehnt und Kontakte entfernt werden. Freunde sehen nur Anzeigenamen und Beziehungsstatus, keine E-Mail-, Körper- oder Trainingsdaten. Veröffentlichte Pläne unter „Entdecken“ lassen sich ansehen, als eigene Kopie übernehmen und direkt als aktiver Trainingsplan verwenden.
+Im eigenen Freunde-Reiter den privaten Freundescode teilen oder erhaltenen Code eingeben. Anfragen können angenommen/abgelehnt und Kontakte entfernt werden. Freunde sehen nur Anzeigenamen und Beziehungsstatus, keine E-Mail-, Körper- oder Trainingsdaten. Veröffentlichte Pläne unter „Entdecken“ lassen sich ansehen, als eigene Kopie übernehmen und direkt als aktiver Trainingsplan verwenden.
 
-Eigene Trainingspläne lassen sich an angenommene Freunde senden. Der Empfänger übernimmt sie als unabhängige Kopie und kann sie ändern, ohne den Plan des Absenders zu verändern. Im Profil können Freunde außerdem eine Wochen-Challenge mit einem Ziel von 1 bis 14 Trainings starten. Sichtbar sind nur der Challenge-Fortschritt und Anzeigenamen; Trainingsdetails bleiben privat.
+Eigene Trainingspläne lassen sich an angenommene Freunde senden. Der Empfänger übernimmt sie als unabhängige Kopie und kann sie ändern, ohne den Plan des Absenders zu verändern. Challenges laufen 7, 14 oder 30 Tage und können Trainings, Sätze, Minuten, Kalorien oder bewegtes Gewicht zählen. Einladungen, laufende Challenges und Verlauf sind getrennt. Sichtbar sind nur der aggregierte Challenge-Fortschritt und Anzeigenamen; Trainingsdetails bleiben privat.
 
 ## Training und Darstellung
 
 - Angefangene Trainings können gespeichert und auf der Startseite exakt beim letzten Satz fortgesetzt oder verworfen werden.
+- „Training abschließen“ beendet die Einheit endgültig. „Für später speichern“ lässt sie ausdrücklich fortsetzbar.
+- Freie Trainings wie Joggen, Gehen, Radfahren, Wandern, Schwimmen oder Rudern lassen sich mit Dauer, Intensität, optionaler Distanz und Notiz erfassen.
+- Der Kalorienverbrauch ist eine Schätzung aus persönlichen Angaben, Dauer und Aktivitätsintensität. Für Erwachsene wird der Ruheumsatz nach [Mifflin–St Jeor](https://pubmed.ncbi.nlm.nih.gov/2305711/) mit Intensitätsfaktoren nach dem [2024 Adult Compendium](https://pacompendium.com/adult-compendium/) kombiniert. Unter 18 Jahren nutzt FORGE stattdessen eine allgemeine gewichtsbezogene MET-Schätzung. Krafttrainings-Kalorien werden nur als grobe Schätzung gleichmäßig auf erfasste Sätze verteilt; Messgeräte oder medizinische Messungen ersetzt dies nicht.
+- Der Pausentimer orientiert sich an der tatsächlichen Uhrzeit und korrigiert sich nach Hintergrundpausen. Ton und Vibration sind in den Einstellungen einzeln testbar; Geräte ohne Vibrations-API können nicht vibrieren.
 - Nach früheren Einheiten empfiehlt FORGE bei passenden Wiederholungsbereichen das nächste Gewicht oder das Beibehalten des aktuellen Gewichts.
 - Jeder Übung kann im Planeditor eine persönliche Technik- oder Geräte-Notiz hinzugefügt werden.
 - Das Wochenziel ist zwischen 1 und 14 Trainings einstellbar und wird auf der Startseite angezeigt.

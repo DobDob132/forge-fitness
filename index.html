@@ -27,12 +27,12 @@
     </div>
 </header>
 <nav class="nav" id="nav">
-<button class="active" onclick="show('home',this)">🏠 Home</button>
-<button onclick="show('plan',this)">📅 Woche</button>
-<button onclick="show('plans',this)">📚 Pläne</button>
-<button onclick="show('progress',this)">📈 Statistik</button>
-<button onclick="show('trophies',this)">🏆 Trophäen</button>
-<button onclick="show('friends',this)">👥 Freunde</button>
+<button class="active" onclick="show('home',this)"><span>🏠</span><span>Home</span></button>
+<button onclick="show('plan',this)"><span>📅</span><span>Woche</span></button>
+<button onclick="show('plans',this)"><span>📚</span><span>Pläne</span></button>
+<button onclick="show('progress',this)"><span>📈</span><span>Statistik</span></button>
+<button onclick="show('trophies',this)"><span>🏆</span><span>Trophäen</span></button>
+<button onclick="show('friends',this)"><span>👥</span><span>Freunde</span></button>
 </nav>
 
 <!-- HOME -->
@@ -61,9 +61,9 @@
 <div class="grid">
 <div class="card hero">
     <div><div class="eyebrow" id="todayLabel"></div><div class="flame">🔥</div><div class="title" id="todayTitle"></div><div class="sub" id="todaySub"></div></div>
-    <div class="row"><button class="btn" onclick="startWorkoutFlow()" style="width:100%">TRAINING STARTEN</button></div>
+    <div class="home-actions"><button class="btn" onclick="startWorkoutFlow()">TRAINING STARTEN</button><button class="btn secondary" onclick="openActivityModal()">🏃 FREIES TRAINING</button></div>
 </div>
-<div class="card"><div class="eyebrow">Dein Überblick</div><div class="stats" style="margin-top:14px"><div class="stat"><b id="streak">0</b><span>🔥 Streak</span></div><div class="stat"><b id="sessions">0</b><span>Trainings</span></div><div class="stat"><b id="sets">0</b><span>Sätze</span></div><div class="stat"><b id="minutes">0</b><span>Minuten</span></div><div class="stat"><b id="records">0</b><span>Rekorde</span></div><div class="stat"><b id="next">—</b><span>Nächstes</span></div></div></div>
+<div class="card"><div class="eyebrow">Dein Überblick</div><div class="stats" style="margin-top:14px"><div class="stat"><b id="streak">0</b><span>🔥 Streak</span></div><div class="stat"><b id="sessions">0</b><span>Trainings</span></div><div class="stat"><b id="sets">0</b><span>Sätze</span></div><div class="stat"><b id="minutes">0</b><span>Minuten</span></div><div class="stat"><b id="calories">0</b><span>kcal geschätzt</span></div><div class="stat"><b id="records">0</b><span>Rekorde</span></div></div></div>
 <div class="card week"><div class="section-title">Diese Woche</div><div id="weekList"></div></div>
 </div>
 </section>
@@ -71,24 +71,26 @@
 <!-- FREUNDE & CHALLENGES -->
 <section id="friends" class="hidden">
  <div id="friendsSignedOut" class="card hidden"><div class="section-title">👥 Freunde</div><p class="sub">Melde dich an, um Freunde hinzuzufügen und Challenges zu starten.</p><button class="btn" onclick="ForgeCloud.open()">ANMELDEN</button></div>
- <div id="friendsSignedIn" class="grid">
-  <div class="card">
-   <div class="section-title">👥 Freunde</div>
+ <div id="friendsSignedIn">
+  <div class="social-hero card"><div><div class="eyebrow">FORGE Together</div><div class="section-title">Gemeinsam dranbleiben</div><p class="account-note">Freunde sehen nur deinen Benutzernamen und den Fortschritt angenommener Challenges.</p></div><div class="social-counts"><div><b id="friendCount">0</b><span>Freunde</span></div><div><b id="activeChallengeCount">0</b><span>Aktive Challenges</span></div></div></div>
+  <div class="social-tabs"><button class="active" id="friendsPeopleTab" onclick="ForgeSocial.switchView('people')">👥 Freunde</button><button id="friendsChallengesTab" onclick="ForgeSocial.switchView('challenges')">⚔️ Challenges</button></div>
+  <div class="card social-panel" id="friendsPeoplePanel">
+   <div class="section-title">👥 Deine Freunde</div>
    <p class="account-note">Kontakte sehen nur deinen Benutzernamen. Trainings- und Körperdaten werden nicht geteilt.</p>
    <h3>Dein Freundescode</h3><p class="account-note">Teile diesen Code nur mit Personen, die dich hinzufügen dürfen.</p><code class="friend-code" id="friendCode"></code><button class="btn secondary" id="copyFriendCode" style="margin-top:8px">Code kopieren</button>
    <h3>Freund hinzufügen</h3><label for="friendInput">Freundescode einfügen</label><div class="row"><input class="input" id="friendInput" autocomplete="off" placeholder="Freundescode"><button class="btn" id="friendAdd">Anfragen</button></div>
    <div id="friendsList" style="margin-top:12px"></div><button class="btn secondary" id="friendRefresh" style="margin-top:12px">Aktualisieren</button>
   </div>
-  <div class="card">
-   <div class="section-title">⚔️ Challenges</div>
-   <p class="account-note">Fordere einen Freund über 7, 14 oder 30 Tage heraus. Geteilt wird nur der Fortschritt, niemals einzelne Übungen oder Körperdaten.</p>
-   <div class="challenge-form">
+  <div class="card social-panel hidden" id="friendsChallengesPanel">
+   <div class="row between social-heading"><div><div class="section-title">⚔️ Challenges</div><p class="account-note">Klare Ziele, Live-Fortschritt und ein sichtbares Ergebnis.</p></div><button class="btn" id="challengeComposerToggle" onclick="ForgeSocial.toggleComposer()">+ Neue Challenge</button></div>
+   <div class="challenge-composer hidden" id="challengeComposer"><div class="challenge-form">
     <label><span>Freund</span><select class="input" id="challengeFriend"></select></label>
-    <label><span>Zielart</span><select class="input" id="challengeMetric"><option value="workouts">Trainings</option><option value="sets">Sätze</option><option value="minutes">Trainingsminuten</option><option value="volume">Bewegtes Gewicht</option></select></label>
+    <label><span>Zielart</span><select class="input" id="challengeMetric"><option value="workouts">Trainings</option><option value="sets">Sätze</option><option value="minutes">Trainingsminuten</option><option value="calories">Kalorien</option><option value="volume">Bewegtes Gewicht</option></select></label>
     <label><span>Laufzeit</span><select class="input" id="challengeDuration"><option value="7">7 Tage</option><option value="14">14 Tage</option><option value="30">30 Tage</option></select></label>
     <label><span>Ziel</span><input class="input" id="challengeTarget" type="number" min="1" max="1000000000" value="3" aria-label="Challenge-Ziel"></label>
-    <button class="btn" id="challengeCreate">CHALLENGE SENDEN</button>
-   </div>
+    <div class="challenge-presets" id="challengePresets"></div><button class="btn" id="challengeCreate">CHALLENGE SENDEN</button>
+   </div></div>
+   <div class="challenge-filter" id="challengeFilter"><button class="active" data-filter="active">Aktiv</button><button data-filter="invites">Einladungen</button><button data-filter="history">Verlauf</button></div>
    <div id="challengesList" style="margin-top:16px"></div>
   </div>
  </div>
@@ -226,7 +228,7 @@
         <button class="btn" style="margin-top:15px; width:100%;" onclick="endPauseEarly()">PAUSE BEENDEN & WEITER</button>
     </div>
 </div>
-<div class="row" style="justify-content:center; margin-top:20px;"><button class="btn secondary" onclick="saveAndExit()">Beenden & speichern</button><button class="btn secondary" id="fullscreenBtn" onclick="toggleFullscreen()">⛶ Vollbild</button></div>
+<div class="row workout-exit" style="justify-content:center; margin-top:20px;"><button class="btn" onclick="finishWorkout()">TRAINING ABSCHLIESSEN</button><button class="btn secondary" onclick="saveAndExit()">Für später speichern</button><button class="btn secondary" id="fullscreenBtn" onclick="toggleFullscreen()">⛶ Vollbild</button></div>
 </div>
 </section>
 
@@ -382,6 +384,18 @@
     <button class="btn" style="width:100%; margin-top:20px;" onclick="saveBodyData()">SPEICHERN</button>
 </div></div>
 
+<!-- Free Activity -->
+<div class="modal" id="activityModal"><div class="card">
+ <div class="row between"><div class="section-title">🏃 Freies Training</div><button class="icon" onclick="closeActivityModal()">✕</button></div>
+ <p class="sub">Erfasse Joggen, Radfahren oder eine andere spontane Einheit. Kalorien sind ein persönlicher Schätzwert.</p>
+ <div class="activity-types" id="activityTypes">
+  <button class="active" data-activity="running">🏃 Joggen</button><button data-activity="walking">🚶 Gehen</button><button data-activity="cycling">🚴 Radfahren</button><button data-activity="hiking">🥾 Wandern</button><button data-activity="swimming">🏊 Schwimmen</button><button data-activity="rowing">🚣 Rudern</button><button data-activity="other">✨ Sonstiges</button>
+ </div>
+ <div class="activity-form"><label><span>Dauer (Minuten)</span><input class="input" id="activityMinutes" type="number" min="1" max="1440" value="30"></label><label><span>Distanz (km, optional)</span><input class="input" id="activityDistance" type="number" min="0" step="0.1"></label><label><span>Intensität</span><select class="input" id="activityIntensity"><option value="light">Locker</option><option value="moderate" selected>Mittel</option><option value="intense">Intensiv</option></select></label><label><span>Notiz (optional)</span><input class="input" id="activityNote" maxlength="120"></label></div>
+ <div class="calorie-preview"><span>Geschätzter Verbrauch</span><b id="activityCalories">0 kcal</b><small id="activityProfileHint"></small></div>
+ <button class="btn" style="width:100%;margin-top:14px" onclick="saveFreeActivity()">TRAINING SPEICHERN</button>
+</div></div>
+
 <!-- Info Modal -->
 <div class="modal" id="infoModal"><div class="card"><div class="row between"><div class="section-title" id="infoTitle">Info</div><button class="icon" onclick="document.getElementById('infoModal').style.display='none'">✕</button></div><div style="font-size: 14px; line-height: 1.6; color:var(--muted);" id="infoText"></div><button class="btn" style="margin-top:20px; width:100%;" onclick="document.getElementById('infoModal').style.display='none'">Verstanden</button></div></div>
 
@@ -396,6 +410,10 @@
 <div class="setting-group-title">Training</div>
 <div class="setting"><label>Gewichtseinheit</label><select class="input" id="unitSetting"><option value="kg">Kilogramm (kg)</option><option value="lb">Pfund (lb)</option></select></div>
 <div class="setting"><label>Trainingsziel pro Woche</label><input class="input" id="weeklyGoalSetting" type="number" min="1" max="14" step="1"></div>
+<div class="setting-group-title">Kalorien-Schätzung</div>
+<p class="account-note">FORGE nutzt Alter, Größe, Gewicht, Geschlecht, Dauer und Intensität. Das Ergebnis ist eine Schätzung und kein medizinischer Messwert.</p>
+<div class="profile-grid"><label><span>Alter</span><input class="input" id="calorieAge" type="number" min="13" max="100"></label><label><span>Größe (cm)</span><input class="input" id="calorieHeight" type="number" min="120" max="230"></label><label><span>Gewicht (kg)</span><input class="input" id="calorieWeight" type="number" min="25" max="350" step="0.1"></label><label><span>Geschlecht für Berechnung</span><select class="input" id="calorieSex"><option value="neutral">Keine Angabe</option><option value="female">Weiblich</option><option value="male">Männlich</option></select></label></div>
+<div class="setting"><label>Krafttraining-Intensität</label><select class="input" id="strengthIntensity"><option value="light">Locker</option><option value="moderate">Mittel</option><option value="intense">Intensiv</option></select></div>
 <div class="setting"><label>Standard-Pause (Sekunden)</label><input class="input" id="pauseSetting" type="number" min="0" step="5"></div>
 <div class="setting"><label>Pausen Quick-Buttons (Kommagetrennt in Sek.)</label><input class="input" id="customPauses" type="text" placeholder="z.B. 30, 60, 90, 120"></div>
 
@@ -420,6 +438,7 @@
 <div class="setting setting-toggle"><div><b>Display aktiv halten</b><small>Verhindert nach Möglichkeit, dass der Bildschirm ausgeht.</small></div><input type="checkbox" id="wakeLockSetting"></div>
 <div class="setting setting-toggle"><div><b>Bei Pausenende vibrieren</b><small>Funktioniert auf unterstützten Smartphones.</small></div><input type="checkbox" id="vibrationSetting"></div>
 <div class="setting setting-toggle"><div><b>Signalton bei Pausenende</b><small>Spielt einen kurzen, dezenten Ton ab.</small></div><input type="checkbox" id="soundSetting"></div>
+<div class="pause-test"><button class="btn secondary" type="button" onclick="testPauseSignal('vibration')">📳 Vibration testen</button><button class="btn secondary" type="button" onclick="testPauseSignal('sound')">🔊 Ton testen</button><span class="sub" id="pauseTestStatus"></span></div>
 
 <div class="controls"><button class="btn" onclick="saveSettings()">SPEICHERN</button><button class="btn secondary" onclick="exportData()">💾 Export</button><button class="btn secondary" onclick="importData()">📥 Import</button><button class="btn secondary" onclick="resetData()">Daten löschen</button></div>
 </div></div>
@@ -441,7 +460,7 @@
    <div id="signupNameWrap" class="hidden"><label for="authName">Benutzername (für Freunde sichtbar)</label><input class="input" id="authName" minlength="1" maxlength="40" autocomplete="nickname" required><p class="account-note">Jeder Benutzername kann nur einmal verwendet werden.</p></div>
    <div id="authEmailWrap"><label for="authEmail">E-Mail-Adresse</label><input class="input" id="authEmail" type="email" autocomplete="email" required></div>
    <div id="authPasswordWrap"><label for="authPassword">Passwort</label><input class="input" id="authPassword" type="password" autocomplete="current-password" required></div>
-   <p class="account-note">Mit Konto werden deine Pläne, Trainings, Körperdaten und Einstellungen privat in Supabase (Frankfurt) gespeichert. Freunde sehen nur deinen Anzeigenamen. Eine E-Mail-Bestätigung ist derzeit nicht nötig. Auf diesem Gerät bleibt eine Offline-Kopie.</p>
+   <p class="account-note">Mit Konto werden deine Pläne, Trainings, Körperdaten und Einstellungen privat in Supabase (Frankfurt) gespeichert. Freunde sehen deinen Benutzernamen und den Fortschritt angenommener Challenges, aber keine Trainingsdetails oder Körperdaten. Eine E-Mail-Bestätigung ist derzeit nicht nötig. Auf diesem Gerät bleibt eine Offline-Kopie.</p>
    <button class="btn" type="submit" id="authSubmit">ANMELDEN</button>
   </form>
   <div id="accountMessage" class="account-status" role="status" aria-live="polite"></div>
@@ -471,6 +490,7 @@
 <script src="vendor/supabase.js"></script>
 <script src="js/config.js"></script>
 <script src="js/storage.js"></script>
+<script src="js/calories.js"></script>
 <script src="js/data.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/utils.js"></script>
@@ -478,6 +498,7 @@
 <script src="js/plans.js"></script>
 <script src="js/workout.js"></script>
 <script src="js/timer.js"></script>
+<script src="js/activity.js"></script>
 <script src="js/progress.js"></script>
 <script src="js/settings.js"></script>
 <script src="js/community.js"></script>

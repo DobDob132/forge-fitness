@@ -36,17 +36,19 @@ const ForgeCloud = (() => {
         for(const ex of day.ex) if(!Array.isArray(ex) || typeof ex[0] !== 'string' || !Number.isFinite(Number(ex[1])) || typeof ex[2] !== 'string') throw Error('Ungültige Übung.');
       }
     }
-    p.settings = {...defaultSettings,...p.settings};
+    const existingProfile=p.settings?.calorieProfile;
+    p.settings = {...defaultSettings,...p.settings,calorieProfile:{...defaultSettings.calorieProfile,...p.settings?.calorieProfile}};
     if(!p.xp) {p.xp=0;p.level=1;p.xpHistory=[];}
     p.claimedMilestones ||= [];
     p.bodyData = (p.bodyData || []).map(d=>typeof d.metric==='undefined'?{date:d.date,metric:'weight',value:d.weight||d.value}:d);
+    if(!existingProfile){const latestWeight=[...p.bodyData].reverse().find(d=>d.metric==='weight');if(latestWeight)p.settings.calorieProfile.weight=Number(latestWeight.value)||70;}
     if(!Array.isArray(p.xpHistory) || !Array.isArray(p.claimedMilestones)) throw Error('Ungültige Fortschrittsdaten.');
     return p;
   }
   function renderData(payload) {
     data = normalize(payload);
     clearInterval(state.interval);releaseWakeLock();
-    state={day:null,exercise:0,set:0,setsDone:0,started:0,paused:false,timer:90,timerMax:90,interval:null};
+    state={day:null,exercise:0,set:0,setsDone:0,started:0,paused:false,timer:90,timerMax:90,timerEndsAt:0,interval:null,finishing:false};
     lastSetBackup=null;editPlanCopy=null;
     for(const chart of [exChartInstance,bodyChartInstance,summaryChartInstance])chart?.destroy();
     exChartInstance=bodyChartInstance=summaryChartInstance=null;
@@ -243,14 +245,16 @@ const ForgeCloud = (() => {
   async function friends() {
     const r=await client.rpc('forge_friends',{p_action:'list'});if(r.error)throw r.error;
     const list=$('friendsList');list.replaceChildren();
-    if(!r.data.length){list.textContent='Noch keine Kontakte. Tausche deinen Freundescode persönlich aus.';return;}
+    if(!r.data.length){list.innerHTML=`<div class="social-empty"><span>👥</span><b>${I18n.translate('Noch keine Freunde')}</b><small>${I18n.translate('Tausche deinen Freundescode aus, um jemanden einzuladen.')}</small></div>`;return;}
     for(const f of r.data){
       const row=document.createElement('div');row.className='friend-row';
+      const avatar=document.createElement('span');avatar.className='friend-avatar';avatar.textContent=f.display_name.slice(0,1).toUpperCase();
       const text=document.createElement('div'),name=document.createElement('b'),sub=document.createElement('div');
-      name.textContent=f.display_name;sub.className='sub';sub.textContent=f.status==='accepted'?'Befreundet':f.incoming?'Anfrage erhalten':'Anfrage gesendet';text.append(name,sub);row.append(text);
+      name.textContent=f.display_name;sub.className='sub';sub.textContent=I18n.translate(f.status==='accepted'?'Befreundet':f.incoming?'Anfrage erhalten':'Anfrage gesendet');text.append(name,sub);row.append(avatar,text);
       const actions=document.createElement('div');actions.className='account-buttons';
+      if(f.status==='accepted'){const challenge=document.createElement('button');challenge.className='btn';challenge.textContent=I18n.translate('⚔️ Herausfordern');challenge.onclick=()=>ForgeSocial.challengeFriendName(f.display_name);actions.append(challenge);}
       for(const [action,label] of [...(f.status==='pending'&&f.incoming?[['accept','Annehmen']]:[]),['remove',f.status==='accepted'?'Entfernen':f.incoming?'Ablehnen':'Zurückziehen']]){
-        const b=document.createElement('button');b.className='btn secondary';b.textContent=label;b.onclick=()=>friendAction(action,f.id);actions.append(b);
+        const b=document.createElement('button');b.className='btn secondary';b.textContent=I18n.translate(label);b.onclick=()=>friendAction(action,f.id);actions.append(b);
       }
       row.append(actions);list.append(row);
     }
