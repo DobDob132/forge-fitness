@@ -1,4 +1,4 @@
-const ACTIVITY_METS={running:{light:7,moderate:9.8,intense:12.3},walking:{light:2.8,moderate:4.3,intense:6},cycling:{light:4,moderate:7.5,intense:10},hiking:{light:4.5,moderate:6,intense:8},swimming:{light:5,moderate:7,intense:9.8},rowing:{light:4.8,moderate:7,intense:9},strength:{light:3.5,moderate:5.5,intense:7.5},other:{light:3,moderate:5,intense:7}};
+const ACTIVITY_METS={running:{light:7,moderate:9.8,intense:12.3},walking:{light:2.8,moderate:4.3,intense:6},cycling:{light:4,moderate:7.5,intense:10},hiking:{light:4.5,moderate:6,intense:8},swimming:{light:5,moderate:7,intense:9.8},rowing:{light:4.8,moderate:7,intense:9},tennis:{light:5,moderate:6.8,intense:8},strength:{light:3.5,moderate:5.5,intense:7.5},other:{light:3,moderate:5,intense:7}};
 
 function calorieProfile(){
   const profile=data?.settings?.calorieProfile||{},latest=[...(data?.bodyData||[])].reverse().find(item=>item.metric==='weight');

@@ -39,7 +39,7 @@ Der Wochenrückblick im Challenge-Reiter zählt laufende und in dieser Woche bee
 
 - Angefangene Trainings können gespeichert und auf der Startseite exakt beim letzten Satz fortgesetzt oder verworfen werden.
 - „Training abschließen“ beendet die Einheit endgültig. „Für später speichern“ lässt sie ausdrücklich fortsetzbar.
-- Freie Trainings wie Joggen, Gehen, Radfahren, Wandern, Schwimmen oder Rudern lassen sich mit Dauer, Intensität, optionaler Distanz und Notiz erfassen.
+- Freie Trainings wie Joggen, Gehen, Radfahren, Wandern, Schwimmen, Rudern oder Tennis lassen sich mit Dauer, Belastung, optionaler Distanz und Notiz erfassen.
 - Der Kalorienverbrauch ist eine Schätzung aus persönlichen Angaben, Dauer und Aktivitätsintensität. Für Erwachsene wird der Ruheumsatz nach [Mifflin–St Jeor](https://pubmed.ncbi.nlm.nih.gov/2305711/) mit Intensitätsfaktoren nach dem [2024 Adult Compendium](https://pacompendium.com/adult-compendium/) kombiniert. Unter 18 Jahren nutzt FORGE stattdessen eine allgemeine gewichtsbezogene MET-Schätzung. Krafttrainings-Kalorien werden nur als grobe Schätzung gleichmäßig auf erfasste Sätze verteilt; Messgeräte oder medizinische Messungen ersetzt dies nicht.
 - Der Pausentimer orientiert sich an der tatsächlichen Uhrzeit und korrigiert sich nach Hintergrundpausen. Ton und Vibration sind in den Einstellungen einzeln testbar; Geräte ohne Vibrations-API können nicht vibrieren.
 - Nach früheren Einheiten empfiehlt FORGE bei passenden Wiederholungsbereichen das nächste Gewicht oder das Beibehalten des aktuellen Gewichts.

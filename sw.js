@@ -1,4 +1,4 @@
-const CACHE='forge-shell-a5ef19e22abb3a9f';
+const CACHE='forge-shell-573667f10b7e3e3f';
 const ASSETS=["./index.html","./manifest.webmanifest","./css/account.css","./css/style.css","./js/activity.js","./js/app.js","./js/calories.js","./js/cloud.js","./js/community.js","./js/config.js","./js/data.js","./js/i18n.js","./js/install.js","./js/plans.js","./js/progress.js","./js/settings.js","./js/social.js","./js/storage.js","./js/timer.js","./js/utils.js","./js/workout.js","./js/xp.js","./vendor/chart.umd.js","./vendor/supabase.js","./assets/icons/icon-192.png","./assets/icons/icon-512.png","./assets/icons/icon-maskable.png"];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('forge-shell-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
