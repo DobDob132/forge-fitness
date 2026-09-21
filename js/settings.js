@@ -8,6 +8,7 @@ function openSettings(){
   document.getElementById("soundSetting").checked=data.settings.pauseSound===true;
   document.getElementById("unitSetting").value=data.settings.unit==='lb'?'lb':'kg';
   document.getElementById("weeklyGoalSetting").value=Math.max(1,Math.min(14,Number(data.settings.weeklyGoal)||3));
+  document.getElementById("languageSetting").value=data.settings.language || 'de';
   document.getElementById("warmupTypeSetting").style.display = (data.settings.warmup === "ja") ? "block" : "none";
   document.getElementById("settingsModal").style.display="flex";
 }
@@ -22,6 +23,8 @@ function saveSettings(){
   data.settings.pauseSound=document.getElementById("soundSetting").checked;
   data.settings.unit=document.getElementById("unitSetting").value;
   data.settings.weeklyGoal=Math.max(1,Math.min(14,+document.getElementById("weeklyGoalSetting").value||3));
+  data.settings.language=document.getElementById("languageSetting").value;
+  I18n.setLanguage(data.settings.language);
   saveData(); closeSettings(); toast("Einstellungen gespeichert");
 }
 function exportData(){
@@ -41,3 +44,4 @@ function importData(){
   };i.click();
 }
 function resetData(){ForgeCloud.reset().catch(error=>toast(error.message));}
+
