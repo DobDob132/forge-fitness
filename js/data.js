@@ -1,5 +1,5 @@
 const weightSteps = [4, 7, 9, 11, 13, 16, 18, 20, 22, 25];
-let defaultSettings = {pause:90, customPauses:"30, 60, 90, 120", warmup:"nein", warmupType:"Rudern", keepAwake:true, vibration:true, pauseSound:false, unit:"kg", weeklyGoal:3};
+let defaultSettings = {pause:90, customPauses:"30, 60, 90, 120", warmup:"nein", warmupType:"Rudern", keepAwake:true, vibration:true, pauseSound:false, unit:"kg", weeklyGoal:3, language:localStorage.getItem('forgeLanguage') || (navigator.language?.toLowerCase().startsWith('el')?'el':navigator.language?.toLowerCase().startsWith('en')?'en':'de')};
 let data = JSON.parse(ForgeStore.read() || "null");
 
 const emptyWeek = () => [
@@ -62,3 +62,4 @@ const comPlansData = [
     {name: "Home Workout Essentials", days: [{name: "Mo", focus: "Full Body", ex: [["Liegestütze", 3, "Max", 0], ["Kniebeugen", 3, "20", 0], ["Plank", 3, "60s", 0]]}, {name: "Di", focus: "Pause", ex: []}, {name: "Mi", focus: "Full Body", ex: [["Ausfallschritte", 3, "15", 0], ["Dips (Stuhl)", 3, "12", 0], ["Sit-Ups", 3, "20", 0]]}, {name: "Do", focus: "Pause", ex: []}, {name: "Fr", focus: "Full Body", ex: [["Burpees", 3, "15", 0], ["Liegestütze", 3, "Max", 0], ["Superman", 3, "15", 0]]}, {name: "Sa", focus: "Pause", ex: []}, {name: "So", focus: "Pause", ex: []}]},
     {name: "Ruder-Cardio Hybrid", days: [{name: "Mo", focus: "Ausdauer", ex: [["Rudern (Leicht)", 1, "30min", 0]]}, {name: "Di", focus: "Kraft", ex: [["Bankdrücken", 3, "10", 0], ["Rudern (Gerät)", 3, "10", 0]]}, {name: "Mi", focus: "Intervalle", ex: [["Rudern Intervalle", 1, "20min", 0]]}, {name: "Do", focus: "Kraft", ex: [["Klimmzüge", 3, "Max", 0], ["Kniebeugen", 3, "12", 0]]}, {name: "Fr", focus: "Ausdauer Lang", ex: [["Rudern (Ausdauer)", 1, "45min", 0]]}, {name: "Sa", focus: "Pause", ex: []}, {name: "So", focus: "Pause", ex: []}]}
 ];
+
