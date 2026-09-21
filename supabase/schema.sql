@@ -202,4 +202,25 @@ create function public.forge_social(p_action text,p_id uuid default null,p_frien
 returns jsonb language sql security invoker set search_path='' as $$select forge_private.social_action(p_action,p_id,p_friend,p_payload,p_value);$$;
 revoke all on function public.forge_social(text,uuid,uuid,jsonb,integer) from public,anon;
 grant execute on function public.forge_social(text,uuid,uuid,jsonb,integer) to authenticated;
+
+-- Usernames are unique regardless of capitalization or surrounding spaces.
+create unique index forge_profiles_display_name_unique
+on public.forge_profiles (lower(btrim(display_name)));
+
+-- Create the profile in the same transaction as the Auth user. A duplicate
+-- username therefore prevents the account itself from being created.
+create function forge_private.create_profile_for_new_user()
+returns trigger language plpgsql security definer set search_path='' as $$
+declare chosen_name text:=btrim(coalesce(new.raw_user_meta_data->>'display_name',''));
+begin
+ if length(chosen_name) not between 1 and 40 then raise exception 'USERNAME_INVALID' using errcode='22023'; end if;
+ insert into public.forge_profiles(user_id,display_name) values(new.id,chosen_name);
+ return new;
+exception when unique_violation then raise exception 'USERNAME_TAKEN' using errcode='23505';
+end $$;
+revoke all on function forge_private.create_profile_for_new_user() from public,anon,authenticated;
+create trigger forge_create_profile_after_signup after insert on auth.users
+for each row execute function forge_private.create_profile_for_new_user();
+
 commit;
+
