@@ -24,7 +24,7 @@ const ForgeCloud = (() => {
   function defaults() {
     const days = emptyWeek();
     days[0].ex = [['Bankdrücken', 3, '8-12', 20], ['Liegestütze', 3, 'Max', 0]];
-    return {allPlans:[{id:'p_default',name:'Mein erster Plan',days,archived:false}],activePlanId:'p_default',logs:[],settings:{...defaultSettings},xp:0,level:1,xpHistory:[],claimedMilestones:[],bodyData:[],activeWorkout:null};
+    return {allPlans:[{id:'p_default',name:'Mein erster Plan',days,archived:false}],activePlanId:'p_default',logs:[],settings:{...defaultSettings},xp:0,level:1,xpHistory:[],claimedMilestones:[],bodyData:[],activeWorkout:null,activityTemplates:[]};
   }
   function normalize(value) {
     if (!value || !Array.isArray(value.allPlans) || !value.allPlans.length || !Array.isArray(value.logs)) throw Error('Ungültige FORGE-Sicherungsdatei.');
@@ -41,6 +41,7 @@ const ForgeCloud = (() => {
     if(!p.xp) {p.xp=0;p.level=1;p.xpHistory=[];}
     p.claimedMilestones ||= [];
     p.bodyData = (p.bodyData || []).map(d=>typeof d.metric==='undefined'?{date:d.date,metric:'weight',value:d.weight||d.value}:d);
+    p.activityTemplates=Array.isArray(p.activityTemplates)?p.activityTemplates.filter(t=>t&&typeof t.name==='string'&&typeof t.activity==='string').slice(0,20):[];
     if(!existingProfile){const latestWeight=[...p.bodyData].reverse().find(d=>d.metric==='weight');if(latestWeight)p.settings.calorieProfile.weight=Number(latestWeight.value)||70;}
     if(!Array.isArray(p.xpHistory) || !Array.isArray(p.claimedMilestones)) throw Error('Ungültige Fortschrittsdaten.');
     return p;

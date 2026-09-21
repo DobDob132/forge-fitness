@@ -65,6 +65,7 @@
 </div>
 <div class="card"><div class="eyebrow">Dein Überblick</div><div class="stats" style="margin-top:14px"><div class="stat"><b id="streak">0</b><span>🔥 Streak</span></div><div class="stat"><b id="sessions">0</b><span>Trainings</span></div><div class="stat"><b id="sets">0</b><span>Sätze</span></div><div class="stat"><b id="minutes">0</b><span>Minuten</span></div><div class="stat"><b id="calories">0</b><span>kcal geschätzt</span></div><div class="stat"><b id="records">0</b><span>Rekorde</span></div></div></div>
 <div class="card week"><div class="section-title">Diese Woche</div><div id="weekList"></div></div>
+<div class="card" id="activityTemplatesCard" style="display:none"><div class="section-title">⚡ Deine Vorlagen</div><div class="activity-types" id="activityTemplateShortcuts"></div></div>
 </div>
 </section>
 
@@ -90,6 +91,7 @@
     <label><span>Ziel</span><input class="input" id="challengeTarget" type="number" min="1" max="1000000000" value="3" aria-label="Challenge-Ziel"></label>
     <div class="challenge-presets" id="challengePresets"></div><button class="btn" id="challengeCreate">CHALLENGE SENDEN</button>
    </div></div>
+   <div class="card weekly-recap"><div class="section-title">📅 Wochenrückblick</div><div class="sub">Nur Ergebnisse und Fortschritte eurer angenommenen Challenges.</div><div id="challengeWeeklyRecap" class="recap-grid"></div></div>
    <div class="challenge-filter" id="challengeFilter"><button class="active" data-filter="active">Aktiv</button><button data-filter="invites">Einladungen</button><button data-filter="history">Verlauf</button></div>
    <div id="challengesList" style="margin-top:16px"></div>
   </div>
@@ -158,7 +160,8 @@
 </div>
 </div>
 <div class="card" style="margin-top:18px">
-<div class="section-title">📜 Trainings-Historie</div>
+<div class="section-title">🏅 Persönliche Rekorde</div><div class="sub">Deine besten Werte aus gespeicherten Trainings.</div><div id="personalRecords" class="records-grid"></div></div>
+<div class="card" style="margin-top:18px"><div class="section-title">📜 Trainings-Historie</div>
 <div class="sub" style="margin-bottom:10px;">Klicke auf ein Training für Details.</div>
 <div id="historyList"></div>
 </div>
@@ -238,6 +241,7 @@
     <h1>TRAINING COMPLETE</h1>
     <div class="sub" id="completeText"></div>
     <div class="stats" id="completeStats" style="margin:22px 0"></div>
+    <div class="effort-panel"><label for="workoutEffort">Wie anstrengend war das Training? <b id="workoutEffortValue">5 / 10</b></label><input id="workoutEffort" type="range" min="1" max="10" value="5" oninput="document.getElementById('workoutEffortValue').textContent=this.value+' / 10'" onchange="updateWorkoutEffort()"><small>Deine Einschätzung verfeinert die Kalorien-Schätzung.</small></div>
     <div class="chart-container" style="height:200px; margin-bottom:20px;">
         <canvas id="workoutSummaryChart"></canvas>
     </div>
@@ -391,8 +395,10 @@
  <div class="activity-types" id="activityTypes">
   <button class="active" data-activity="running">🏃 Joggen</button><button data-activity="walking">🚶 Gehen</button><button data-activity="cycling">🚴 Radfahren</button><button data-activity="hiking">🥾 Wandern</button><button data-activity="swimming">🏊 Schwimmen</button><button data-activity="rowing">🚣 Rudern</button><button data-activity="other">✨ Sonstiges</button>
  </div>
- <div class="activity-form"><label><span>Dauer (Minuten)</span><input class="input" id="activityMinutes" type="number" min="1" max="1440" value="30"></label><label><span>Distanz (km, optional)</span><input class="input" id="activityDistance" type="number" min="0" step="0.1"></label><label><span>Intensität</span><select class="input" id="activityIntensity"><option value="light">Locker</option><option value="moderate" selected>Mittel</option><option value="intense">Intensiv</option></select></label><label><span>Notiz (optional)</span><input class="input" id="activityNote" maxlength="120"></label></div>
+ <div class="activity-form"><label><span>Dauer (Minuten)</span><input class="input" id="activityMinutes" type="number" min="1" max="1440" value="30"></label><label><span>Distanz (km, optional)</span><input class="input" id="activityDistance" type="number" min="0" step="0.1"></label><label><span>Notiz (optional)</span><input class="input" id="activityNote" maxlength="120"></label><label><span>Vorlage</span><select class="input" id="activityTemplateSelect" onchange="applyActivityTemplate(this.value)"><option value="">Neue Einheit</option></select></label></div>
+ <div class="effort-panel"><label for="activityEffort">Wie anstrengend war es? <b id="activityEffortValue">5 / 10</b></label><input id="activityEffort" type="range" min="1" max="10" value="5"><small>1 = sehr locker · 10 = maximal</small></div>
  <div class="calorie-preview"><span>Geschätzter Verbrauch</span><b id="activityCalories">0 kcal</b><small id="activityProfileHint"></small></div>
+ <div class="template-actions"><input class="input" id="activityTemplateName" maxlength="40" placeholder="Name der Vorlage"><button class="btn secondary" onclick="saveActivityTemplate()">Vorlage speichern</button><button class="btn secondary" onclick="removeActivityTemplate()">Entfernen</button></div>
  <button class="btn" style="width:100%;margin-top:14px" onclick="saveFreeActivity()">TRAINING SPEICHERN</button>
 </div></div>
 

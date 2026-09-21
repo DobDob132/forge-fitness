@@ -29,7 +29,13 @@ Im eigenen Freunde-Reiter den privaten Freundescode teilen oder erhaltenen Code 
 
 Eigene Trainingspläne lassen sich an angenommene Freunde senden. Der Empfänger übernimmt sie als unabhängige Kopie und kann sie ändern, ohne den Plan des Absenders zu verändern. Challenges laufen 7, 14 oder 30 Tage und können Trainings, Sätze, Minuten, Kalorien oder bewegtes Gewicht zählen. Einladungen, laufende Challenges und Verlauf sind getrennt. Sichtbar sind nur der aggregierte Challenge-Fortschritt und Anzeigenamen; Trainingsdetails bleiben privat.
 
+Der Wochenrückblick im Challenge-Reiter zählt laufende und in dieser Woche beendete Challenges sowie Siege und Unentschieden. Er verwendet ausschließlich die ohnehin für angenommene Challenges sichtbaren Ergebnisse.
+
 ## Training und Darstellung
+
+- Freie Aktivitäten können als Vorlagen gespeichert und direkt von der Startseite aus wieder geöffnet werden. Die Vorlage enthält Art, Dauer, Distanz, Belastung und Notiz.
+- Eine Belastungsskala von 1 bis 10 verfeinert nach dem Training die Kalorien-Schätzung. Diese bleibt ein Schätzwert, keine Messung.
+- Die Statistik zeigt persönliche Rekorde für Maximalgewicht je Übung, längste Distanz je Aktivität und beste Laufpace.
 
 - Angefangene Trainings können gespeichert und auf der Startseite exakt beim letzten Satz fortgesetzt oder verworfen werden.
 - „Training abschließen“ beendet die Einheit endgültig. „Für später speichern“ lässt sie ausdrücklich fortsetzbar.

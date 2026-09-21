@@ -8,8 +8,12 @@ function restingCaloriesPerDay(profile=calorieProfile()){
   const base=10*profile.weight+6.25*profile.height-5*profile.age;
   return Math.max(900,base+(profile.sex==='male'?5:profile.sex==='female'?-161:-78));
 }
-function estimateCalories({activity='strength',intensity='moderate',minutes=0,profile=calorieProfile()}={}){
-  const met=ACTIVITY_METS[activity]?.[intensity]||ACTIVITY_METS.other.moderate;
+function estimateCalories({activity='strength',intensity='moderate',effort,minutes=0,profile=calorieProfile()}={}){
+  const levels=ACTIVITY_METS[activity]||ACTIVITY_METS.other;
+  const score=Number(effort);
+  const met=Number.isFinite(score)&&score>=1&&score<=10
+    ? score<=5?levels.light+(levels.moderate-levels.light)*(score-1)/4:levels.moderate+(levels.intense-levels.moderate)*(score-5)/5
+    :levels[intensity]||levels.moderate;
   const oneMetPerMinute=profile.age<18?profile.weight/60:restingCaloriesPerDay(profile)/1440;
   return Math.max(0,Math.round(oneMetPerMinute*met*Math.max(0,Number(minutes)||0)));
 }

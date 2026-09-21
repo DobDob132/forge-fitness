@@ -13,6 +13,7 @@ function show(id,btn){
 
 function renderHome(){
     renderXP();
+    renderActivityTemplates();
     let d=today(); let days = getActiveDays();
     document.getElementById("todayLabel").textContent=I18n.translate(d.name)+" · "+new Date().toLocaleDateString(I18n.locale(),{day:"2-digit",month:"2-digit",year:"numeric"});
     document.getElementById("todayTitle").textContent=I18n.translate(d.focus);

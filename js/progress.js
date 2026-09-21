@@ -58,7 +58,27 @@ function streak(){
     return s;
 }
 
-function countRecords(){let m={};data.logs.flatMap(l=>l.entries||[]).forEach(x=>{if(Number(x.weight)>0)m[x.name]=Math.max(m[x.name]||0,x.weight)});return Object.keys(m).length}
+function personalRecords(logs){
+  const weights=new Map(),distances=new Map();let bestPace=null;
+  for(const log of logs){
+    for(const entry of log.entries||[]){const weight=Number(entry.weight);if(weight>0&&Number.isFinite(weight))weights.set(entry.name,Math.max(weights.get(entry.name)||0,weight));}
+    const distance=Number(log.distance),minutes=Number(log.minutes);
+    if(log.type==='activity'&&distance>0&&Number.isFinite(distance)){
+      distances.set(log.activity||'other',Math.max(distances.get(log.activity||'other')||0,distance));
+      if(log.activity==='running'&&minutes>0){const pace=minutes/distance;if(!bestPace||pace<bestPace)bestPace=pace;}
+    }
+  }
+  return {weights,distances,bestPace};
+}
+function countRecords(){const records=personalRecords(data.logs);return records.weights.size+records.distances.size+(records.bestPace?1:0);}
+function renderPersonalRecords(){
+  const root=document.getElementById('personalRecords'),records=personalRecords(data.logs),items=[];
+  for(const [name,weight] of records.weights)items.push({label:name,value:`${formatWeight(weight)}`});
+  for(const [activity,distance] of records.distances)items.push({label:`${I18n.translate(activityLabels[activity]||'Freies Training')} · ${I18n.translate('Distanz')}`,value:`${distance.toLocaleString(I18n.locale())} km`});
+  if(records.bestPace){const seconds=Math.round(records.bestPace*60);items.push({label:I18n.translate('Beste Laufpace'),value:`${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')} min/km`});}
+  root.replaceChildren();if(!items.length){root.textContent=I18n.translate('Noch keine Rekorde.');return;}
+  for(const item of items){const card=document.createElement('div'),label=document.createElement('span'),value=document.createElement('b');card.className='personal-record';label.textContent=item.label;value.textContent=item.value;card.append(label,value);root.append(card);}
+}
 
 function renderSummaryChart() {
     let ctx = document.getElementById("workoutSummaryChart");
@@ -100,6 +120,7 @@ function renderSummaryChart() {
 }
 
 function renderProgress(){
+  renderPersonalRecords();
   let exMap = new Set();
   const weightOption=document.querySelector('#chartBodySelect option[value="weight"]');
   if(weightOption)weightOption.textContent=`Gewicht (${weightUnit()})`;

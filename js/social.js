@@ -24,12 +24,20 @@ const ForgeSocial=(()=>{
   const formatDate=value=>new Date(`${value}T12:00:00`).toLocaleDateString(I18n.locale(),{day:'2-digit',month:'2-digit',year:'numeric'});
   function metricText(challenge){const config=metricSettings[challenge.metric]||metricSettings.workouts;return `${t(config.label)} · ${Number(challenge.target).toLocaleString(I18n.locale())}${config.unit}`;}
   function resultText(challenge){const a=Number(challenge.creator_progress),b=Number(challenge.opponent_progress);if(a===b)return t('Unentschieden');return `${a>b?challenge.creator_name:challenge.opponent_name} ${t('hat gewonnen!')}`;}
+  function renderWeeklyRecap(challenges){
+    const root=$('challengeWeeklyRecap'),start=weekStart(),now=new Date(),ended=challenges.filter(c=>c.status==='accepted'&&new Date(`${c.ends_on}T23:59:59`)>=start&&new Date(`${c.ends_on}T23:59:59`)<now);
+    const active=challenges.filter(c=>c.status==='accepted'&&new Date(`${c.starts_on}T00:00:00`)<=now&&new Date(`${c.ends_on}T23:59:59`)>=now);
+    let wins=0,draws=0;
+    for(const c of ended){const mine=Number(c.incoming?c.opponent_progress:c.creator_progress),theirs=Number(c.incoming?c.creator_progress:c.opponent_progress);if(mine>theirs)wins++;else if(mine===theirs)draws++;}
+    root.replaceChildren();for(const [value,label] of [[active.length,'Laufende Challenges'],[ended.length,'Diese Woche beendet'],[wins,'Gewonnen'],[draws,'Unentschieden']]){const tile=document.createElement('div'),number=document.createElement('b'),caption=document.createElement('span');number.textContent=value;caption.textContent=t(label);tile.append(number,caption);root.append(tile);}
+  }
   async function refreshChallenges(){
     const list=$('challengesList');if(!list||!ForgeCloud.isSignedIn())return;
     try{
       let challenges=await ForgeCloud.social('challenges');await syncProgress(challenges);challenges=await ForgeCloud.social('challenges');
       const today=new Date();today.setHours(0,0,0,0);const isFinished=c=>c.status==='accepted'&&today>new Date(`${c.ends_on}T23:59:59`);
       const groups={active:challenges.filter(c=>c.status==='accepted'&&!isFinished(c)),invites:challenges.filter(c=>c.status==='pending'),history:challenges.filter(isFinished)};
+      renderWeeklyRecap(challenges);
       $('activeChallengeCount').textContent=groups.active.length;document.querySelectorAll('#challengeFilter button').forEach(button=>button.classList.toggle('active',button.dataset.filter===challengeFilter));
       list.replaceChildren();const visible=groups[challengeFilter];
       if(!visible.length){const empty=document.createElement('div');empty.className='social-empty';empty.innerHTML=`<span>${challengeFilter==='active'?'⚔️':challengeFilter==='invites'?'✉️':'🏁'}</span><b>${t(challengeFilter==='active'?'Keine aktive Challenge':'Hier ist noch nichts')}</b><small>${t(challengeFilter==='active'?'Starte eine Challenge und bleibt gemeinsam dran.':'Dieser Bereich füllt sich automatisch.')}</small>`;list.append(empty);return;}

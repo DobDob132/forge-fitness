@@ -155,12 +155,15 @@ function skipSet(){
   if(state.exercise>=state.day.ex.length) finishWorkout(); else renderWorkout();
 }
 
+let completedWorkoutLog=null;
 async function finishWorkout(){
   if(state.finishing)return;state.finishing=true;clearInterval(state.interval);
-  const finishedDay=state.day,mins=Math.max(1,(Date.now()-state.started)/60000),calories=(data.current||[]).length?estimateCalories({activity:'strength',intensity:data.settings.strengthIntensity||'moderate',minutes:mins}):0,entries=distributeCalories(data.current||[],calories);
+  completedWorkoutLog=null;
+  const finishedDay=state.day,mins=Math.max(1,(Date.now()-state.started)/60000),effort=5,calories=(data.current||[]).length?estimateCalories({activity:'strength',effort,minutes:mins}):0,entries=distributeCalories(data.current||[],calories);
   data.activeWorkout=null;
   if(entries.length>0){
-    data.logs.push({date:new Date().toISOString(),type:'strength',plan:finishedDay.name,focus:finishedDay.focus,sets:state.setsDone,minutes:mins,calories,entries});
+    completedWorkoutLog={date:new Date().toISOString(),type:'strength',plan:finishedDay.name,focus:finishedDay.focus,sets:state.setsDone,minutes:mins,calories,effort,entries};
+    data.logs.push(completedWorkoutLog);
     addXP(50, "Training beendet!");
   }
   data.current=[];await saveData();
@@ -171,10 +174,21 @@ async function finishWorkout(){
   
   show('complete');
   document.getElementById("completeText").textContent=`${finishedDay.name} · ${finishedDay.focus}`;
+  document.getElementById('workoutEffort').value=5;document.getElementById('workoutEffortValue').textContent='5 / 10';
   document.getElementById("completeStats").innerHTML=`<div class="stat"><b>${state.setsDone}</b><span>Sätze</span></div><div class="stat"><b>${Math.round(mins)}</b><span>Minuten</span></div><div class="stat"><b>${calories}</b><span>kcal geschätzt</span></div><div class="stat"><b>+${(state.setsDone*10)+50}</b><span>XP</span></div>`;
   state.day=null;state.finishing=false;
   
   setTimeout(renderSummaryChart, 100);
+}
+
+async function updateWorkoutEffort(){
+  if(!completedWorkoutLog||!data.logs.includes(completedWorkoutLog))return;
+  const effort=Number(document.getElementById('workoutEffort').value);
+  completedWorkoutLog.effort=effort;
+  completedWorkoutLog.calories=estimateCalories({activity:'strength',effort,minutes:completedWorkoutLog.minutes});
+  completedWorkoutLog.entries=distributeCalories(completedWorkoutLog.entries,completedWorkoutLog.calories);
+  const stats=document.querySelectorAll('#completeStats .stat b');if(stats[2])stats[2].textContent=completedWorkoutLog.calories;
+  await saveData();ForgeSocial.syncProgress();
 }
 
 function saveAndExit(){

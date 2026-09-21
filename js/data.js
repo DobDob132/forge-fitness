@@ -19,7 +19,7 @@ if(!data) {
         logs: [], 
         settings: defaultSettings,
         xp: 0, level: 1, xpHistory: [],
-        claimedMilestones: [], bodyData: [], activeWorkout: null
+        claimedMilestones: [], bodyData: [], activeWorkout: null, activityTemplates: []
     }; 
     // Add default exercises for first view
     data.allPlans[0].days[0].ex = [["Bankdrücken", 3, "8-12", 20], ["Liegestütze", 3, "Max", 0]];
@@ -30,6 +30,7 @@ if(!data) {
     if(!data.claimedMilestones) data.claimedMilestones=[];
     if(!data.bodyData) data.bodyData=[];
     if(!data.activeWorkout) data.activeWorkout=null;
+    if(!Array.isArray(data.activityTemplates)) data.activityTemplates=[];
     // Migration for bodyData if it was old format
     data.bodyData = data.bodyData.map(d => typeof d.metric === 'undefined' ? {date: d.date, metric: 'weight', value: d.weight || d.value} : d);
     if(!existingProfile){const latestWeight=[...data.bodyData].reverse().find(d=>d.metric==='weight');if(latestWeight)data.settings.calorieProfile.weight=Number(latestWeight.value)||70;}
