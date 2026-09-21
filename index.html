@@ -364,6 +364,8 @@
 <!-- Settings -->
 <div class="modal" id="settingsModal"><div class="card">
 <div class="row between"><div class="section-title">⚙️ Einstellungen</div><button class="icon" onclick="closeSettings()">✕</button></div>
+<div class="setting-group-title">App</div>
+<div class="setting"><label>Sprache</label><select class="input" id="languageSetting"><option value="de">Deutsch</option><option value="en">English</option><option value="el">Ελληνικά</option></select></div>
 <div class="setting-group-title">Training</div>
 <div class="setting"><label>Gewichtseinheit</label><select class="input" id="unitSetting"><option value="kg">Kilogramm (kg)</option><option value="lb">Pfund (lb)</option></select></div>
 <div class="setting"><label>Trainingsziel pro Woche</label><input class="input" id="weeklyGoalSetting" type="number" min="1" max="14" step="1"></div>
@@ -409,7 +411,7 @@
   </div>
   <form id="authForm">
    <input type="hidden" id="authMode" value="login">
-   <div id="signupNameWrap" class="hidden"><label for="authName">Anzeigename (für Freunde sichtbar)</label><input class="input" id="authName" maxlength="40" autocomplete="nickname"></div>
+   <div id="signupNameWrap" class="hidden"><label for="authName">Benutzername (für Freunde sichtbar)</label><input class="input" id="authName" minlength="1" maxlength="40" autocomplete="nickname" required><p class="account-note">Jeder Benutzername kann nur einmal verwendet werden.</p></div>
    <div id="authEmailWrap"><label for="authEmail">E-Mail-Adresse</label><input class="input" id="authEmail" type="email" autocomplete="email" required></div>
    <div id="authPasswordWrap"><label for="authPassword">Passwort</label><input class="input" id="authPassword" type="password" autocomplete="current-password" required></div>
    <p class="account-note">Mit Konto werden deine Pläne, Trainings, Körperdaten und Einstellungen privat in Supabase (Frankfurt) gespeichert. Freunde sehen nur deinen Anzeigenamen. Eine E-Mail-Bestätigung ist derzeit nicht nötig. Auf diesem Gerät bleibt eine Offline-Kopie.</p>
@@ -434,6 +436,7 @@
  <h3>Wochen-Challenges</h3><p class="account-note">Teile nur den Fortschritt dieser Challenge, keine Trainingsdetails.</p>
  <div class="challenge-form"><select class="input" id="challengeFriend"></select><input class="input" id="challengeTarget" type="number" min="1" max="14" value="3" aria-label="Zieltrainings"><button class="btn" id="challengeCreate">Starten</button></div>
  <div id="challengesList" style="margin-top:12px"></div>
+ <div class="danger-zone"><h3>Konto löschen</h3><p class="account-note">Dein Konto und alle damit gespeicherten Daten werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.</p><button class="btn danger" id="deleteAccountButton">KONTO DAUERHAFT LÖSCHEN</button></div>
  <p id="accountDetailsMessage" role="status" class="account-status"></p>
  </div><button class="btn secondary install-button" type="button">📲 App installieren</button>
 </div></div>
@@ -449,6 +452,7 @@
 <script src="js/config.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/data.js"></script>
+<script src="js/i18n.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/xp.js"></script>
 <script src="js/plans.js"></script>
@@ -463,3 +467,4 @@
 <script src="js/install.js"></script>
 </body>
 </html>
+
