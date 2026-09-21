@@ -12,6 +12,9 @@ const ForgeCloud = (() => {
     const raw = error?.message || String(error);
     if (/Invalid login credentials/i.test(raw)) return 'E-Mail oder Passwort stimmt nicht.';
     if (/Email not confirmed/i.test(raw)) return 'Bitte bestätige zuerst deine E-Mail-Adresse.';
+    if (/USERNAME_TAKEN|forge_profiles_display_name_unique|duplicate key/i.test(raw)) return 'Dieser Benutzername ist bereits vergeben.';
+    if (/USERNAME_INVALID/i.test(raw)) return 'Bitte gib einen Benutzernamen mit 1–40 Zeichen ein.';
+    if (/Database error saving new user/i.test(raw)) return 'Dieser Benutzername ist möglicherweise bereits vergeben. Bitte wähle einen anderen.';
     if (/token.*expired|invalid.*token|token.*invalid/i.test(raw)) return 'Der Code ist falsch oder abgelaufen. Bitte fordere einen neuen Code an.';
     if (/rate|too many/i.test(raw)) return 'Zu viele Versuche. Bitte warte etwas und versuche es erneut.';
     if (/email.*not.*authorized|sending confirmation email|sending recovery email/i.test(raw)) return 'Der Mailversand ist noch nicht eingerichtet. Bitte informiere den App-Betreiber.';
@@ -217,7 +220,12 @@ const ForgeCloud = (() => {
         response=await client.auth.signInWithPassword({email,password});
         if(response.error)throw response.error;await connect(response.data.session);
       } else if(name==='signup') {
-        response=await client.auth.signUp({email,password,options:{data:{display_name:$('authName').value.trim().slice(0,40)||'FORGE Athlet'}}});
+        const displayName=$('authName').value.trim().slice(0,40);
+        if(!displayName)throw Error('Bitte gib einen Benutzernamen mit 1–40 Zeichen ein.');
+        const available=await client.functions.invoke('username-available',{body:{displayName}});
+        if(available.error)throw available.error;
+        if(!available.data?.available)throw Error('Dieser Benutzername ist bereits vergeben.');
+        response=await client.auth.signUp({email,password,options:{data:{display_name:displayName}}});
         if(response.error)throw response.error;
         if(response.data.session)await connect(response.data.session);
         else throw Error('Das Konto konnte nicht direkt geöffnet werden. Bitte versuche es erneut.');
@@ -268,6 +276,25 @@ const ForgeCloud = (() => {
     if(!confirm('ACHTUNG: ALLE Trainingsdaten dieses Kontos bzw. lokalen Gastprofils werden gelöscht! Sicher?'))return;
     ForgeStore.backup('vor-reset',data);renderData(defaults());await save(data);await flush();
   }
+  async function deleteAccount() {
+    if(!user||!ready)return;
+    if(activeWorkout()){toast('Bitte beende oder speichere zuerst dein Training.');return;}
+    const typed=prompt(I18n.deletionPrompt());
+    if(typed!==I18n.deleteWord())return;
+    if(!confirm('Konto jetzt endgültig löschen? Diese Aktion kann nicht rückgängig gemacht werden.'))return;
+    const button=$('deleteAccountButton');button.disabled=true;
+    $('accountDetailsMessage').textContent='Konto wird gelöscht …';
+    try{
+      const result=await client.functions.invoke('delete-account',{body:{confirmation:'delete'}});
+      if(result.error)throw result.error;
+      const oldId=user.id;generation++;clearTimeout(syncTimer);user=null;ready=false;conflict=null;
+      await client.auth.signOut({scope:'local'}).catch(()=>{});
+      localStorage.removeItem(`forgeData:account:${oldId}`);
+      ForgeStore.select(null);renderData(ForgeStore.guest()||defaults());
+      $('accountModal').style.display='none';$('accountSignedIn').classList.add('hidden');
+      gate(true);mode('signup');status('Konto gelöscht');message('Dein Konto und die gespeicherten Daten wurden gelöscht.');
+    }catch(error){$('accountDetailsMessage').textContent=explain(error);button.disabled=false;}
+  }
   async function social(action,{id=null,friend=null,payload=null,value=null}={}){
     if(!user||!ready)throw Error('Bitte melde dich zuerst an.');
     const response=await client.rpc('forge_social',{p_action:action,p_id:id,p_friend:friend,p_payload:payload,p_value:value});
@@ -280,10 +307,11 @@ const ForgeCloud = (() => {
     $('guestButton').onclick=guest;$('accountButton').onclick=open;
     $('accountClose').onclick=()=>$('accountModal').style.display='none';
     $('logoutButton').onclick=logout;$('syncButton').onclick=async()=>{if(await syncNow())toast('Synchronisiert.');else toast('Noch nicht synchronisiert. Prüfe Verbindung oder Versionskonflikt.');};
+    $('deleteAccountButton').onclick=deleteAccount;
     $('importGuestButton').onclick=()=>importGuest().catch(e=>toast(explain(e)));
     $('friendAdd').onclick=()=>friendAction('request');
     $('friendRefresh').onclick=()=>friends().catch(e=>$('accountDetailsMessage').textContent=explain(e));
-    $('saveProfile').onclick=async()=>{try{const name=$('profileName').value.trim();if(!name||name.length>40)throw Error('Bitte einen Namen mit 1–40 Zeichen eingeben.');const r=await client.from('forge_profiles').update({display_name:name}).eq('user_id',user.id);if(r.error)throw r.error;toast('Name gespeichert.');}catch(e){$('accountDetailsMessage').textContent=explain(e);}};
+    $('saveProfile').onclick=async()=>{try{const name=$('profileName').value.trim();if(!name||name.length>40)throw Error('Bitte einen Benutzernamen mit 1–40 Zeichen eingeben.');const available=await client.functions.invoke('username-available',{body:{displayName:name}});if(available.error)throw available.error;if(!available.data?.available)throw Error('Dieser Benutzername ist bereits vergeben.');const r=await client.from('forge_profiles').update({display_name:name}).eq('user_id',user.id);if(r.error)throw r.error;toast('Benutzername gespeichert.');}catch(e){$('accountDetailsMessage').textContent=explain(e);}};
     $('useCloud').onclick=()=>resolveConflict(false);$('useLocal').onclick=()=>resolveConflict(true);
     $('copyFriendCode').onclick=async()=>{try{await navigator.clipboard.writeText($('friendCode').textContent);toast('Freundescode kopiert.');}catch{toast('Halte den Code gedrückt, um ihn zu kopieren.');}};
     ForgeSocial.init();
@@ -303,3 +331,4 @@ const ForgeCloud = (() => {
   return {boot,save,flush,syncNow,open,guest,logout,importPayload,reset,normalize,defaults,resolveConflict,social,isSignedIn:()=>!!user&&ready,
     diagnostics:()=>({userId:user?.id || null,ready,version,syncing,conflict:!!conflict})};
 })();
+
