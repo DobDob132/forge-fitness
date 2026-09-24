@@ -7,3 +7,6 @@
 .danger-zone{margin-top:26px;padding:16px;border:1px solid #ff5d5d66;background:#ff37370b;border-radius:14px}.danger-zone h3{margin-top:0!important;color:#ff8585}.btn.danger{background:#9f2929;border-color:#df5555;color:#fff}
 @media(max-width:500px){.cloud-state{display:none}.top{gap:8px}.account-header .icon{padding:10px}.account-gate{padding-top:22px}}
 .install-steps{margin:14px 0 18px;padding:14px;border:1px solid var(--line);border-radius:12px;background:#0d1118}.install-steps h3{margin:0 0 8px;color:var(--accent2)}.install-steps p{margin:8px 0;line-height:1.55}
+
+/* Account screens follow the same restrained workshop look. */
+.account-gate{background:#12110f;padding:28px 16px}.account-panel{max-width:440px;border-color:#423b34;box-shadow:0 24px 65px #0008}.account-panel h1{font-weight:740;letter-spacing:-.5px}.account-tabs{padding:0;background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0}.account-tabs button{border-radius:0;color:var(--muted);font-weight:650}.account-tabs button[aria-selected=true]{background:transparent;border-bottom:3px solid var(--accent);box-shadow:none;color:var(--text)}.friend-code{background:#151412;border:1px solid #38342f;border-radius:7px}.danger-zone{background:#271817;border-color:#633b37;border-radius:10px}.install-steps{background:#151412;border-color:#38342f;border-radius:9px}
