@@ -1,5 +1,5 @@
 const I18n = (() => {
-  const languages = ['de','en','el'];
+  const languages = ['de','en','el'];//add polish, french, spanish, italian, russian, portugese, austrobavarian, dutch, chinese, sbk
   const en = {
     'Mit Konto werden deine Pläne, Trainings, Körperdaten und Einstellungen privat in Supabase (Frankfurt) gespeichert. Freunde sehen deinen Benutzernamen und den Fortschritt angenommener Challenges, aber keine Trainingsdetails oder Körperdaten. Eine E-Mail-Bestätigung ist derzeit nicht nötig. Auf diesem Gerät bleibt eine Offline-Kopie.':'With an account, your plans, workouts, body data and settings are stored privately in Supabase (Frankfurt). Friends see your username and progress in accepted challenges, but no workout details or body data. Email confirmation is currently not required. An offline copy remains on this device.',
     'Konto wird geladen …':'Loading account …','Home':'Home','Woche':'Week','Pläne':'Plans','Statistik':'Statistics','Trophäen':'Trophies','📅 Woche':'📅 Week','📚 Pläne':'📚 Plans','📈 Statistik':'📈 Statistics','🏆 Trophäen':'🏆 Trophies','Konto und Freunde':'Account and friends',
