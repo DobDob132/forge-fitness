@@ -3,7 +3,7 @@ function startWorkoutFlow() {
   preparePauseSignals();
   let d = today();
   if (!d.ex.length) { toast("Heute ist Regeneration 💛"); return; }
-  state = { day: d, exercise: 0, set: 0, setsDone: 0, started: Date.now(), timer: data.settings.pause, timerMax: data.settings.pause, timerEndsAt:0, interval: null, paused: false, finishing:false };
+  state = { day: d, exercise: 0, set: 0, setsDone: 0, started: Date.now(), timer: data.settings.pause, timerMax: data.settings.pause, timerEndsAt:0, interval: null, paused: false, finishing:false, nextWeight:null };
   data.current=[];
   lastSetBackup = null;
   document.getElementById("undoBtn").style.display="none";
@@ -39,7 +39,7 @@ function beginLifting() {
 
 function snapshotWorkout(phase='lifting'){
   if(!state.day)return;
-  data.activeWorkout={planId:data.activePlanId,dayId:state.day.id,dayName:state.day.name,focus:state.day.focus,exercise:state.exercise,set:state.set,setsDone:state.setsDone,started:state.started,phase,draftWeight:document.getElementById('weightInput')?.value||'',draftReps:document.getElementById('repInput')?.value||''};
+  data.activeWorkout={planId:data.activePlanId,dayId:state.day.id,dayName:state.day.name,focus:state.day.focus,exercise:state.exercise,set:state.set,setsDone:state.setsDone,started:state.started,phase,nextWeight:state.nextWeight,draftWeight:document.getElementById('weightInput')?.value||'',draftReps:document.getElementById('repInput')?.value||''};
   saveData();
 }
 function saveWorkoutDraftInputs(){snapshotWorkout('lifting')}
@@ -48,7 +48,7 @@ function resumeWorkout(){
   preparePauseSignals();
   const plan=data.allPlans.find(p=>p.id===saved.planId)||data.allPlans.find(p=>p.id===data.activePlanId),day=plan?.days.find(d=>d.id===saved.dayId);
   if(!day){discardWorkout(true);toast('Der gespeicherte Plan ist nicht mehr vorhanden.');return;}
-  state={day:JSON.parse(JSON.stringify(day)),exercise:saved.exercise||0,set:saved.set||0,setsDone:saved.setsDone||0,started:saved.started||Date.now(),timer:data.settings.pause,timerMax:data.settings.pause,timerEndsAt:0,interval:null,paused:false,finishing:false};
+  state={day:JSON.parse(JSON.stringify(day)),exercise:saved.exercise||0,set:saved.set||0,setsDone:saved.setsDone||0,started:saved.started||Date.now(),timer:data.settings.pause,timerMax:data.settings.pause,timerEndsAt:0,interval:null,paused:false,finishing:false,nextWeight:Number.isFinite(saved.nextWeight)?saved.nextWeight:null};
   show('workout');if(data.settings.keepAwake!==false)requestWakeLock();
   if(saved.phase==='warmup'){document.getElementById('activePhase').classList.add('hidden');document.getElementById('pausePhase').classList.add('hidden');document.getElementById('warmupPhase').classList.remove('hidden');document.getElementById('warmupMethodText').textContent=data.settings.warmupType;}
   else{document.getElementById('warmupPhase').classList.add('hidden');beginLifting();if(saved.draftWeight!=='')document.getElementById('weightInput').value=saved.draftWeight;if(saved.draftReps)document.getElementById('repInput').value=saved.draftReps;}
@@ -74,7 +74,8 @@ function getProgressionSuggestion(exercise){
   if(allReached)return {weight:Math.round((lastWeight+2.5)*2)/2,text:`Alle Sätze mit mindestens ${upper} Wdh geschafft · nächster Schritt ${formatWeight(Math.round((lastWeight+2.5)*2)/2)}`};
   return {weight:lastWeight,text:`Letzte Einheit: ${formatWeight(lastWeight)} · Gewicht beibehalten und Wiederholungen steigern`};
 }
-function applySuggestedWeight(kg){document.getElementById('weightInput').value=toDisplayWeight(kg);saveWorkoutDraftInputs();toast('Vorschlag übernommen.');}
+function progressionStep(kg){return Math.round((Number(kg)+2.5)*2)/2;}
+function targetUpperReps(exercise){const range=String(exercise[2]).match(/(\\d+)\\s*-\\s*(\\d+)/);return range?Number(range[2]):null;}
 
 function renderWorkout(){
   let d=state.day, e=d.ex[state.exercise];
@@ -83,13 +84,14 @@ function renderWorkout(){
   document.getElementById("workName").textContent=e[0];
   document.getElementById("workTarget").textContent="Ziel: "+e[2];
   
-  let suggestedWeight = getSmartWeight(e[0], e[3]);
+  const progression=getProgressionSuggestion(e);
+  let suggestedWeight = state.nextWeight ?? (progression ? progression.weight : getSmartWeight(e[0], e[3]));
   let isCardio = String(e[2]).toLowerCase().match(/(min|km|sec)/);
   document.getElementById("workWeight").textContent=e[3]>0?formatWeight(suggestedWeight) : (isCardio ? "Cardio / Eigene" : "Körpergewicht");
   document.getElementById("workProgress").style.width=((state.exercise+(state.set/e[1]))/d.ex.length*100)+"%";
   
   document.getElementById("setInputs").innerHTML=`<div class="inputs"><input class="input" id="weightInput" type="number" step=".5" value="${isCardio ? 0 : escapeHtml(toDisplayWeight(suggestedWeight))}" placeholder="${weightUnit()}" oninput="saveWorkoutDraftInputs()"><input class="input" id="repInput" type="text" placeholder="Wdh / Info" oninput="saveWorkoutDraftInputs()"></div>`;
-  const suggestion=getProgressionSuggestion(e),suggestionEl=document.getElementById('workSuggestion');suggestionEl.classList.toggle('hidden',!suggestion);suggestionEl.innerHTML=suggestion?`<span>↗ ${escapeHtml(suggestion.text)}</span><button class="btn secondary" onclick="applySuggestedWeight(${suggestion.weight})">Übernehmen</button>`:'';
+  const suggestionEl=document.getElementById('workSuggestion');suggestionEl.classList.add('hidden');suggestionEl.innerHTML='';
   const note=document.getElementById('workNote');note.classList.toggle('hidden',!e[6]);note.textContent=e[6]?`📝 ${e[6]}`:'';
   
   document.getElementById("activePhase").classList.remove("hidden");
@@ -115,7 +117,7 @@ function toggleFullscreen() {
 async function finishSet(){
   let e=state.day.ex[state.exercise], w=fromDisplayWeight(+document.getElementById("weightInput").value||0), r=document.getElementById("repInput").value||"";
   if(!r){toast("Bitte Ausführung eintragen");return}
-  lastSetBackup={ exercise: state.exercise, set: state.set, setsDone: state.setsDone };
+  lastSetBackup={ exercise: state.exercise, set: state.set, setsDone: state.setsDone, nextWeight:state.nextWeight };
   data.current=data.current||[];
   
   let isRecord = false;
@@ -125,9 +127,12 @@ async function finishSet(){
   data.current.push({name:e[0], weight:w, reps:r});
   addXP(10, `Satz beendet: ${e[0]}`);
   
+  const upper=targetUpperReps(e);
+  const shouldRaiseNextSet=w>0&&upper!==null&&Number(r)>=upper&&state.set+1<Number(e[1]);
+  state.nextWeight=shouldRaiseNextSet?progressionStep(w):null;
   state.set++; state.setsDone++;
   let isExerciseDone = false;
-  if(state.set>=e[1]){state.set=0; state.exercise++; isExerciseDone = true;}
+  if(state.set>=e[1]){state.set=0; state.exercise++; state.nextWeight=null; isExerciseDone = true;}
   
   const completed=state.exercise>=state.day.ex.length;
   if(!completed){snapshotWorkout('lifting');await saveData();}
@@ -139,7 +144,7 @@ async function finishSet(){
 async function undoLastSet(){
   if(!lastSetBackup){toast("Nichts zum Rückgängig machen");return}
   data.current.pop();
-  state.exercise=lastSetBackup.exercise; state.set=lastSetBackup.set; state.setsDone=lastSetBackup.setsDone;
+  state.exercise=lastSetBackup.exercise; state.set=lastSetBackup.set; state.setsDone=lastSetBackup.setsDone; state.nextWeight=lastSetBackup.nextWeight??null;
   lastSetBackup=null;
   document.getElementById("undoBtn").style.display="none";
   renderWorkout();
@@ -149,7 +154,7 @@ async function undoLastSet(){
 function skipSet(){
   lastSetBackup={ exercise: state.exercise, set: state.set, setsDone: state.setsDone };
   state.set++;
-  if(state.set>=state.day.ex[state.exercise][1]){state.set=0; state.exercise++;}
+  if(state.set>=state.day.ex[state.exercise][1]){state.set=0; state.exercise++;state.nextWeight=null;}
   if(state.exercise<state.day.ex.length)snapshotWorkout('lifting');
   document.getElementById("undoBtn").style.display="inline-block";
   if(state.exercise>=state.day.ex.length) finishWorkout(); else renderWorkout();
