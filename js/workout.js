@@ -75,7 +75,7 @@ function getProgressionSuggestion(exercise){
   return {weight:lastWeight,text:`Letzte Einheit: ${formatWeight(lastWeight)} · Gewicht beibehalten und Wiederholungen steigern`};
 }
 function progressionStep(kg){return Math.round((Number(kg)+2.5)*2)/2;}
-function targetUpperReps(exercise){const range=String(exercise[2]).match(/(\\d+)\\s*-\\s*(\\d+)/);return range?Number(range[2]):null;}
+function targetUpperReps(exercise){const range=String(exercise[2]).match(/(\d+)\s*-\s*(\d+)/);return range?Number(range[2]):null;}
 
 function renderWorkout(){
   let d=state.day, e=d.ex[state.exercise];
