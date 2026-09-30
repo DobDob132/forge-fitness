@@ -22,5 +22,5 @@
  document.getElementById('installDone').onclick=close;
  document.getElementById('installCopyLink').onclick=async()=>{try{await navigator.clipboard.writeText(location.href.split('#')[0]);toast('FORGE-Link kopiert. Öffne ihn jetzt im normalen Browser.');}catch{toast('Kopiere die Adresse oben aus dem Browser.');}};
  window.addEventListener('appinstalled',()=>{prompt=null;close();toast('FORGE wurde installiert.');});
- if('serviceWorker' in navigator && location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
+ if('serviceWorker' in navigator && location.protocol!=='file:')navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(registration=>registration.update()).catch(()=>{});
 })();
