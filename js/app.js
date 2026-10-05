@@ -18,6 +18,9 @@ function renderHome(){
     document.getElementById("todayLabel").textContent=I18n.translate(d.name)+" · "+new Date().toLocaleDateString(I18n.locale(),{day:"2-digit",month:"2-digit",year:"numeric"});
     document.getElementById("todayTitle").textContent=I18n.translate(d.focus);
     document.getElementById("todaySub").textContent=I18n.translate(d.ex.length?`${d.ex.reduce((a,e)=>a+(Number(e[1])||1),0)} Sätze`:"Regenerationstag - Erhalte deinen Streak automatisch aufrecht!");
+    const startButton=document.getElementById('homeStartWorkout');
+    if(d.ex.length){startButton.textContent=I18n.translate('TRAINING STARTEN');startButton.onclick=()=>startWorkoutFlow();}
+    else{startButton.textContent=I18n.translate('TRAINING AUSWÄHLEN');startButton.onclick=openRestDayWorkoutPicker;}
     document.getElementById("streak").textContent=streak();
     document.getElementById("sessions").textContent=data.logs.length;
     document.getElementById("sets").textContent=data.logs.reduce((a,l)=>a+(l.sets||0),0);
