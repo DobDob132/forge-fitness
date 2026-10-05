@@ -139,9 +139,8 @@ async function finishSet(){
   lastSetBackup={ exercise: state.exercise, set: state.set, setsDone: state.setsDone, nextWeight:state.nextWeight };
   data.current=data.current||[];
   
-  let isRecord = false;
-  let prevBest = data.logs.flatMap(l=>l.entries||[]).filter(x=>x.name===e[0]).reduce((max, cur) => cur.weight > max ? cur.weight : max, 0);
-  if(w > prevBest && prevBest > 0) { isRecord = true; addXP(25, "Neuer Rekord: "+e[0]); toast("🏆 Neuer Gewichts-Rekord!"); }
+  const current1RM=estimated1RM(w,r),prevBest=best1RM(data.logs,e[0]);
+  if(current1RM&&prevBest>0&&current1RM>prevBest+0.01){addXP(25,"Neuer 1RM-Rekord: "+e[0]);toast("🏆 Neuer 1RM-Rekord!");}
 
   data.current.push({name:e[0], weight:w, reps:r});
   addXP(10, `Satz beendet: ${e[0]}`);
