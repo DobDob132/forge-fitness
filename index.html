@@ -76,7 +76,9 @@
   <div class="social-hero card"><div><div class="eyebrow">FORGE Together</div><div class="section-title">Gemeinsam dranbleiben</div><p class="account-note">Freunde sehen nur deinen Benutzernamen und den Fortschritt angenommener Challenges.</p></div><div class="social-counts"><div><b id="friendCount">0</b><span>Freunde</span></div><div><b id="activeChallengeCount">0</b><span>Aktive Challenges</span></div></div></div>
   <div class="social-tabs"><button class="active" id="friendsPeopleTab" onclick="ForgeSocial.switchView('people')">👥 Freunde</button><button id="friendsChallengesTab" onclick="ForgeSocial.switchView('challenges')">⚔️ Challenges</button></div>
   <div class="card social-panel" id="friendsPeoplePanel">
-   <div class="section-title">👥 Deine Freunde</div>
+   <div class="friends-leaderboard-head"><div><div class="section-title">🏅 Rangliste</div><p class="account-note">Dein Level im Vergleich mit deinen Freunden.</p></div><span class="leaderboard-note">Level</span></div>
+   <div class="friend-leaderboard" id="friendLeaderboard"></div>
+   <div class="section-title friends-list-title">👥 Deine Freunde</div>
    <p class="account-note">Kontakte sehen nur deinen Benutzernamen. Trainings- und Körperdaten werden nicht geteilt.</p>
    <h3>Dein Freundescode</h3><p class="account-note">Teile diesen Code nur mit Personen, die dich hinzufügen dürfen.</p><code class="friend-code" id="friendCode"></code><button class="btn secondary" id="copyFriendCode" style="margin-top:8px">Code kopieren</button>
    <h3>Freund hinzufügen</h3><label for="friendInput">Freundescode einfügen</label><div class="row"><input class="input" id="friendInput" autocomplete="off" placeholder="Freundescode"><button class="btn" id="friendAdd">Anfragen</button></div>
@@ -160,7 +162,7 @@
 </div>
 </div>
 <div class="card" style="margin-top:18px">
-<div class="section-title">🏅 Persönliche Rekorde</div><div class="sub">Deine besten Werte aus gespeicherten Trainings.</div><div id="personalRecords" class="records-grid"></div></div>
+<div class="section-title">🏅 Persönliche Rekorde</div><div class="sub">Dein bestes geschätztes 1RM pro Übung sowie deine besten Ausdauerwerte.</div><div id="personalRecords" class="records-grid"></div></div>
 <div class="card" style="margin-top:18px"><div class="section-title">📜 Trainings-Historie</div>
 <div class="sub" style="margin-bottom:10px;">Klicke auf ein Training für Details.</div>
 <div id="historyList"></div>
