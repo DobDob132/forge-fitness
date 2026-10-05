@@ -1,8 +1,8 @@
-function startWorkoutFlow() {
+function startWorkoutFlow(dayOverride=null) {
   if(data.activeWorkout){resumeWorkout();return;}
   preparePauseSignals();
-  let d = today();
-  if (!d.ex.length) { toast("Heute ist Regeneration 💛"); return; }
+  let d = dayOverride ? JSON.parse(JSON.stringify(dayOverride)) : today();
+  if (!d.ex.length) { openRestDayWorkoutPicker(); return; }
   state = { day: d, exercise: 0, set: 0, setsDone: 0, started: Date.now(), timer: data.settings.pause, timerMax: data.settings.pause, timerEndsAt:0, interval: null, paused: false, finishing:false, nextWeight:null };
   data.current=[];
   lastSetBackup = null;
@@ -19,6 +19,25 @@ function startWorkoutFlow() {
   } else {
       beginLifting();
   }
+}
+
+function closeRestDayWorkoutPicker(){document.getElementById('restDayWorkoutModal').style.display='none';}
+function openRestDayWorkoutPicker(){
+  if(data.activeWorkout){resumeWorkout();return;}
+  const list=document.getElementById('restDayWorkouts');
+  const days=getActiveDays().filter(day=>Array.isArray(day.ex)&&day.ex.length);
+  list.replaceChildren();
+  days.forEach(day=>{
+    const button=document.createElement('button');
+    button.type='button';button.className='rest-day-workout';
+    const title=document.createElement('b');title.textContent=day.name;
+    const detail=document.createElement('span');detail.textContent=`${day.focus} · ${day.ex.length} Übungen`;
+    const action=document.createElement('small');action.textContent='Auswählen →';
+    button.append(title,detail,action);
+    button.onclick=()=>{closeRestDayWorkoutPicker();startWorkoutFlow(day);};
+    list.append(button);
+  });
+  document.getElementById('restDayWorkoutModal').style.display='flex';
 }
 
 function finishWarmup() {
