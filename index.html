@@ -61,7 +61,7 @@
 <div class="grid">
 <div class="card hero">
     <div><div class="eyebrow" id="todayLabel"></div><div class="flame">🔥</div><div class="title" id="todayTitle"></div><div class="sub" id="todaySub"></div></div>
-    <div class="home-actions"><button class="btn" onclick="startWorkoutFlow()">TRAINING STARTEN</button><button class="btn secondary" onclick="openActivityModal()">🏃 FREIES TRAINING</button></div>
+    <div class="home-actions"><button class="btn" id="homeStartWorkout" onclick="startWorkoutFlow()">TRAINING STARTEN</button><button class="btn secondary" onclick="openActivityModal()">🏃 FREIES TRAINING</button></div>
 </div>
 <div class="card"><div class="eyebrow">Dein Überblick</div><div class="stats" style="margin-top:14px"><div class="stat"><b id="streak">0</b><span>🔥 Streak</span></div><div class="stat"><b id="sessions">0</b><span>Trainings</span></div><div class="stat"><b id="sets">0</b><span>Sätze</span></div><div class="stat"><b id="minutes">0</b><span>Minuten</span></div><div class="stat"><b id="calories">0</b><span>kcal geschätzt</span></div><div class="stat"><b id="records">0</b><span>Rekorde</span></div></div></div>
 <div class="card week"><div class="section-title">Diese Woche</div><div id="weekList"></div></div>
@@ -400,6 +400,13 @@
  <div class="calorie-preview"><span>Geschätzter Verbrauch</span><b id="activityCalories">0 kcal</b><small id="activityProfileHint"></small></div>
  <div class="template-actions"><input class="input" id="activityTemplateName" maxlength="40" placeholder="Name der Vorlage"><button class="btn secondary" onclick="saveActivityTemplate()">Vorlage speichern</button><button class="btn secondary" onclick="removeActivityTemplate()">Entfernen</button></div>
  <button class="btn" style="width:100%;margin-top:14px" onclick="saveFreeActivity()">TRAINING SPEICHERN</button>
+</div></div>
+
+<!-- REST DAY WORKOUT PICKER -->
+<div class="modal" id="restDayWorkoutModal"><div class="card">
+  <div class="row between"><div><div class="eyebrow">Regenerationstag</div><div class="section-title" style="margin:2px 0 0">Training auswählen</div></div><button class="icon" onclick="closeRestDayWorkoutPicker()" aria-label="Schließen">✕</button></div>
+  <p class="sub" style="margin:16px 0 12px">Du kannst heute freiwillig einen anderen Trainingstag aus deinem Plan machen.</p>
+  <div class="rest-day-workouts" id="restDayWorkouts"></div>
 </div></div>
 
 <!-- Info Modal -->
