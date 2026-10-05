@@ -6,7 +6,20 @@ const ForgeSocial=(()=>{
     if(!ForgeCloud.isSignedIn()){friends=[];return friends;}friends=await ForgeCloud.social('friends');if($('friendCount'))$('friendCount').textContent=friends.length;
     for(const select of [$('shareFriendSelect'),$('challengeFriend')].filter(Boolean)){const chosen=select.value;select.replaceChildren();if(!friends.length){const o=document.createElement('option');o.textContent=t('Noch keine Freunde');o.value='';select.append(o);continue;}for(const f of friends){const o=document.createElement('option');o.value=f.user_id;o.textContent=f.display_name;select.append(o);}if(friends.some(f=>f.user_id===chosen))select.value=chosen;}return friends;
   }
-  async function refreshFriendsPage(){const signed=ForgeCloud.isSignedIn();$('friendsSignedOut')?.classList.toggle('hidden',signed);$('friendsSignedIn')?.classList.toggle('hidden',!signed);if(!signed)return;try{await ForgeCloud.refreshFriends();await loadFriends();await refreshChallenges();}catch(error){if($('challengesList'))$('challengesList').textContent=error.message;}}
+  async function refreshLeaderboard(){
+    const root=$('friendLeaderboard');if(!root)return;
+    const members=await ForgeCloud.social('leaderboard');root.replaceChildren();
+    if(!members.length){root.textContent=t('Noch keine Rangliste.');return;}
+    members.forEach((member,index)=>{
+      const row=document.createElement('div');row.className='leaderboard-row';
+      if(member.is_me)row.classList.add('me');
+      const rank=document.createElement('span');rank.className='leaderboard-rank';rank.textContent='#'+(index+1);
+      const name=document.createElement('b');name.textContent=member.is_me?member.display_name+' ('+t('Du')+')':member.display_name;
+      const level=document.createElement('span');level.className='leaderboard-level';level.textContent=t('Level')+' '+(Number(member.level)||1);
+      row.append(rank,name,level);root.append(row);
+    });
+  }
+  async function refreshFriendsPage(){const signed=ForgeCloud.isSignedIn();$('friendsSignedOut')?.classList.toggle('hidden',signed);$('friendsSignedIn')?.classList.toggle('hidden',!signed);if(!signed)return;try{await ForgeCloud.refreshFriends();await loadFriends();await refreshLeaderboard();await refreshChallenges();}catch(error){if($('challengesList'))$('challengesList').textContent=error.message;}}
   function switchView(view){const people=view==='people';$('friendsPeoplePanel').classList.toggle('hidden',!people);$('friendsChallengesPanel').classList.toggle('hidden',people);$('friendsPeopleTab').classList.toggle('active',people);$('friendsChallengesTab').classList.toggle('active',!people);if(!people)refreshChallenges();}
   function challengeFriend(userId){switchView('challenges');$('challengeFriend').value=userId;toggleComposer(true);$('challengeComposer').scrollIntoView({behavior:'smooth',block:'center'});}
   async function challengeFriendName(name){try{await loadFriends();const match=friends.find(friend=>friend.display_name===name);if(match)challengeFriend(match.user_id);else toast(t('Freund nicht gefunden.'));}catch(error){toast(error.message);}}
