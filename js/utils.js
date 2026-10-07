@@ -8,22 +8,22 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
 function escapeHtml(value){ return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function showInfoModal(title, text){ document.getElementById('infoTitle').textContent=title; document.getElementById('infoText').innerHTML=text; document.getElementById('infoModal').style.display='flex'; }
 const releaseNotes={
-  de:{label:'FORGE v1.5.1 <span>· Was ist neu?</span>',title:'FORGE · Version 1.5.1',updates:[
-    ['v1.5.1 · Heute','Anmeldung repariert','Das versteckte Benutzername-Feld blockiert die Anmeldung nicht mehr.'],
+  de:{label:'FORGE v1.5.2 <span>· Was ist neu?</span>',title:'FORGE · Version 1.5.2',updates:[
+    ['v1.5.2 · Heute','Anmeldung repariert','Das Benutzername-Feld ist nur noch bei der Registrierung verpflichtend und blockiert die Anmeldung nicht mehr.'],
     ['v1.5.0 · Heute','Mehr Kontrolle im Training','Rückgängig ist während der Pause verfügbar. Seitenübungen sind klar als „pro Seite“ beschriftet und Zeitübungen haben einen einstellbaren Timer. Das Gewicht bleibt innerhalb einer Einheit gleich; +1 kg wird erst nach zwei stabilen Einheiten optional empfohlen.'],
     ['v1.4.0 · Heute','Automatische Gewichtssteigerung','Das vorgeschlagene Gewicht wird direkt eingesetzt und kann sich zwischen den Sätzen erhöhen.'],
     ['v1.3.0','Neues FORGE-Design','Eine ruhigere, klarere Oberfläche mit dem vertrauten dunklen Look und Orange.'],
     ['v1.2.0','Mehr Training für dich','Freie Aktivitäten inklusive Tennis, Kalorien-Schätzung, persönliche Rekorde und eigene Vorlagen.']
   ]},
-  en:{label:'FORGE v1.5.1 <span>· What’s new?</span>',title:'FORGE · Version 1.5.1',updates:[
-    ['v1.5.1 · Today','Login fixed','The hidden username field no longer blocks sign-in.'],
+  en:{label:'FORGE v1.5.2 <span>· What’s new?</span>',title:'FORGE · Version 1.5.2',updates:[
+    ['v1.5.2 · Today','Login fixed','The username field is now only required for registration and no longer blocks sign-in.'],
     ['v1.5.0 · Today','More training control','Undo is available during rests. Side exercises clearly say “per side” and timed exercises have an adjustable timer. Weight stays unchanged during a workout; an optional +1 kg is only suggested after two stable sessions.'],
     ['v1.4.0 · Today','Automatic weight progression','Suggested weight is applied directly and can increase between sets.'],
     ['v1.3.0','New FORGE design','A calmer, clearer interface with the familiar dark look and orange accent.'],
     ['v1.2.0','More ways to train','Free activities including tennis, calorie estimates, personal records and your own templates.']
   ]},
-  el:{label:'FORGE v1.5.1 <span>· Τι νέο υπάρχει;</span>',title:'FORGE · Έκδοση 1.5.1',updates:[
-    ['v1.5.1 · Σήμερα','Διορθώθηκε η σύνδεση','Το κρυφό πεδίο ονόματος χρήστη δεν εμποδίζει πλέον τη σύνδεση.'],
+  el:{label:'FORGE v1.5.2 <span>· Τι νέο υπάρχει;</span>',title:'FORGE · Έκδοση 1.5.2',updates:[
+    ['v1.5.2 · Σήμερα','Διορθώθηκε η σύνδεση','Το όνομα χρήστη απαιτείται πλέον μόνο κατά την εγγραφή και δεν εμποδίζει τη σύνδεση.'],
     ['v1.5.0 · Σήμερα','Περισσότερος έλεγχος στην προπόνηση','Η αναίρεση είναι διαθέσιμη στα διαλείμματα. Οι ασκήσεις ανά πλευρά έχουν σαφή ένδειξη και οι χρονισμένες ασκήσεις διαθέτουν ρυθμιζόμενο χρονόμετρο. Το βάρος δεν αλλάζει μέσα στην προπόνηση και η προαιρετική αύξηση +1 kg προτείνεται μόνο μετά από δύο σταθερές συνεδρίες.'],
     ['v1.4.0 · Σήμερα','Αυτόματη αύξηση βάρους','Το προτεινόμενο βάρος εφαρμόζεται απευθείας και μπορεί να αυξάνεται ανάμεσα στα σετ.'],
     ['v1.3.0','Νέο design FORGE','Μια πιο ήρεμη και καθαρή εμφάνιση με το γνώριμο σκούρο ύφος και πορτοκαλί.'],

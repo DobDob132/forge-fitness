@@ -219,6 +219,7 @@ const ForgeCloud = (() => {
     event.preventDefault();$('authSubmit').disabled=true;
     const email=$('authEmail').value.trim(),password=$('authPassword').value,name=$('authMode').value;
     try {
+      if(!email||!password)throw Error('Bitte gib E-Mail-Adresse und Passwort ein.');
       message('Bitte warten …');let response;
       if(name==='login') {
         response=await client.auth.signInWithPassword({email,password});

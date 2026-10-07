@@ -48,7 +48,7 @@ Der Wochenrückblick im Challenge-Reiter zählt laufende und in dieser Woche bee
 - Gewichte lassen sich in den Einstellungen zwischen kg und lb umschalten. Gespeichert wird intern weiterhin in kg, damit beim Wechsel keine Trainingsdaten verfälscht werden.
 - Auf Handys bleibt die Hauptnavigation erreichbar am unteren Bildschirmrand.
 
-## Version 1.5.1
+## Version 1.5.2
 
 - Die Anmeldung wird nicht mehr durch das versteckte Benutzername-Pflichtfeld blockiert.
 
