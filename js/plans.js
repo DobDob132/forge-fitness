@@ -64,7 +64,7 @@ function renderEditDay() {
                     <input class="input" style="padding:6px; font-size:13px;" value="${escapeHtml(ex[0])}" placeholder="Name (z.B. Bankdrücken)" onchange="updateEditEx(${i},0,this.value)">
                     <div style="display:flex; gap:5px;">
                         <input class="input" style="padding:6px; font-size:12px; width:60px;" type="number" value="${escapeHtml(ex[1])}" placeholder="Sätze" onchange="updateEditEx(${i},1,this.value)">
-                        <input class="input" style="padding:6px; font-size:12px;" value="${escapeHtml(ex[2])}" placeholder="Wdh (z.B. 8-12 oder 30min)" onchange="updateEditEx(${i},2,this.value)">
+                        <input class="input" style="padding:6px; font-size:12px;" value="${escapeHtml(ex[2])}" placeholder="Wdh. (z.B. 8-12 pro Seite)" onchange="updateEditEx(${i},2,this.value)">
                         <input class="input" style="padding:6px; font-size:12px; width:78px;" type="number" value="${escapeHtml(toDisplayWeight(ex[3]))}" placeholder="${weightUnit()}" onchange="updateEditEx(${i},3,fromDisplayWeight(this.value))">
                     </div>
                     <textarea class="input exercise-note-input" placeholder="Eigene Notiz, z.B. Sitzposition oder Technikhinweis" onchange="updateEditEx(${i},6,this.value)">${escapeHtml(ex[6]||'')}</textarea>

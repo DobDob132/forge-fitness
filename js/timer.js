@@ -19,7 +19,10 @@ function testPauseSignal(type){
 }
 function timerRemaining(){return state.paused?Math.max(0,state.timer):Math.max(0,Math.ceil((state.timerEndsAt-Date.now())/1000));}
 function startPause(sec){
+  clearExerciseTimer();
   document.getElementById('activePhase').classList.add('hidden');document.getElementById('pausePhase').classList.remove('hidden');
+  const pauseUndoContainer=document.getElementById('pauseUndoContainer'),undoButton=document.getElementById('undoBtn');
+  if(pauseUndoContainer?.appendChild&&undoButton)pauseUndoContainer.appendChild(undoButton);
   preparePauseSignals();state.timer=Math.max(0,Number(sec)||0);state.timerMax=Math.max(1,state.timer);state.timerEndsAt=Date.now()+state.timer*1000;state.paused=false;document.getElementById('timerBtn').textContent=I18n.translate('Pause');updateTimerUI();
   clearInterval(state.interval);state.interval=setInterval(tickPauseTimer,250);tickPauseTimer();
 }
@@ -38,4 +41,42 @@ function toggleTimer(){
 function adjustTimer(sec){state.timer=Math.max(0,timerRemaining()+sec);state.timerMax=Math.max(1,state.timerMax+sec);if(!state.paused)state.timerEndsAt=Date.now()+state.timer*1000;updateTimerUI();if(state.timer<=0)endPauseEarly();}
 function setPauseTime(sec){state.timer=Math.max(0,Number(sec)||0);state.timerMax=Math.max(1,state.timer);if(!state.paused)state.timerEndsAt=Date.now()+state.timer*1000;updateTimerUI();}
 function endPauseEarly(){clearInterval(state.interval);state.timer=0;renderWorkout();}
+
+function parseExerciseDuration(target){
+  const match=String(target).toLowerCase().match(/(\d+(?:[.,]\d+)?)\s*(min(?:ute[ns]?)?|sek(?:unde[ns]?)?|sec(?:ond[sc]?)?|s)\b/);
+  if(!match)return 0;
+  const value=Number(match[1].replace(',','.'));
+  return Math.max(1,Math.round(value*(match[2].startsWith('m')?60:1)));
+}
+function clearExerciseTimer(){
+  if(state.exerciseTimerInterval)clearInterval(state.exerciseTimerInterval);
+  state.exerciseTimerInterval=null;state.exerciseTimerPaused=true;
+}
+function updateExerciseTimerUI(){
+  document.getElementById('exerciseTimerTime').textContent=fmt(Math.max(0,state.exerciseTimer));
+  document.getElementById('exerciseTimerBar').style.width=(state.exerciseTimerMax?Math.max(0,state.exerciseTimer/state.exerciseTimerMax*100):0)+'%';
+  document.getElementById('exerciseTimerBtn').textContent=state.exerciseTimerPaused?'Start':'Pause';
+}
+function setExerciseTimer(seconds){
+  clearExerciseTimer();state.exerciseTimer=Math.max(1,Math.round(Number(seconds)||0));state.exerciseTimerMax=state.exerciseTimer;
+  document.getElementById('exerciseTimerInput').value=state.exerciseTimer;updateExerciseTimerUI();
+}
+function setExerciseTimerFromInput(){setExerciseTimer(document.getElementById('exerciseTimerInput').value);}
+function adjustExerciseTimer(seconds){
+  state.exerciseTimer=Math.max(0,state.exerciseTimer+seconds);state.exerciseTimerMax=Math.max(state.exerciseTimer,state.exerciseTimerMax+seconds,1);
+  document.getElementById('exerciseTimerInput').value=state.exerciseTimer;updateExerciseTimerUI();
+}
+function toggleExerciseTimer(){
+  if(!state.exerciseTimer)return;
+  state.exerciseTimerPaused=!state.exerciseTimerPaused;
+  if(!state.exerciseTimerPaused){
+    clearInterval(state.exerciseTimerInterval);
+    state.exerciseTimerInterval=setInterval(()=>{
+      if(state.exerciseTimerPaused)return;
+      state.exerciseTimer--;updateExerciseTimerUI();
+      if(state.exerciseTimer<=0){clearExerciseTimer();updateExerciseTimerUI();notifyPauseEnd();}
+    },1000);
+  }
+  updateExerciseTimerUI();
+}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.timerEndsAt&&!state.paused&&!document.getElementById('pausePhase')?.classList.contains('hidden'))tickPauseTimer();});

@@ -36,7 +36,7 @@ if(!data) {
     if(!existingProfile){const latestWeight=[...data.bodyData].reverse().find(d=>d.metric==='weight');if(latestWeight)data.settings.calorieProfile.weight=Number(latestWeight.value)||70;}
 }
 
-let state={day:null,exercise:0,set:0,setsDone:0,started:0,paused:false,timer:90,timerMax:90,timerEndsAt:0,interval:null,finishing:false};
+let state={day:null,exercise:0,set:0,setsDone:0,started:0,paused:false,timer:90,timerMax:90,timerEndsAt:0,interval:null,finishing:false,exerciseTimer:0,exerciseTimerMax:0,exerciseTimerInterval:null,exerciseTimerPaused:true};
 let lastSetBackup=null;
 let wakeLock=null;
 let exChartInstance=null;

@@ -42,11 +42,18 @@ Der Wochenrückblick im Challenge-Reiter zählt laufende und in dieser Woche bee
 - Freie Trainings wie Joggen, Gehen, Radfahren, Wandern, Schwimmen, Rudern oder Tennis lassen sich mit Dauer, Belastung, optionaler Distanz und Notiz erfassen.
 - Der Kalorienverbrauch ist eine Schätzung aus persönlichen Angaben, Dauer und Aktivitätsintensität. Für Erwachsene wird der Ruheumsatz nach [Mifflin–St Jeor](https://pubmed.ncbi.nlm.nih.gov/2305711/) mit Intensitätsfaktoren nach dem [2024 Adult Compendium](https://pacompendium.com/adult-compendium/) kombiniert. Unter 18 Jahren nutzt FORGE stattdessen eine allgemeine gewichtsbezogene MET-Schätzung. Krafttrainings-Kalorien werden nur als grobe Schätzung gleichmäßig auf erfasste Sätze verteilt; Messgeräte oder medizinische Messungen ersetzt dies nicht.
 - Der Pausentimer orientiert sich an der tatsächlichen Uhrzeit und korrigiert sich nach Hintergrundpausen. Ton und Vibration sind in den Einstellungen einzeln testbar; Geräte ohne Vibrations-API können nicht vibrieren.
-- Nach früheren Einheiten empfiehlt FORGE bei passenden Wiederholungsbereichen das nächste Gewicht oder das Beibehalten des aktuellen Gewichts.
+- Bei Wiederholungsbereichen empfiehlt FORGE eine optionale Steigerung von 1 kg erst nach zwei stabilen Einheiten, in denen alle Sätze das obere Wiederholungsziel erreicht haben. Innerhalb einer Einheit wird das Gewicht nie automatisch erhöht.
 - Jeder Übung kann im Planeditor eine persönliche Technik- oder Geräte-Notiz hinzugefügt werden.
 - Das Wochenziel ist zwischen 1 und 14 Trainings einstellbar und wird auf der Startseite angezeigt.
 - Gewichte lassen sich in den Einstellungen zwischen kg und lb umschalten. Gespeichert wird intern weiterhin in kg, damit beim Wechsel keine Trainingsdaten verfälscht werden.
 - Auf Handys bleibt die Hauptnavigation erreichbar am unteren Bildschirmrand.
+
+## Version 1.5.0
+
+- Rückgängig ist während der Satzpause verfügbar.
+- Wiederholungseingaben für Seitenübungen sind eindeutig als „pro Seite“ beschriftet.
+- Zeitübungen besitzen einen einstellbaren Timer direkt in der App.
+- Die Gewichtsempfehlung ist konservativer und erhöht das Gewicht nicht mehr automatisch.
 
 ## Dateien
 
