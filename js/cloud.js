@@ -204,6 +204,7 @@ const ForgeCloud = (() => {
     if(name!=='login'&&name!=='signup')name='login';
     $('authMode').value=name;
     $('signupNameWrap').classList.toggle('hidden',name!=='signup');
+    $('authName').required=name==='signup';
     $('authPasswordWrap').classList.remove('hidden');
     $('authEmailWrap').classList.remove('hidden');
     $('authEmail').required=true;$('authPassword').required=true;
