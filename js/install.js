@@ -24,5 +24,20 @@
  document.getElementById('installDone').onclick=close;
  document.getElementById('installCopyLink').onclick=async()=>{try{await navigator.clipboard.writeText(installUrl);toast('FORGE-Link kopiert. Öffne ihn jetzt im normalen Browser.');}catch{help();toast('Kopiere den angezeigten FORGE-Link.');}};
  window.addEventListener('appinstalled',()=>{prompt=null;close();toast('FORGE wurde installiert.');});
- if('serviceWorker' in navigator && location.protocol!=='file:')navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(registration=>registration.update()).catch(()=>{});
+ if('serviceWorker' in navigator && location.protocol!=='file:'){
+  if(navigator.serviceWorker.controller){
+   const notice=document.createElement('div'),message=document.createElement('span'),update=document.createElement('button'),workout=document.getElementById('workout');
+   notice.className='app-update';notice.setAttribute('role','status');update.type='button';update.className='btn secondary';notice.append(message,update);
+   const renderNotice=()=>{
+    const active=!workout.classList.contains('hidden'),lang=I18n.language();
+    const words=lang==='en'?['A new version is ready.','Update after your workout.','Update now']:lang==='el'?['Υπάρχει νέα έκδοση.','Ενημέρωσε μετά την προπόνηση.','Ενημέρωση τώρα']:['Eine neue Version ist verfügbar.','Nach dem Training aktualisieren.','Jetzt aktualisieren'];
+    message.textContent=active?words[1]:words[0];update.textContent=words[2];update.disabled=active;
+   };
+   navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!notice.isConnected)document.body.append(notice);renderNotice();});
+   new MutationObserver(()=>{if(notice.isConnected)renderNotice();}).observe(workout,{attributes:true,attributeFilter:['class']});
+   window.addEventListener('forge-language-change',()=>{if(notice.isConnected)renderNotice();});
+   update.onclick=()=>location.reload();
+  }
+  navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(registration=>registration.update()).catch(()=>{});
+ }
 })();

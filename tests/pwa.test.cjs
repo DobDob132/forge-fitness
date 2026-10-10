@@ -45,6 +45,33 @@ test('install prompt can be dismissed and the next click shows usable instructio
   assert.equal(copied,'https://example.com/forge-fitness/');
 });
 
+test('update notice blocks reload during a workout',()=>{
+  const workerEvents={};
+  let active=false,reloads=0,notice,observeChange;
+  const workout={classList:{contains:()=>!active}};
+  const elements={installModal:{style:{}},installSteps:{},installClose:{},installDone:{},installCopyLink:{},workout};
+  const serviceWorker={controller:{},addEventListener:(name,handler)=>{workerEvents[name]=handler;},register:async()=>({update:async()=>{}})};
+  const navigator={serviceWorker};
+  const window={navigator,matchMedia:()=>({matches:false}),addEventListener:()=>{}};
+  const document={
+    getElementById:id=>elements[id],querySelectorAll:()=>[],createElement:()=>({append(...children){this.children=children;},setAttribute(){}}),
+    body:{append(element){notice=element;element.isConnected=true;}}
+  };
+  class MutationObserver{constructor(handler){observeChange=handler;}observe(){}}
+  vm.runInNewContext(fs.readFileSync(path.join(root,'js/install.js'),'utf8'),{
+    window,document,navigator,location:{href:'https://example.com/forge-fitness/',protocol:'https:',reload:()=>{reloads++;}},
+    URL,MutationObserver,I18n:{language:()=> 'de'},toast:()=>{}
+  });
+  workerEvents.controllerchange();
+  assert.equal(notice.children[1].disabled,false);
+  active=true;observeChange();
+  assert.equal(notice.children[1].disabled,true);
+  assert.match(notice.children[0].textContent,/Nach dem Training/);
+  active=false;observeChange();
+  notice.children[1].onclick();
+  assert.equal(reloads,1);
+});
+
 test('service worker fetches current page before using the offline copy',async()=>{
   const handlers={},waits=[],puts=[];
   const live={ok:true,clone:()=>({copy:true})};
