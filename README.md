@@ -8,6 +8,8 @@ Die bisherige Trainings-App wurde um Supabase-Konten, private Cloud-Speicherung,
 
 - Android: Link in Chrome öffnen und „App installieren“ oder „Zum Startbildschirm hinzufügen“ wählen.
 - iPhone: Link in Safari öffnen, Teilen → „Zum Home-Bildschirm“.
+- In eingebetteten Browsern (zum Beispiel ChatGPT oder Messenger) zuerst „Link kopieren“ wählen und die Adresse direkt in Chrome, Edge oder Safari öffnen. FORGE wird als Web-App installiert; es gibt keine separate APK-Datei.
+- Falls nach einer Aktualisierung noch eine alte Oberfläche erscheint, die Seite im Browser neu laden beziehungsweise die installierte App schließen und erneut öffnen. Trainingsdaten bleiben dabei gespeichert.
 - Ohne Konto fortfahren: Daten bleiben lokal im Browser.
 - Mit Konto: Anmeldung über das Profilsymbol; Trainingsdaten werden privat synchronisiert.
 
