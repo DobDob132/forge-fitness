@@ -158,6 +158,28 @@ grant select on public.forge_challenges to authenticated;
 create policy forge_challenges_select on public.forge_challenges for select to authenticated
 using ((select auth.uid())=creator or (select auth.uid())=opponent);
 
+create or replace function forge_private.valid_plan_payload(payload jsonb)
+returns boolean language plpgsql immutable set search_path='' as $$
+declare day_item jsonb; exercise_item jsonb; sets_value numeric; weight_value numeric;
+begin
+ if payload is null or jsonb_typeof(payload)<>'object' or jsonb_typeof(payload->'name')<>'string'
+    or length(btrim(payload->>'name')) not between 1 and 80 or jsonb_typeof(payload->'days')<>'array'
+    or jsonb_array_length(payload->'days')<>7 or pg_column_size(payload)>262144 then return false; end if;
+ for day_item in select value from jsonb_array_elements(payload->'days') loop
+  if jsonb_typeof(day_item)<>'object' or jsonb_typeof(day_item->'ex')<>'array' then return false; end if;
+  for exercise_item in select value from jsonb_array_elements(day_item->'ex') loop
+   if jsonb_typeof(exercise_item)<>'array' or jsonb_array_length(exercise_item)<4
+      or jsonb_typeof(exercise_item->0)<>'string' or length(btrim(exercise_item->>0)) not between 1 and 100
+      or jsonb_typeof(exercise_item->2)<>'string' or length(btrim(exercise_item->>2)) not between 1 and 50 then return false; end if;
+   sets_value:=(exercise_item->>1)::numeric;weight_value:=(exercise_item->>3)::numeric;
+   if sets_value<>trunc(sets_value) or sets_value not between 1 and 100 or weight_value not between 0 and 10000 then return false; end if;
+  end loop;
+ end loop;
+ return true;
+exception when others then return false;
+end $$;
+revoke all on function forge_private.valid_plan_payload(jsonb) from public,anon,authenticated;
+
 create function forge_private.social_action(p_action text,p_id uuid default null,p_friend uuid default null,p_payload jsonb default null,p_value integer default null)
 returns jsonb language plpgsql security definer set search_path='' as $$
 declare uid uuid:=auth.uid(); row_share public.forge_plan_shares; row_challenge public.forge_challenges; result jsonb; monday date:=(current_date-(extract(isodow from current_date)::int-1));
@@ -210,8 +232,14 @@ begin
  if uid is null or not exists(select 1 from auth.users where id=uid) then raise exception 'Anmeldung erforderlich' using errcode='42501'; end if;
  if p_action='friends' then
   select coalesce(jsonb_agg(jsonb_build_object('user_id',p.user_id,'display_name',p.display_name) order by p.display_name),'[]'::jsonb) into result from public.forge_friendships f join public.forge_profiles p on p.user_id=case when f.requester=uid then f.recipient else f.requester end where f.status='accepted' and (f.requester=uid or f.recipient=uid);return result;
+ elsif p_action='leaderboard' then
+  select coalesce(jsonb_agg(jsonb_build_object('user_id',members.user_id,'display_name',members.display_name,'level',members.level,'is_me',members.user_id=uid) order by members.level desc,members.display_name),'[]'::jsonb) into result
+  from (select p.user_id,p.display_name,case when jsonb_typeof(s.payload->'level')='number' then greatest(1,least(100000,floor((s.payload->>'level')::numeric)))::integer else 1 end as level
+        from public.forge_profiles p left join public.forge_state s on s.user_id=p.user_id
+        where p.user_id=uid or exists(select 1 from public.forge_friendships f where f.status='accepted' and ((f.requester=uid and f.recipient=p.user_id) or (f.recipient=uid and f.requester=p.user_id)))) members;
+  return result;
  elsif p_action='share_plan' then
-  if p_payload is null or jsonb_typeof(p_payload)<>'object' or jsonb_array_length(coalesce(p_payload->'days','[]'::jsonb))<>7 or pg_column_size(p_payload)>262144 then raise exception 'Ungültiger Trainingsplan' using errcode='22023'; end if;
+  if not forge_private.valid_plan_payload(p_payload) then raise exception 'Ungültiger Trainingsplan' using errcode='22023'; end if;
   if not exists(select 1 from public.forge_friendships where status='accepted' and ((requester=uid and recipient=p_friend) or (recipient=uid and requester=p_friend))) then raise exception 'Nur mit Freunden möglich' using errcode='42501'; end if;
   insert into public.forge_plan_shares(sender,recipient,plan) values(uid,p_friend,p_payload);return jsonb_build_object('ok',true);
  elsif p_action='plan_shares' then

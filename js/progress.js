@@ -179,14 +179,15 @@ function showHistoryDetail(idx){
   document.getElementById("historyModal").style.display="flex";
 }
 
-function deleteHistoryEntry(idx) {
-    if(confirm("Möchtest du dieses Training wirklich löschen? XP und Statistiken bleiben erhalten, nur der Eintrag verschwindet.")) {
+async function deleteHistoryEntry(idx) {
+    if(confirm("Möchtest du dieses Training wirklich löschen? Die XP bleiben erhalten; Statistiken und Rekorde werden aus den verbleibenden Trainings neu berechnet.")) {
         data.logs.splice(idx, 1);
-        saveData();
+        await saveData();
+        await ForgeSocial.syncProgress().catch(()=>{});
         document.getElementById("historyModal").style.display="none";
         renderProgress();
         renderHome();
-        toast("Training gelöscht.");
+        toast(I18n.translate("Training gelöscht."));
     }
 }
 
@@ -286,10 +287,10 @@ function saveBodyData() {
         saveData();
         checkMilestones();
         document.getElementById("bodyModal").style.display = "none";
-        toast("Körperdaten gespeichert! ⚖️");
+        toast(I18n.translate("Körperdaten gespeichert! ⚖️"));
         updateBodyChart();
     } else {
-        toast("Bitte mindestens einen Wert eintragen.");
+        toast(I18n.translate("Bitte mindestens einen Wert eintragen."));
     }
 }
 

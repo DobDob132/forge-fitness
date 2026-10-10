@@ -13,6 +13,21 @@ function addXP(amount, reason) {
     saveData();
 }
 
+function captureXPState() {
+    return {
+        xp: Number(data.xp) || 0,
+        level: Number(data.level) || 1,
+        xpHistory: JSON.parse(JSON.stringify(data.xpHistory || []))
+    };
+}
+
+function restoreXPState(snapshot) {
+    if(!snapshot) return;
+    data.xp = Number(snapshot.xp) || 0;
+    data.level = Math.max(1, Number(snapshot.level) || 1);
+    data.xpHistory = Array.isArray(snapshot.xpHistory) ? JSON.parse(JSON.stringify(snapshot.xpHistory)) : [];
+}
+
 function renderXP() {
     document.getElementById("levelBadge").textContent = data.level;
     document.getElementById("levelText").textContent = data.level;

@@ -1,6 +1,30 @@
 const getActivePlan = () => data.allPlans.find(p => p.id === data.activePlanId) || data.allPlans[0];
 const getActiveDays = () => getActivePlan().days;
 
+function normalizePlanStructure(plan,{id=plan?.id,archived=plan?.archived===true}={}){
+    if(!plan||typeof plan!=='object'||!Array.isArray(plan.days)||plan.days.length!==7)throw Error('Ein Trainingsplan muss genau sieben gültige Tage enthalten.');
+    const name=String(plan.name||'').trim();if(!name||name.length>80)throw Error('Der Planname muss 1–80 Zeichen lang sein.');
+    const template=emptyWeek();
+    const days=plan.days.map((day,dayIndex)=>{
+        if(!day||typeof day!=='object'||!Array.isArray(day.ex))throw Error(`Tag ${dayIndex+1} enthält keine gültige Übungsliste.`);
+        const dayName=String(day.name||template[dayIndex].name).trim().slice(0,40)||template[dayIndex].name;
+        const focus=String(day.focus||template[dayIndex].focus).trim().slice(0,80)||template[dayIndex].focus;
+        const color=['red','blue','green','yellow'].includes(day.color)?day.color:template[dayIndex].color;
+        const ex=day.ex.map((exercise,exerciseIndex)=>{
+            if(!Array.isArray(exercise)||exercise.length<4)throw Error(`${dayName}: Übung ${exerciseIndex+1} ist unvollständig.`);
+            const exerciseName=String(exercise[0]||'').trim(),sets=Number(exercise[1]),target=String(exercise[2]??'').trim(),weight=Number(exercise[3]);
+            if(!exerciseName||exerciseName.length>100)throw Error(`${dayName}: Der Übungsname muss 1–100 Zeichen lang sein.`);
+            if(!Number.isInteger(sets)||sets<1||sets>100)throw Error(`${exerciseName}: Die Satzanzahl muss zwischen 1 und 100 liegen.`);
+            if(!target||target.length>50)throw Error(`${exerciseName}: Das Ziel muss 1–50 Zeichen lang sein.`);
+            if(!Number.isFinite(weight)||weight<0||weight>10000)throw Error(`${exerciseName}: Das Gewicht muss zwischen 0 und 10.000 kg liegen.`);
+            return [exerciseName,sets,target,weight,String(exercise[4]||'').trim().slice(0,600),String(exercise[5]||'').trim().slice(0,200),String(exercise[6]||'').trim().slice(0,300)];
+        });
+        return {...template[dayIndex],id:template[dayIndex].id,name:dayName,focus,color,ex};
+    });
+    const safeId=typeof id==='string'&&id.trim()?id.trim().slice(0,100):`p_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
+    return {id:safeId,name,days,archived};
+}
+
 function renderPlan(){
     let active = getActivePlan();
     document.getElementById("activePlanNameTag").textContent = active.name;
@@ -63,9 +87,9 @@ function renderEditDay() {
                 <div style="flex-grow:1; display:grid; gap:5px;">
                     <input class="input" style="padding:6px; font-size:13px;" value="${escapeHtml(ex[0])}" placeholder="Name (z.B. Bankdrücken)" onchange="updateEditEx(${i},0,this.value)">
                     <div style="display:flex; gap:5px;">
-                        <input class="input" style="padding:6px; font-size:12px; width:60px;" type="number" value="${escapeHtml(ex[1])}" placeholder="Sätze" onchange="updateEditEx(${i},1,this.value)">
+                        <input class="input" style="padding:6px; font-size:12px; width:60px;" type="number" min="1" max="100" step="1" value="${escapeHtml(ex[1])}" placeholder="Sätze" onchange="updateEditEx(${i},1,this.value)">
                         <input class="input" style="padding:6px; font-size:12px;" value="${escapeHtml(ex[2])}" placeholder="Wdh. (z.B. 8-12 pro Seite)" onchange="updateEditEx(${i},2,this.value)">
-                        <input class="input" style="padding:6px; font-size:12px; width:78px;" type="number" value="${escapeHtml(toDisplayWeight(ex[3]))}" placeholder="${weightUnit()}" onchange="updateEditEx(${i},3,fromDisplayWeight(this.value))">
+                        <input class="input" style="padding:6px; font-size:12px; width:78px;" type="number" min="0" max="22046" step="0.5" value="${escapeHtml(toDisplayWeight(ex[3]))}" placeholder="${weightUnit()}" onchange="updateEditEx(${i},3,fromDisplayWeight(this.value))">
                     </div>
                     <textarea class="input exercise-note-input" placeholder="Eigene Notiz, z.B. Sitzposition oder Technikhinweis" onchange="updateEditEx(${i},6,this.value)">${escapeHtml(ex[6]||'')}</textarea>
                 </div>
@@ -101,17 +125,13 @@ function addExerciseToEdit() {
     renderEditDay();
 }
 function savePlanEdit() {
-    editPlanCopy.name = document.getElementById("editPlanName").value || "Mein Plan";
-    let idx = data.allPlans.findIndex(p => p.id === editPlanCopy.id);
-    if(idx > -1) {
-        data.allPlans[idx] = editPlanCopy;
-    }
-    saveData();
-    closePlanEditor();
-    renderPlan();
-    renderPlansList();
-    renderHome();
-    toast("Plan erfolgreich aktualisiert! 💾");
+    try{
+        editPlanCopy.name = document.getElementById("editPlanName").value || "Mein Plan";
+        const normalized=normalizePlanStructure(editPlanCopy,{id:editPlanCopy.id,archived:editPlanCopy.archived});
+        let idx = data.allPlans.findIndex(p => p.id === editPlanCopy.id);
+        if(idx > -1) data.allPlans[idx] = normalized;
+        saveData();closePlanEditor();renderPlan();renderPlansList();renderHome();toast(I18n.translate("Plan erfolgreich aktualisiert! 💾"));
+    }catch(error){toast(error.message||'Der Trainingsplan ist ungültig.');}
 }
 
 function renderPlansList() {
@@ -136,7 +156,7 @@ function renderPlansList() {
 }
 
 function activatePlan(id) {
-    data.activePlanId = id; saveData(); renderPlansList(); toast("Plan aktiviert!");
+    data.activePlanId = id; saveData(); renderPlansList(); toast(I18n.translate("Plan aktiviert!"));
 }
 
 function deleteMyPlan(id) {
@@ -146,7 +166,7 @@ function deleteMyPlan(id) {
         data.allPlans = data.allPlans.filter(p => p.id !== id);
         saveData();
         renderPlansList();
-        toast("Plan gelöscht 🗑️");
+        toast(I18n.translate("Plan gelöscht 🗑️"));
     }
 }
 
@@ -249,17 +269,14 @@ function saveKiPlan() {
         if(jsonText.endsWith("```")) jsonText = jsonText.substring(0, jsonText.length - 3);
 
         let parsed = JSON.parse(jsonText);
-        if(!parsed.name || !parsed.days || parsed.days.length !== 7) throw "Invalid Format";
-
-        parsed.id = "p_" + Date.now();
-        parsed.archived = false;
+        parsed=normalizePlanStructure(parsed,{id:"p_"+Date.now(),archived:false});
         data.allPlans.push(parsed);
         saveData();
         
         document.getElementById("kiModal").style.display = "none";
         renderPlansList();
-        toast("KI Plan erfolgreich importiert! 🎉");
+        toast(I18n.translate("KI Plan erfolgreich importiert! 🎉"));
     } catch(e) {
-        toast("Fehler: JSON ungültig! Stelle sicher, dass nur der Code eingefügt wurde.");
+        toast(e?.message||"Fehler: JSON ungültig! Stelle sicher, dass nur der Code eingefügt wurde.");
     }
 }

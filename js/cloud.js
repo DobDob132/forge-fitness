@@ -29,13 +29,8 @@ const ForgeCloud = (() => {
   function normalize(value) {
     if (!value || !Array.isArray(value.allPlans) || !value.allPlans.length || !Array.isArray(value.logs)) throw Error('Ungültige FORGE-Sicherungsdatei.');
     const p = clone(value);
-    for (const plan of p.allPlans) {
-      if (typeof plan.id !== 'string' || typeof plan.name !== 'string' || !Array.isArray(plan.days) || plan.days.length !== 7) throw Error('Ungültiger Trainingsplan.');
-      for(const day of plan.days) {
-        if(typeof day.name !== 'string' || typeof day.focus !== 'string' || !Array.isArray(day.ex)) throw Error('Ungültiger Trainingstag.');
-        for(const ex of day.ex) if(!Array.isArray(ex) || typeof ex[0] !== 'string' || !Number.isFinite(Number(ex[1])) || typeof ex[2] !== 'string') throw Error('Ungültige Übung.');
-      }
-    }
+    p.allPlans=p.allPlans.map(plan=>normalizePlanStructure(plan,{id:plan?.id,archived:plan?.archived===true}));
+    if(!p.allPlans.some(plan=>plan.id===p.activePlanId))p.activePlanId=p.allPlans[0].id;
     const existingProfile=p.settings?.calorieProfile;
     p.settings = {...defaultSettings,...p.settings,calorieProfile:{...defaultSettings.calorieProfile,...p.settings?.calorieProfile}};
     if(!p.xp) {p.xp=0;p.level=1;p.xpHistory=[];}
@@ -49,7 +44,7 @@ const ForgeCloud = (() => {
   function renderData(payload) {
     data = normalize(payload);
     clearInterval(state.interval);releaseWakeLock();
-    state={day:null,exercise:0,set:0,setsDone:0,started:0,paused:false,timer:90,timerMax:90,timerEndsAt:0,interval:null,finishing:false};
+    state={day:null,exercise:0,set:0,setsDone:0,started:0,paused:false,timer:90,timerMax:90,timerEndsAt:0,interval:null,finishing:false,exerciseTimer:0,exerciseTimerMax:0,exerciseTimerEndsAt:0,exerciseTimerInterval:null,exerciseTimerPaused:true,workoutXp:0,xpBaseline:null};
     lastSetBackup=null;editPlanCopy=null;
     for(const chart of [exChartInstance,bodyChartInstance,summaryChartInstance])chart?.destroy();
     exChartInstance=bodyChartInstance=summaryChartInstance=null;

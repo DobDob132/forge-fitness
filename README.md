@@ -50,6 +50,11 @@ Der Wochenrückblick im Challenge-Reiter zählt laufende und in dieser Woche bee
 - Gewichte lassen sich in den Einstellungen zwischen kg und lb umschalten. Gespeichert wird intern weiterhin in kg, damit beim Wechsel keine Trainingsdaten verfälscht werden.
 - Auf Handys bleibt die Hauptnavigation erreichbar am unteren Bildschirmrand.
 
+## Version 1.6.0
+
+- Zeitübungen übernehmen die abgelaufene Zeit automatisch in das Satz-Ergebnis.
+- Rückgängig, XP-Anzeige, Planvalidierung, Rangliste, Statistikhilfe und Aktualisierung alter App-Stände wurden korrigiert.
+
 ## Version 1.5.2
 
 - Die Anmeldung wird nicht mehr durch das versteckte Benutzername-Pflichtfeld blockiert.

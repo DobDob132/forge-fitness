@@ -3,7 +3,7 @@ function startWorkoutFlow(dayOverride=null) {
   preparePauseSignals();
   let d = dayOverride ? JSON.parse(JSON.stringify(dayOverride)) : today();
   if (!d.ex.length) { openRestDayWorkoutPicker(); return; }
-  state = { day: d, exercise: 0, set: 0, setsDone: 0, started: Date.now(), timer: data.settings.pause, timerMax: data.settings.pause, timerEndsAt:0, interval: null, paused: false, finishing:false, nextWeight:null, exerciseTimer:0, exerciseTimerMax:0, exerciseTimerInterval:null, exerciseTimerPaused:true };
+  state = { day: d, exercise: 0, set: 0, setsDone: 0, started: Date.now(), timer: data.settings.pause, timerMax: data.settings.pause, timerEndsAt:0, interval: null, paused: false, finishing:false, nextWeight:null, exerciseTimer:0, exerciseTimerMax:0, exerciseTimerEndsAt:0, exerciseTimerInterval:null, exerciseTimerPaused:true, workoutXp:0, xpBaseline:captureXPState() };
   data.current=[];
   lastSetBackup = null;
   document.getElementById("undoBtn").style.display="none";
@@ -58,7 +58,7 @@ function beginLifting() {
 
 function snapshotWorkout(phase='lifting'){
   if(!state.day)return;
-  data.activeWorkout={planId:data.activePlanId,dayId:state.day.id,dayName:state.day.name,focus:state.day.focus,exercise:state.exercise,set:state.set,setsDone:state.setsDone,started:state.started,phase,nextWeight:state.nextWeight,draftWeight:document.getElementById('weightInput')?.value||'',draftReps:document.getElementById('repInput')?.value||''};
+  data.activeWorkout={planId:data.activePlanId,dayId:state.day.id,dayName:state.day.name,focus:state.day.focus,exercise:state.exercise,set:state.set,setsDone:state.setsDone,started:state.started,phase,nextWeight:state.nextWeight,draftWeight:document.getElementById('weightInput')?.value||'',draftReps:document.getElementById('repInput')?.value||'',workoutXp:state.workoutXp||0,xpBaseline:state.xpBaseline};
   saveData();
 }
 function saveWorkoutDraftInputs(){snapshotWorkout('lifting')}
@@ -67,7 +67,7 @@ function resumeWorkout(){
   preparePauseSignals();
   const plan=data.allPlans.find(p=>p.id===saved.planId)||data.allPlans.find(p=>p.id===data.activePlanId),day=plan?.days.find(d=>d.id===saved.dayId);
   if(!day){discardWorkout(true);toast('Der gespeicherte Plan ist nicht mehr vorhanden.');return;}
-  state={day:JSON.parse(JSON.stringify(day)),exercise:saved.exercise||0,set:saved.set||0,setsDone:saved.setsDone||0,started:saved.started||Date.now(),timer:data.settings.pause,timerMax:data.settings.pause,timerEndsAt:0,interval:null,paused:false,finishing:false,nextWeight:null,exerciseTimer:0,exerciseTimerMax:0,exerciseTimerInterval:null,exerciseTimerPaused:true};
+  state={day:JSON.parse(JSON.stringify(day)),exercise:saved.exercise||0,set:saved.set||0,setsDone:saved.setsDone||0,started:saved.started||Date.now(),timer:data.settings.pause,timerMax:data.settings.pause,timerEndsAt:0,interval:null,paused:false,finishing:false,nextWeight:null,exerciseTimer:0,exerciseTimerMax:0,exerciseTimerEndsAt:0,exerciseTimerInterval:null,exerciseTimerPaused:true,workoutXp:Number(saved.workoutXp)||0,xpBaseline:saved.xpBaseline||captureXPState()};
   show('workout');if(data.settings.keepAwake!==false)requestWakeLock();
   if(saved.phase==='warmup'){document.getElementById('activePhase').classList.add('hidden');document.getElementById('pausePhase').classList.add('hidden');document.getElementById('warmupPhase').classList.remove('hidden');document.getElementById('warmupMethodText').textContent=data.settings.warmupType;}
   else{document.getElementById('warmupPhase').classList.add('hidden');beginLifting();if(saved.draftWeight!=='')document.getElementById('weightInput').value=saved.draftWeight;if(saved.draftReps)document.getElementById('repInput').value=saved.draftReps;}
@@ -75,7 +75,7 @@ function resumeWorkout(){
 }
 function discardWorkout(silent=false){
   if(!silent&&!confirm('Gespeichertes Training wirklich verwerfen?'))return;
-  clearInterval(state.interval);clearExerciseTimer();data.activeWorkout=null;data.current=[];state.day=null;state.finishing=false;saveData();renderHome();
+  clearInterval(state.interval);clearExerciseTimer();restoreXPState(state.xpBaseline);data.activeWorkout=null;data.current=[];state.day=null;state.finishing=false;saveData();renderHome();
 }
 
 function getSmartWeight(name, startWeight) {
@@ -102,10 +102,10 @@ function renderWorkout(){
   let d=state.day, e=d.ex[state.exercise];
   clearExerciseTimer();
   document.getElementById('setControls').appendChild(document.getElementById('undoBtn'));
-  document.getElementById("workDay").textContent=d.name+" · "+d.focus;
-  document.getElementById("workStep").textContent=`Übung ${state.exercise+1} / ${d.ex.length} · Satz ${state.set+1} / ${e[1]}`;
+  document.getElementById("workDay").textContent=I18n.translate(d.name)+" · "+I18n.translate(d.focus);
+  document.getElementById("workStep").textContent=`${I18n.translate('Übung')} ${state.exercise+1} / ${d.ex.length} · ${I18n.translate('Satz')} ${state.set+1} / ${e[1]}`;
   document.getElementById("workName").textContent=e[0];
-  document.getElementById("workTarget").textContent="Ziel: "+e[2];
+  document.getElementById("workTarget").textContent=I18n.translate('Ziel:')+" "+e[2];
   
   const progression=getProgressionSuggestion(e);
   let suggestedWeight = state.nextWeight ?? (progression ? progression.weight : getSmartWeight(e[0], e[3]));
@@ -143,8 +143,9 @@ function toggleFullscreen() {
 async function finishSet(){
   let e=state.day.ex[state.exercise], w=fromDisplayWeight(+document.getElementById("weightInput").value||0), r=document.getElementById("repInput").value||"";
   if(!r){toast("Bitte Ausführung eintragen");return}
-  lastSetBackup={ exercise: state.exercise, set: state.set, setsDone: state.setsDone, nextWeight:state.nextWeight };
   data.current=data.current||[];
+  lastSetBackup={ kind:'completed', exercise:state.exercise, set:state.set, setsDone:state.setsDone, nextWeight:state.nextWeight, currentLength:data.current.length, xpState:captureXPState(), workoutXp:state.workoutXp||0 };
+  const xpBefore=Number(data.xp)||0;
   
   const current1RM=estimated1RM(w,r),prevBest=best1RM(data.logs,e[0]);
   if(current1RM&&prevBest>0&&current1RM>prevBest+0.01){addXP(25,"Neuer 1RM-Rekord: "+e[0]);toast("🏆 Neuer 1RM-Rekord!");}
@@ -152,6 +153,7 @@ async function finishSet(){
   clearExerciseTimer();
   data.current.push({name:e[0], weight:w, reps:r});
   addXP(10, `Satz beendet: ${e[0]}`);
+  state.workoutXp=(state.workoutXp||0)+((Number(data.xp)||0)-xpBefore);
   
   state.nextWeight=null;
   state.set++; state.setsDone++;
@@ -167,8 +169,10 @@ async function finishSet(){
 
 async function undoLastSet(){
   if(!lastSetBackup){toast("Nichts zum Rückgängig machen");return}
-  data.current.pop();
+  data.current=data.current||[];data.current.length=Math.min(data.current.length,lastSetBackup.currentLength);
+  if(lastSetBackup.kind==='completed')restoreXPState(lastSetBackup.xpState);
   state.exercise=lastSetBackup.exercise; state.set=lastSetBackup.set; state.setsDone=lastSetBackup.setsDone; state.nextWeight=lastSetBackup.nextWeight??null;
+  state.workoutXp=lastSetBackup.workoutXp||0;
   lastSetBackup=null;
   document.getElementById("undoBtn").style.display="none";
   renderWorkout();
@@ -177,7 +181,7 @@ async function undoLastSet(){
 
 function skipSet(){
   clearExerciseTimer();
-  lastSetBackup={ exercise: state.exercise, set: state.set, setsDone: state.setsDone };
+  lastSetBackup={ kind:'skipped', exercise:state.exercise, set:state.set, setsDone:state.setsDone, nextWeight:state.nextWeight, currentLength:(data.current||[]).length, workoutXp:state.workoutXp||0 };
   state.set++;
   if(state.set>=state.day.ex[state.exercise][1]){state.set=0; state.exercise++;state.nextWeight=null;}
   if(state.exercise<state.day.ex.length)snapshotWorkout('lifting');
@@ -194,7 +198,7 @@ async function finishWorkout(){
   if(entries.length>0){
     completedWorkoutLog={date:new Date().toISOString(),type:'strength',plan:finishedDay.name,focus:finishedDay.focus,sets:state.setsDone,minutes:mins,calories,effort,entries};
     data.logs.push(completedWorkoutLog);
-    addXP(50, "Training beendet!");
+    const xpBefore=Number(data.xp)||0;addXP(50, "Training beendet!");state.workoutXp=(state.workoutXp||0)+((Number(data.xp)||0)-xpBefore);
   }
   data.current=[];await saveData();
   ForgeSocial.syncProgress();
@@ -205,7 +209,7 @@ async function finishWorkout(){
   show('complete');
   document.getElementById("completeText").textContent=`${finishedDay.name} · ${finishedDay.focus}`;
   document.getElementById('workoutEffort').value=5;document.getElementById('workoutEffortValue').textContent='5 / 10';
-  document.getElementById("completeStats").innerHTML=`<div class="stat"><b>${state.setsDone}</b><span>Sätze</span></div><div class="stat"><b>${Math.round(mins)}</b><span>Minuten</span></div><div class="stat"><b>${calories}</b><span>kcal geschätzt</span></div><div class="stat"><b>+${(state.setsDone*10)+50}</b><span>XP</span></div>`;
+  document.getElementById("completeStats").innerHTML=`<div class="stat"><b>${state.setsDone}</b><span>Sätze</span></div><div class="stat"><b>${Math.round(mins)}</b><span>Minuten</span></div><div class="stat"><b>${calories}</b><span>kcal geschätzt</span></div><div class="stat"><b>+${Math.max(0,Math.round(state.workoutXp||0))}</b><span>XP</span></div>`;
   state.day=null;state.finishing=false;
   
   setTimeout(renderSummaryChart, 100);

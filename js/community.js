@@ -9,14 +9,14 @@ function previewCommunityPlan(idx) {
             html += `</div></div>`;
         }
     });
-    html += `<button class="btn" style="width:100%;margin-top:8px" onclick="useCommunityPlan(${idx})">DIESEN PLAN AUSWÄHLEN</button>`;
+    html += `<button class="btn" style="width:100%;margin-top:8px" onclick="useCommunityPlan(${idx})">${I18n.translate('DIESEN PLAN AUSWÄHLEN')}</button>`;
     document.getElementById("previewModalBody").innerHTML = html;
     document.getElementById("previewModal").style.display = "flex";
 }
 
 function useCommunityPlan(idx) {
     const source = comPlansData[idx];
-    if(!source || !Array.isArray(source.days) || source.days.length !== 7) return toast("Dieser Plan ist leider ungültig.");
+    if(!source || !Array.isArray(source.days) || source.days.length !== 7) return toast(I18n.translate("Dieser Plan ist leider ungültig."));
     const template = emptyWeek();
     const copy = {
         id: `p_community_${Date.now()}_${idx}`,
@@ -36,5 +36,5 @@ function useCommunityPlan(idx) {
     renderPlansList();
     renderPlan();
     renderHome();
-    toast(`${copy.name} ist jetzt dein aktiver Plan.`);
+    toast(`${copy.name} · ${I18n.translate('Plan aktiviert!')}`);
 }

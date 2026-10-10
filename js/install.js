@@ -38,6 +38,8 @@
    window.addEventListener('forge-language-change',()=>{if(notice.isConnected)renderNotice();});
    update.onclick=()=>location.reload();
   }
-  navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(registration=>registration.update()).catch(()=>{});
+  navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(registration=>{
+   const check=()=>registration.update().catch(()=>{});check();window.addEventListener('focus',check);window.setInterval?.(check,60*60*1000);
+  }).catch(()=>{});
  }
 })();

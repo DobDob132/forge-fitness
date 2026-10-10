@@ -96,3 +96,9 @@ test('service worker fetches current page before using the offline copy',async()
   online=false;
   assert.deepEqual(await dispatch(),{offline:true});
 });
+
+test('service worker refreshes known scripts and styles before using offline cache',()=>{
+  const source=fs.readFileSync(path.join(root,'sw.js'),'utf8');
+  assert.match(source,/if\(known\)e\.respondWith\(fetch\(e\.request,\{cache:'no-store'\}\)/);
+  assert.match(source,/catch\(\(\)=>caches\.match\(e\.request\)\)/);
+});
