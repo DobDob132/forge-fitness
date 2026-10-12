@@ -51,6 +51,11 @@ Der Wochenrückblick im Challenge-Reiter zählt laufende und in dieser Woche bee
 - Gewichte lassen sich in den Einstellungen zwischen kg und lb umschalten. Gespeichert wird intern weiterhin in kg, damit beim Wechsel keine Trainingsdaten verfälscht werden.
 - Auf Handys bleibt die Hauptnavigation erreichbar am unteren Bildschirmrand.
 
+## Version 1.8.1
+
+- Der Einstellungsinhalt scrollt nun unabhängig von der Speicherleiste, sodass die untersten Felder auf jeder Bildschirmgröße vollständig erreichbar bleiben.
+- Dauerhaft sichtbare Feldbeschriftungen und Einheiten kennzeichnen im Training Gewicht, Wiederholungen und Sekunden auch dann eindeutig, wenn bereits Werte eingetragen sind.
+
 ## Version 1.8.0
 
 - Einstellungen sind in fünf übersichtliche Reiter gegliedert und lassen sich durchsuchen; ungespeicherte Änderungen werden sichtbar markiert.

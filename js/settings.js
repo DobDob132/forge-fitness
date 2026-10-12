@@ -30,6 +30,7 @@ function openSettingsTab(name,silent=false){
   if(!silent&&settingsDirty&&name!==settingsActiveTab)toast('Änderungen noch nicht gespeichert');
   settingsActiveTab=name;document.querySelectorAll('[data-settings-tab]').forEach(button=>button.classList.toggle('active',button.dataset.settingsTab===name));
   document.querySelectorAll('[data-settings-panel]').forEach(panel=>panel.classList.toggle('hidden',panel.dataset.settingsPanel!==name));
+  const content=document.getElementById('settingsContent');if(content)content.scrollTop=0;
   const search=document.getElementById('settingsSearch');if(search&&search.value)search.value='';
   if(name==='signals')renderSignalDiagnostics();
 }

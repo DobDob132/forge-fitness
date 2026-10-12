@@ -17,7 +17,8 @@ function escapeHtml(value){ return String(value ?? '').replace(/[&<>"']/g, c => 
 function normalizeShortcutKey(value,fallback){const key=String(value||'').trim().toLowerCase();return /^[a-z]$/.test(key)?key:fallback;}
 function showInfoModal(title, text){ document.getElementById('infoTitle').textContent=title; document.getElementById('infoText').innerHTML=text; document.getElementById('infoModal').style.display='flex'; }
 const releaseNotes={
-  de:{label:'FORGE 1.8.0 · Updateinfos',title:'FORGE · Version 1.8.0',updates:[
+  de:{label:'FORGE 1.8.1 · Updateinfos',title:'FORGE · Version 1.8.1',updates:[
+    ['v1.8.1 · Heute','Alles erreichbar und eindeutig','Die Speicherleiste verdeckt keine Eingabefelder mehr. Der Einstellungsinhalt bleibt vollständig erreichbar. Im Training zeigen dauerhafte Feldbeschriftungen und Einheiten klar Gewicht, Wiederholungen und Sekunden an.'],
     ['v1.8.0 · Heute','Übersichtliche Einstellungen & verlässliche Signale','Neue Einstellungsreiter, Suche, sichtbarer Speicherstatus und Geräte-Diagnose. Mobile Zielwert-Tasten passen sich jeder Übung an. Vibrationsmuster, Ton-Ersatz und ein visueller Pausenhinweis machen das Trainingsende zuverlässiger bemerkbar.'],
     ['v1.7.0 · Heute','Schneller erfassen, ruhiger steigern','Frei wählbare Minimum-/Maximum-Tasten schließen einen Satz sofort ab. Die neue doppelte Progression steigert erst Wiederholungen oder Zeit und danach kontrolliert das Gewicht.'],
     ['v1.6.0 · Heute','Training verlässlicher','Zeitübungen tragen ihr Ergebnis automatisch ein. Rückgängig, XP-Anzeige, Planprüfung, Statistiken, Rangliste und App-Aktualisierungen wurden korrigiert.'],
@@ -27,7 +28,8 @@ const releaseNotes={
     ['v1.3.0','Neues FORGE-Design','Eine ruhigere, klarere Oberfläche mit dem vertrauten dunklen Look und Orange.'],
     ['v1.2.0','Mehr Training für dich','Freie Aktivitäten inklusive Tennis, Kalorien-Schätzung, persönliche Rekorde und eigene Vorlagen.']
   ]},
-  en:{label:'FORGE 1.8.0 · Update info',title:'FORGE · Version 1.8.0',updates:[
+  en:{label:'FORGE 1.8.1 · Update info',title:'FORGE · Version 1.8.1',updates:[
+    ['v1.8.1 · Today','Everything reachable and clear','The save bar no longer covers fields. Settings remain fully accessible, while persistent workout labels and units clearly identify weight, repetitions and seconds.'],
     ['v1.8.0 · Today','Clearer settings and reliable alerts','New settings tabs, search, save status and device diagnostics. Mobile target buttons adapt to each exercise. Vibration patterns, sound fallback and a visual rest alert make timer completion easier to notice.'],
     ['v1.7.0 · Today','Faster logging, steadier progress','Custom minimum and maximum keys complete a set immediately. Double progression now increases reps or time first, then raises weight in a controlled step.'],
     ['v1.6.0 · Today','More reliable workouts','Timed exercises now enter their result automatically. Undo, XP display, plan validation, statistics, leaderboard and app updates were corrected.'],
@@ -37,7 +39,8 @@ const releaseNotes={
     ['v1.3.0','New FORGE design','A calmer, clearer interface with the familiar dark look and orange accent.'],
     ['v1.2.0','More ways to train','Free activities including tennis, calorie estimates, personal records and your own templates.']
   ]},
-  el:{label:'FORGE 1.8.0 · Πληροφορίες ενημέρωσης',title:'FORGE · Έκδοση 1.8.0',updates:[
+  el:{label:'FORGE 1.8.1 · Πληροφορίες ενημέρωσης',title:'FORGE · Έκδοση 1.8.1',updates:[
+    ['v1.8.1 · Σήμερα','Όλα προσβάσιμα και σαφή','Η γραμμή αποθήκευσης δεν καλύπτει πλέον πεδία. Οι ρυθμίσεις παραμένουν προσβάσιμες και οι μόνιμες ετικέτες δείχνουν καθαρά βάρος, επαναλήψεις και δευτερόλεπτα.'],
     ['v1.8.0 · Σήμερα','Καθαρότερες ρυθμίσεις και αξιόπιστες ειδοποιήσεις','Νέες καρτέλες ρυθμίσεων, αναζήτηση, ένδειξη αποθήκευσης και διάγνωση συσκευής. Τα κουμπιά στόχου προσαρμόζονται σε κάθε άσκηση. Μοτίβα δόνησης, εφεδρικός ήχος και οπτική ειδοποίηση κάνουν το τέλος του διαλείμματος πιο εμφανές.'],
     ['v1.7.0 · Σήμερα','Ταχύτερη καταγραφή, σταθερή πρόοδος','Προσαρμόσιμα πλήκτρα ελάχιστου και μέγιστου ολοκληρώνουν αμέσως το σετ. Η διπλή πρόοδος αυξάνει πρώτα επαναλήψεις ή χρόνο και μετά ελεγχόμενα το βάρος.'],
     ['v1.6.0 · Σήμερα','Πιο αξιόπιστες προπονήσεις','Οι ασκήσεις χρόνου καταχωρίζουν αυτόματα το αποτέλεσμα. Διορθώθηκαν η αναίρεση, τα XP, ο έλεγχος πλάνων, τα στατιστικά, η κατάταξη και οι ενημερώσεις.'],
@@ -49,7 +52,7 @@ const releaseNotes={
   ]}
 };
 function releaseNotesLocale(){const language=window.ForgeI18n?.language?.();return releaseNotes[language]||releaseNotes.de;}
-function updateReleaseNotesLabel(){const button=document.querySelector('.settings-version-badge');if(button)button.textContent=releaseNotesLocale().label;const version=document.querySelector('.version-card strong');if(version)version.textContent='FORGE 1.8.0';}
+function updateReleaseNotesLabel(){const button=document.querySelector('.settings-version-badge');if(button)button.textContent=releaseNotesLocale().label;const version=document.querySelector('.version-card strong');if(version)version.textContent='FORGE 1.8.1';}
 function openReleaseNotes(){const notes=releaseNotesLocale();const items=notes.updates.map(([version,title,text])=>`<article class="release-note"><div class="release-note-version">${version}</div><b>${title}</b><p>${text}</p></article>`).join('');showInfoModal(notes.title,`<div class="release-notes">${items}</div>`);}
 window.addEventListener('forge-language-change',updateReleaseNotesLabel);setTimeout(updateReleaseNotesLabel,0);
 function weightUnit(){return data.settings.unit==='lb'?'lb':'kg'}
