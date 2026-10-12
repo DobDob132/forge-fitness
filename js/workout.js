@@ -84,19 +84,34 @@ function getSmartWeight(name, startWeight) {
     return lastSet ? (lastSet.weight || startWeight) : startWeight;
 }
 
-function getProgressionSuggestion(exercise){
-  const range=String(exercise[2]).match(/(\d+)\s*-\s*(\d+)/),expectedSets=Number(exercise[1]);
-  if(!range||!expectedSets)return null;
-  const sessions=[...data.logs].reverse().map(log=>(log.entries||[]).filter(x=>x.name===exercise[0]&&Number(x.weight)>0)).filter(sets=>sets.length);
-  if(!sessions.length)return null;
-  const lastSession=sessions[0],lastWeight=Number(lastSession[lastSession.length-1].weight)||0,upper=Number(range[2]);
-  const isStableSuccess=sets=>sets.length>=expectedSets&&sets.every(set=>Number(set.reps)>=upper&&Math.abs(Number(set.weight)-lastWeight)<0.01);
-  const readyToIncrease=sessions.length>=2&&isStableSuccess(sessions[0])&&isStableSuccess(sessions[1]);
-  if(readyToIncrease)return {weight:lastWeight,text:`Zwei stabile Einheiten mit allen ${upper} Wdh. geschafft · wenn es sich gut anfühlt, probiere optional ${formatWeight(progressionStep(lastWeight))}.`};
-  return {weight:lastWeight,text:`Letzte Einheit: ${formatWeight(lastWeight)} · Gewicht beibehalten und erst nach zwei stabilen Einheiten steigern.`};
+function exerciseTargetBounds(exercise){
+  const target=String(exercise?.[2]||'').trim(),range=target.match(/(\d+)\s*[-–]\s*(\d+)/),single=target.match(/^\s*(\d+)\s*(s|sek\.?|sec\.?|min(?:uten?)?)?\s*(?:pro|je)?/i);
+  const isMinutes=/\bmin(?:uten?)?\b/i.test(target),isSeconds=!isMinutes&&/(?:\d)\s*(?:s|sek\.?|sec\.?)\b/i.test(target);
+  if(range){const factor=isMinutes?60:1;return {min:Number(range[1])*factor,max:Number(range[2])*factor,kind:(isMinutes||isSeconds)?'seconds':'reps',isRange:true};}
+  if(single){const factor=isMinutes?60:1,value=Number(single[1])*factor;return {min:value,max:value,kind:(isMinutes||isSeconds)?'seconds':'reps',isRange:false};}
+  return null;
 }
-function progressionStep(kg){return Math.round((Number(kg)+1)*2)/2;}
-function targetUpperReps(exercise){const range=String(exercise[2]).match(/(\d+)\s*-\s*(\d+)/);return range?Number(range[2]):null;}
+function setResultNumber(value){const match=String(value??'').match(/\d+(?:[.,]\d+)?/);return match?Number(match[0].replace(',','.')):null;}
+function progressionStep(kg){const step=Math.max(.5,Number(data.settings.progressionWeightStep)||1);return Math.round((Number(kg)+step)*2)/2;}
+function getProgressionSuggestion(exercise){
+  const bounds=exerciseTargetBounds(exercise),expectedSets=Number(exercise[1]);
+  if(!bounds?.isRange||!expectedSets)return null;
+  const sessions=[...data.logs].reverse().map(log=>(log.entries||[]).filter(x=>x.name===exercise[0])).filter(sets=>sets.length);
+  const fallbackWeight=Number(exercise[3])||0;
+  if(!sessions.length)return {weight:fallbackWeight,target:bounds.min,kind:bounds.kind,text:`Sanfter Start bei ${formatProgressionTarget(bounds.min,bounds.kind)}. Danach steigert FORGE schrittweise bis ${formatProgressionTarget(bounds.max,bounds.kind)}.`};
+  const lastSession=sessions[0],lastWeight=Number(lastSession[lastSession.length-1].weight)||fallbackWeight;
+  const sameWeight=sets=>sets.length>=expectedSets&&sets.every(set=>Math.abs((Number(set.weight)||0)-lastWeight)<0.01);
+  const reaches= (sets,target)=>sameWeight(sets)&&sets.every(set=>{const result=setResultNumber(set.reps);return result!==null&&result>=target;});
+  const weighted=lastWeight>0||fallbackWeight>0,readyForWeight=weighted&&sessions.length>=2&&reaches(sessions[0],bounds.max)&&reaches(sessions[1],bounds.max);
+  if(readyForWeight){const nextWeight=progressionStep(lastWeight);return {weight:nextWeight,target:bounds.min,kind:bounds.kind,text:`Oberes Ziel zweimal stabil geschafft: Gewicht auf <strong>${escapeHtml(formatWeight(nextWeight))}</strong>, ${formatProgressionTarget(bounds.min,bounds.kind)} als ruhiger Neustart.`};}
+  const results=lastSession.map(set=>setResultNumber(set.reps)).filter(value=>value!==null),lastStable=results.length>=expectedSets?Math.min(...results):bounds.min;
+  const step=bounds.kind==='seconds'?Math.max(1,Number(data.settings.progressionSecondsStep)||5):Math.max(1,Number(data.settings.progressionRepStep)||1);
+  const target=Math.min(bounds.max,Math.max(bounds.min,lastStable+(reaches(lastSession,lastStable)?step:0)));
+  const holding=target>=bounds.max&&reaches(lastSession,bounds.max);
+  return {weight:lastWeight,target,kind:bounds.kind,text:holding?`Oberes Ziel erreicht. Noch eine stabile Einheit mit ${formatProgressionTarget(bounds.max,bounds.kind)}, dann darf das Gewicht steigen.`:`Gewicht bleibt bei ${escapeHtml(formatWeight(lastWeight))}; nächster ruhiger Schritt: <strong>${formatProgressionTarget(target,bounds.kind)}</strong>.`};
+}
+function formatProgressionTarget(value,kind){return kind==='seconds'?`${value} Sek.`:`${value} Wdh.`;}
+function targetUpperReps(exercise){return exerciseTargetBounds(exercise)?.max??null;}
 
 function renderWorkout(){
   let d=state.day, e=d.ex[state.exercise];
@@ -114,15 +129,36 @@ function renderWorkout(){
   document.getElementById("workProgress").style.width=((state.exercise+(state.set/e[1]))/d.ex.length*100)+"%";
   
   const target=String(e[2]),isPerSide=/\b(pro|je)\s+(seite|bein|arm)\b/i.test(target),targetSeconds=parseExerciseDuration(target);
-  document.getElementById("setInputs").innerHTML=`<div class="inputs"><input class="input" id="weightInput" type="number" step=".5" value="${isCardio ? 0 : escapeHtml(toDisplayWeight(suggestedWeight))}" placeholder="${weightUnit()}" oninput="saveWorkoutDraftInputs()"><input class="input" id="repInput" type="text" placeholder="${isPerSide ? 'Wdh. pro Seite' : targetSeconds ? 'Ergebnis / Info' : 'Wdh. / Info'}" oninput="saveWorkoutDraftInputs()"></div>`;
+  const suggestedResult=progression?.target?formatShortcutResult(progression.target,progression.kind):'';
+  const minKey=normalizeShortcutKey(data.settings.shortcutMin,'d').toUpperCase(),maxKey=normalizeShortcutKey(data.settings.shortcutMax,'f').toUpperCase(),bounds=exerciseTargetBounds(e);
+  document.getElementById("setInputs").innerHTML=`<div class="inputs"><input class="input" id="weightInput" type="number" step=".5" value="${isCardio ? 0 : escapeHtml(toDisplayWeight(suggestedWeight))}" placeholder="${weightUnit()}" oninput="saveWorkoutDraftInputs()"><input class="input" id="repInput" type="text" value="${escapeHtml(suggestedResult)}" placeholder="${isPerSide ? 'Wdh. pro Seite' : targetSeconds ? 'Ergebnis / Info' : 'Wdh. / Info'}" oninput="saveWorkoutDraftInputs()"></div>${bounds?`<div class="workout-shortcuts" aria-label="Tastenkürzel"><span><kbd>${escapeHtml(minKey)}</kbd> Minimum &amp; Pause</span><span><kbd>${escapeHtml(maxKey)}</kbd> Maximum &amp; Pause</span></div>`:''}`;
   const exerciseTimer=document.getElementById('exerciseTimer');exerciseTimer.classList.toggle('hidden',!targetSeconds);
   if(targetSeconds){state.exerciseTimer=targetSeconds;state.exerciseTimerMax=targetSeconds;state.exerciseTimerPaused=true;document.getElementById('exerciseTimerInput').value=targetSeconds;updateExerciseTimerUI();}
-  const suggestionEl=document.getElementById('workSuggestion');suggestionEl.classList.toggle('hidden',!progression);suggestionEl.innerHTML=progression?`<span>↗ ${escapeHtml(progression.text)}</span>`:'';
+  const suggestionEl=document.getElementById('workSuggestion');suggestionEl.classList.toggle('hidden',!progression);suggestionEl.innerHTML=progression?`<span>↗ ${progression.text}</span>`:'';
   const note=document.getElementById('workNote');note.classList.toggle('hidden',!e[6]);note.textContent=e[6]?`📝 ${e[6]}`:'';
   
   document.getElementById("activePhase").classList.remove("hidden");
   document.getElementById("pausePhase").classList.add("hidden");
 }
+
+function formatShortcutResult(value,kind){return kind==='seconds'?`${value} Sek.`:String(value);}
+let shortcutSubmitting=false;
+async function applyWorkoutShortcut(which){
+  if(shortcutSubmitting||!state.day||state.exercise>=state.day.ex.length)return false;
+  const bounds=exerciseTargetBounds(state.day.ex[state.exercise]);
+  if(!bounds){toast("Für dieses Ziel gibt es keinen Zahlenbereich");return false;}
+  const input=document.getElementById('repInput');if(!input)return false;
+  input.value=formatShortcutResult(which==='max'?bounds.max:bounds.min,bounds.kind);input.dispatchEvent(new Event('input',{bubbles:true}));
+  shortcutSubmitting=true;try{await finishSet();}finally{shortcutSubmitting=false;}return true;
+}
+document.addEventListener?.('keydown',event=>{
+  if(event.defaultPrevented||event.repeat||event.ctrlKey||event.metaKey||event.altKey||!state.day)return;
+  const workout=document.getElementById('workout'),active=document.getElementById('activePhase');
+  if(!workout||workout.classList.contains('hidden')||!active||active.classList.contains('hidden')||document.querySelector('.modal[style*="display: flex"]'))return;
+  const key=String(event.key||'').toLowerCase(),minimum=normalizeShortcutKey(data.settings.shortcutMin,'d'),maximum=normalizeShortcutKey(data.settings.shortcutMax,'f');
+  if(key!==minimum&&key!==maximum)return;
+  event.preventDefault();applyWorkoutShortcut(key===maximum?'max':'min');
+});
 
 function showExerciseInfo() {
     let e = state.day.ex[state.exercise];

@@ -44,11 +44,18 @@ Der Wochenrückblick im Challenge-Reiter zählt laufende und in dieser Woche bee
 - Freie Trainings wie Joggen, Gehen, Radfahren, Wandern, Schwimmen, Rudern oder Tennis lassen sich mit Dauer, Belastung, optionaler Distanz und Notiz erfassen.
 - Der Kalorienverbrauch ist eine Schätzung aus persönlichen Angaben, Dauer und Aktivitätsintensität. Für Erwachsene wird der Ruheumsatz nach [Mifflin–St Jeor](https://pubmed.ncbi.nlm.nih.gov/2305711/) mit Intensitätsfaktoren nach dem [2024 Adult Compendium](https://pacompendium.com/adult-compendium/) kombiniert. Unter 18 Jahren nutzt FORGE stattdessen eine allgemeine gewichtsbezogene MET-Schätzung. Krafttrainings-Kalorien werden nur als grobe Schätzung gleichmäßig auf erfasste Sätze verteilt; Messgeräte oder medizinische Messungen ersetzt dies nicht.
 - Der Pausentimer orientiert sich an der tatsächlichen Uhrzeit und korrigiert sich nach Hintergrundpausen. Ton und Vibration sind in den Einstellungen einzeln testbar; Geräte ohne Vibrations-API können nicht vibrieren.
-- Bei Wiederholungsbereichen empfiehlt FORGE eine optionale Steigerung von 1 kg erst nach zwei stabilen Einheiten, in denen alle Sätze das obere Wiederholungsziel erreicht haben. Innerhalb einer Einheit wird das Gewicht nie automatisch erhöht.
+- Bei Wiederholungs- und Zeitbereichen nutzt FORGE eine ruhige doppelte Progression: Zuerst steigt das vorgeschlagene Ergebnis schrittweise bis zum oberen Ziel. Erst nach zwei stabilen Einheiten erhöht sich das vorgeschlagene Gewicht; zugleich beginnen die Wiederholungen wieder am unteren Ziel. Die maximalen Schritte für Gewicht, Wiederholungen und Sekunden sind einstellbar.
+- Zwei frei wählbare Buchstaben tragen während des Trainings sofort das untere oder obere Ziel ein, schließen den Satz ab und starten die Pause. Voreingestellt sind D für Minimum und F für Maximum.
 - Jeder Übung kann im Planeditor eine persönliche Technik- oder Geräte-Notiz hinzugefügt werden.
 - Das Wochenziel ist zwischen 1 und 14 Trainings einstellbar und wird auf der Startseite angezeigt.
 - Gewichte lassen sich in den Einstellungen zwischen kg und lb umschalten. Gespeichert wird intern weiterhin in kg, damit beim Wechsel keine Trainingsdaten verfälscht werden.
 - Auf Handys bleibt die Hauptnavigation erreichbar am unteren Bildschirmrand.
+
+## Version 1.7.0
+
+- Neue, frei wählbare Laptop-Tastenkürzel für minimale und maximale Wiederholungen beziehungsweise Sekunden.
+- Ein Tastendruck trägt das Ziel ein, bestätigt den Satz und startet direkt die Pause.
+- Doppelte Progression erhöht Wiederholungen oder Zeit in kleinen Schritten und erst danach das Gewicht; alle Maximalschritte sind einstellbar.
 
 ## Version 1.6.0
 

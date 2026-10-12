@@ -1,5 +1,5 @@
 const weightSteps = [4, 7, 9, 11, 13, 16, 18, 20, 22, 25];
-let defaultSettings = {pause:90, customPauses:"30, 60, 90, 120", warmup:"nein", warmupType:"Rudern", keepAwake:true, vibration:true, pauseSound:false, strengthIntensity:"moderate", calorieProfile:{weight:70,height:175,age:30,sex:"neutral"}, unit:"kg", weeklyGoal:3, language:localStorage.getItem('forgeLanguage') || (navigator.language?.toLowerCase().startsWith('el')?'el':navigator.language?.toLowerCase().startsWith('en')?'en':'de')};
+let defaultSettings = {pause:90, customPauses:"30, 60, 90, 120", warmup:"nein", warmupType:"Rudern", keepAwake:true, vibration:true, pauseSound:false, shortcutMin:"d", shortcutMax:"f", progressionWeightStep:1, progressionRepStep:1, progressionSecondsStep:5, strengthIntensity:"moderate", calorieProfile:{weight:70,height:175,age:30,sex:"neutral"}, unit:"kg", weeklyGoal:3, language:localStorage.getItem('forgeLanguage') || (navigator.language?.toLowerCase().startsWith('el')?'el':navigator.language?.toLowerCase().startsWith('en')?'en':'de')};
 let data = JSON.parse(ForgeStore.read() || "null");
 
 const emptyWeek = () => [
