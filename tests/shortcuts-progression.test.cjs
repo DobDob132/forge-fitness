@@ -46,7 +46,7 @@ test('maximum shortcut fills the upper target and completes the set',async()=>{
 
 test('release version is consistent in app metadata',()=>{
   const root=path.join(__dirname,'..'),pkg=require('../package.json'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),utils=fs.readFileSync(path.join(root,'js/utils.js'),'utf8');
-  assert.equal(pkg.version,'1.8.1');assert.match(html,/FORGE 1\.8\.1/);assert.match(utils,/Version 1\.8\.1/);
+  assert.equal(pkg.version,'1.8.2');assert.match(html,/FORGE 1\.8\.2/);assert.match(utils,/Version 1\.8\.2/);
 });
 
 test('settings keep every control while organizing them into searchable tabs',()=>{
@@ -71,4 +71,9 @@ test('workout inputs keep visible labels and units after values are filled',()=>
   assert.match(source,/class="workout-entry-field" for="weightInput"/);
   assert.match(source,/Gewicht <b>\$\{weightUnit\(\)\}<\/b>/);
   assert.match(source,/resultLabel/);assert.match(source,/resultUnit/);
+});
+
+test('keyboard shortcut hints belong to the repetitions field',()=>{
+  assert.match(source,/for="repInput"[\s\S]*?id="repInput"[\s\S]*?class="workout-shortcuts"[\s\S]*?<\/label><\/div>/);
+  assert.doesNotMatch(source,/for="weightInput"[\s\S]*?class="workout-shortcuts"[\s\S]*?<\/label><label class="workout-entry-field" for="repInput"/);
 });
