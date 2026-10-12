@@ -51,6 +51,13 @@ Der Wochenrückblick im Challenge-Reiter zählt laufende und in dieser Woche bee
 - Gewichte lassen sich in den Einstellungen zwischen kg und lb umschalten. Gespeichert wird intern weiterhin in kg, damit beim Wechsel keine Trainingsdaten verfälscht werden.
 - Auf Handys bleibt die Hauptnavigation erreichbar am unteren Bildschirmrand.
 
+## Version 1.8.0
+
+- Einstellungen sind in fünf übersichtliche Reiter gegliedert und lassen sich durchsuchen; ungespeicherte Änderungen werden sichtbar markiert.
+- Die installierte Version und Updateinfos sind direkt im Einstellungskopf sowie im Bereich „Daten & Info“ erreichbar.
+- Pausensignale besitzen auswählbare Vibrationsmuster, Geräte-Diagnose, optionalen Ton-Ersatz und einen deutlichen visuellen Hinweis.
+- Auf Smartphones zeigen zwei Schnellschaltflächen automatisch die Minimal- und Maximalwerte der aktuellen Übung und schließen den Satz direkt ab.
+
 ## Version 1.7.0
 
 - Neue, frei wählbare Laptop-Tastenkürzel für minimale und maximale Wiederholungen beziehungsweise Sekunden.

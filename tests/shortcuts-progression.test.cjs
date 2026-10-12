@@ -46,5 +46,18 @@ test('maximum shortcut fills the upper target and completes the set',async()=>{
 
 test('release version is consistent in app metadata',()=>{
   const root=path.join(__dirname,'..'),pkg=require('../package.json'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),utils=fs.readFileSync(path.join(root,'js/utils.js'),'utf8');
-  assert.equal(pkg.version,'1.7.0');assert.match(html,/FORGE v1\.7\.0/);assert.match(utils,/Version 1\.7\.0/);
+  assert.equal(pkg.version,'1.8.0');assert.match(html,/FORGE 1\.8\.0/);assert.match(utils,/Version 1\.8\.0/);
+});
+
+test('settings keep every control while organizing them into searchable tabs',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  for(const tab of ['general','training','progression','signals','data'])assert.match(html,new RegExp(`data-settings-panel="${tab}"`));
+  for(const id of ['languageSetting','unitSetting','weeklyGoalSetting','pauseSetting','customPauses','warmupSetting','warmupType','wakeLockSetting','vibrationSetting','soundSetting','shortcutMinSetting','shortcutMaxSetting','progressionWeightStep','progressionRepStep','progressionSecondsStep'])assert.match(html,new RegExp(`id="${id}"`));
+  assert.match(html,/id="settingsSearch"/);assert.match(html,/id="signalDiagnostics"/);
+});
+
+test('mobile target buttons show changing exercise values instead of min and max labels',()=>{
+  assert.match(source,/formatShortcutButton\(bounds\.min,bounds\.kind\)/);
+  assert.match(source,/formatShortcutButton\(bounds\.max,bounds\.kind\)/);
+  assert.doesNotMatch(source,/mobile-target-buttons[^`]*>Minimum</);
 });

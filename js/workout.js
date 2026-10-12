@@ -131,7 +131,8 @@ function renderWorkout(){
   const target=String(e[2]),isPerSide=/\b(pro|je)\s+(seite|bein|arm)\b/i.test(target),targetSeconds=parseExerciseDuration(target);
   const suggestedResult=progression?.target?formatShortcutResult(progression.target,progression.kind):'';
   const minKey=normalizeShortcutKey(data.settings.shortcutMin,'d').toUpperCase(),maxKey=normalizeShortcutKey(data.settings.shortcutMax,'f').toUpperCase(),bounds=exerciseTargetBounds(e);
-  document.getElementById("setInputs").innerHTML=`<div class="inputs"><input class="input" id="weightInput" type="number" step=".5" value="${isCardio ? 0 : escapeHtml(toDisplayWeight(suggestedWeight))}" placeholder="${weightUnit()}" oninput="saveWorkoutDraftInputs()"><input class="input" id="repInput" type="text" value="${escapeHtml(suggestedResult)}" placeholder="${isPerSide ? 'Wdh. pro Seite' : targetSeconds ? 'Ergebnis / Info' : 'Wdh. / Info'}" oninput="saveWorkoutDraftInputs()"></div>${bounds?`<div class="workout-shortcuts" aria-label="Tastenkürzel"><span><kbd>${escapeHtml(minKey)}</kbd> Minimum &amp; Pause</span><span><kbd>${escapeHtml(maxKey)}</kbd> Maximum &amp; Pause</span></div>`:''}`;
+  const mobileTargets=bounds?`<div class="mobile-target-buttons" aria-label="Ziel direkt eintragen">${bounds.isRange?`<button type="button" onclick="applyWorkoutShortcut('min')"><b>${formatShortcutButton(bounds.min,bounds.kind)}</b><small>${escapeHtml(minKey)} · Satz abschließen</small></button>`:''}<button type="button" onclick="applyWorkoutShortcut('max')"><b>${formatShortcutButton(bounds.max,bounds.kind)}</b><small>${escapeHtml(maxKey)} · Satz abschließen</small></button></div>`:'';
+  document.getElementById("setInputs").innerHTML=`<div class="inputs"><input class="input" id="weightInput" type="number" step=".5" value="${isCardio ? 0 : escapeHtml(toDisplayWeight(suggestedWeight))}" placeholder="${weightUnit()}" oninput="saveWorkoutDraftInputs()"><input class="input" id="repInput" type="text" value="${escapeHtml(suggestedResult)}" placeholder="${isPerSide ? 'Wdh. pro Seite' : targetSeconds ? 'Ergebnis / Info' : 'Wdh. / Info'}" oninput="saveWorkoutDraftInputs()"></div>${bounds?`<div class="workout-shortcuts" aria-label="Tastenkürzel"><span><kbd>${escapeHtml(minKey)}</kbd> Minimum &amp; Pause</span><span><kbd>${escapeHtml(maxKey)}</kbd> Maximum &amp; Pause</span></div>`:''}${mobileTargets}`;
   const exerciseTimer=document.getElementById('exerciseTimer');exerciseTimer.classList.toggle('hidden',!targetSeconds);
   if(targetSeconds){state.exerciseTimer=targetSeconds;state.exerciseTimerMax=targetSeconds;state.exerciseTimerPaused=true;document.getElementById('exerciseTimerInput').value=targetSeconds;updateExerciseTimerUI();}
   const suggestionEl=document.getElementById('workSuggestion');suggestionEl.classList.toggle('hidden',!progression);suggestionEl.innerHTML=progression?`<span>↗ ${progression.text}</span>`:'';
@@ -142,6 +143,7 @@ function renderWorkout(){
 }
 
 function formatShortcutResult(value,kind){return kind==='seconds'?`${value} Sek.`:String(value);}
+function formatShortcutButton(value,kind){return kind==='seconds'?`${value} s`:`${value}`;}
 let shortcutSubmitting=false;
 async function applyWorkoutShortcut(which){
   if(shortcutSubmitting||!state.day||state.exercise>=state.day.ex.length)return false;

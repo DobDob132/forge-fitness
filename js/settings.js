@@ -1,3 +1,4 @@
+let settingsDirty=false,settingsActiveTab='general';
 function openSettings(){
   document.getElementById("pauseSetting").value=data.settings.pause;
   document.getElementById("customPauses").value=data.settings.customPauses || "30, 60, 90, 120";
@@ -6,6 +7,9 @@ function openSettings(){
   document.getElementById("wakeLockSetting").checked=data.settings.keepAwake!==false;
   document.getElementById("vibrationSetting").checked=data.settings.vibration!==false;
   document.getElementById("soundSetting").checked=data.settings.pauseSound===true;
+  document.getElementById("vibrationPatternSetting").value=data.settings.vibrationPattern||'strong';
+  document.getElementById("fallbackSoundSetting").checked=data.settings.vibrationFallbackSound!==false;
+  document.getElementById("visualPauseAlertSetting").checked=data.settings.visualPauseAlert!==false;
   document.getElementById("unitSetting").value=data.settings.unit==='lb'?'lb':'kg';
   document.getElementById("weeklyGoalSetting").value=Math.max(1,Math.min(14,Number(data.settings.weeklyGoal)||3));
   document.getElementById("shortcutMinSetting").value=normalizeShortcutKey(data.settings.shortcutMin,'d').toUpperCase();
@@ -16,9 +20,31 @@ function openSettings(){
   const profile=calorieProfile();document.getElementById('calorieAge').value=profile.age;document.getElementById('calorieHeight').value=profile.height;document.getElementById('calorieWeight').value=profile.weight;document.getElementById('calorieSex').value=profile.sex;document.getElementById('strengthIntensity').value=data.settings.strengthIntensity||'moderate';document.getElementById('pauseTestStatus').textContent='';
   document.getElementById("languageSetting").value=data.settings.language || 'de';
   document.getElementById("warmupTypeSetting").style.display = (data.settings.warmup === "ja") ? "block" : "none";
+  document.getElementById('settingsSearch').value='';settingsDirty=false;renderSettingsDirty();openSettingsTab('general',true);renderSignalDiagnostics();
   document.getElementById("settingsModal").style.display="flex";
 }
-function closeSettings(){document.getElementById("settingsModal").style.display="none"}
+function closeSettings(){if(settingsDirty&&!confirm('Es gibt noch nicht gespeicherte Änderungen. Einstellungen trotzdem schließen?'))return;document.getElementById("settingsModal").style.display="none";}
+function renderSettingsDirty(){document.getElementById('settingsUnsaved')?.classList.toggle('hidden',!settingsDirty);const hint=document.getElementById('settingsSaveHint');if(hint)hint.textContent=settingsDirty?'Änderungen noch nicht gespeichert':'Alle Änderungen gespeichert';}
+function markSettingsDirty(){settingsDirty=true;renderSettingsDirty();}
+function openSettingsTab(name,silent=false){
+  if(!silent&&settingsDirty&&name!==settingsActiveTab)toast('Änderungen noch nicht gespeichert');
+  settingsActiveTab=name;document.querySelectorAll('[data-settings-tab]').forEach(button=>button.classList.toggle('active',button.dataset.settingsTab===name));
+  document.querySelectorAll('[data-settings-panel]').forEach(panel=>panel.classList.toggle('hidden',panel.dataset.settingsPanel!==name));
+  const search=document.getElementById('settingsSearch');if(search&&search.value)search.value='';
+  if(name==='signals')renderSignalDiagnostics();
+}
+function searchSettings(value){
+  const query=String(value||'').trim().toLocaleLowerCase();
+  document.querySelectorAll('[data-settings-tab]').forEach(button=>button.classList.toggle('searching',!!query));
+  if(!query){openSettingsTab(settingsActiveTab,true);return;}
+  document.querySelectorAll('[data-settings-panel]').forEach(panel=>panel.classList.toggle('hidden',!panel.textContent.toLocaleLowerCase().includes(query)));
+}
+function renderSignalDiagnostics(){
+  const container=document.getElementById('signalDiagnostics');if(!container)return;
+  const ua=navigator.userAgent||'',ios=/iPad|iPhone|iPod/.test(ua),vibration=typeof navigator.vibrate==='function',audio=!!(window.AudioContext||window.webkitAudioContext),wake=!!navigator.wakeLock,standalone=window.matchMedia?.('(display-mode: standalone)').matches||navigator.standalone===true;
+  const items=[['Vibration',vibration&&!ios,ios?'Auf iPhone/iPad nicht verfügbar':vibration?'Verfügbar':'Nicht verfügbar'],['Signalton',audio,audio?'Verfügbar':'Nicht verfügbar'],['Display aktiv halten',wake,wake?'Verfügbar':'Nicht verfügbar'],['Installierter App-Modus',standalone,standalone?'Aktiv':'Im Browser geöffnet']];
+  container.innerHTML=`<div class="setting-group-title">Geräte-Diagnose</div>${items.map(([name,ok,detail])=>`<div class="diagnostic-row"><span class="diagnostic-dot ${ok?'ok':'warn'}"></span><b>${name}</b><small>${detail}</small></div>`).join('')}${ios?'<p class="diagnostic-warning">iOS stellt Webseiten keine normale Vibrationsfunktion bereit. FORGE nutzt deshalb den visuellen Hinweis und auf Wunsch den Signalton.</p>':'<p class="account-note">Lautlos- oder Nicht-stören-Modus und Systemeinstellungen können Vibration trotz Browser-Unterstützung blockieren.</p>'}`;
+}
 function saveSettings(){
   const shortcutMin=normalizeShortcutKey(document.getElementById("shortcutMinSetting").value,'d'),shortcutMax=normalizeShortcutKey(document.getElementById("shortcutMaxSetting").value,'f');
   if(shortcutMin===shortcutMax){toast("Bitte zwei unterschiedliche Buchstaben wählen");return;}
@@ -29,6 +55,9 @@ function saveSettings(){
   data.settings.keepAwake=document.getElementById("wakeLockSetting").checked;
   data.settings.vibration=document.getElementById("vibrationSetting").checked;
   data.settings.pauseSound=document.getElementById("soundSetting").checked;
+  data.settings.vibrationPattern=document.getElementById("vibrationPatternSetting").value;
+  data.settings.vibrationFallbackSound=document.getElementById("fallbackSoundSetting").checked;
+  data.settings.visualPauseAlert=document.getElementById("visualPauseAlertSetting").checked;
   data.settings.unit=document.getElementById("unitSetting").value;
   data.settings.weeklyGoal=Math.max(1,Math.min(14,+document.getElementById("weeklyGoalSetting").value||3));
   data.settings.shortcutMin=shortcutMin;
@@ -40,7 +69,7 @@ function saveSettings(){
   data.settings.strengthIntensity=document.getElementById('strengthIntensity').value;
   data.settings.language=document.getElementById("languageSetting").value;
   I18n.setLanguage(data.settings.language);
-  saveData(); closeSettings(); toast("Einstellungen gespeichert");
+  settingsDirty=false;renderSettingsDirty();saveData(); document.getElementById("settingsModal").style.display="none"; toast("Einstellungen gespeichert");
 }
 function exportData(){
   let b=new Blob([JSON.stringify(data)],{type:"application/json"});
@@ -59,3 +88,5 @@ function importData(){
   };i.click();
 }
 function resetData(){ForgeCloud.reset().catch(error=>toast(error.message));}
+document.getElementById('settingsModal')?.addEventListener('input',event=>{if(event.target.matches('input:not(#settingsSearch),select,textarea'))markSettingsDirty();});
+document.getElementById('settingsModal')?.addEventListener('change',event=>{if(event.target.matches('input:not(#settingsSearch),select,textarea'))markSettingsDirty();});
