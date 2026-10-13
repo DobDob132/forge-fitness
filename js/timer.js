@@ -34,6 +34,7 @@ function timerRemaining(){return state.paused?Math.max(0,state.timer):Math.max(0
 function startPause(sec){
   clearExerciseTimer();
   document.getElementById('activePhase').classList.add('hidden');document.getElementById('pausePhase').classList.remove('hidden');
+  const pauseStep=document.getElementById('pauseWorkStep');if(pauseStep&&typeof currentWorkoutStepText==='function')pauseStep.textContent=currentWorkoutStepText();
   const pauseUndoContainer=document.getElementById('pauseUndoContainer'),undoButton=document.getElementById('undoBtn');
   if(pauseUndoContainer?.appendChild&&undoButton)pauseUndoContainer.appendChild(undoButton);
   preparePauseSignals();state.timer=Math.max(0,Number(sec)||0);state.timerMax=Math.max(1,state.timer);state.timerEndsAt=Date.now()+state.timer*1000;state.paused=false;document.getElementById('timerBtn').textContent=I18n.translate('Pause');updateTimerUI();
@@ -65,13 +66,22 @@ function clearExerciseTimer(){
   if(state.exerciseTimerInterval)clearInterval(state.exerciseTimerInterval);
   state.exerciseTimerInterval=null;state.exerciseTimerEndsAt=0;state.exerciseTimerPaused=true;
 }
+function resetExerciseTimerCompletionUI(){
+  const timer=document.getElementById('exerciseTimer'),confirmButton=document.getElementById('exerciseTimerConfirm'),setControls=document.getElementById('setControls');
+  timer?.classList.remove('exercise-timer-complete');confirmButton?.classList.add('hidden');setControls?.classList.remove('hidden');
+}
+function showExerciseTimerConfirmation(){
+  const timer=document.getElementById('exerciseTimer'),confirmButton=document.getElementById('exerciseTimerConfirm'),setControls=document.getElementById('setControls');
+  timer?.classList.add('exercise-timer-complete');confirmButton?.classList.remove('hidden');setControls?.classList.add('hidden');
+  confirmButton?.focus?.();
+}
 function updateExerciseTimerUI(){
   document.getElementById('exerciseTimerTime').textContent=fmt(Math.max(0,state.exerciseTimer));
   document.getElementById('exerciseTimerBar').style.width=(state.exerciseTimerMax?Math.max(0,state.exerciseTimer/state.exerciseTimerMax*100):0)+'%';
   document.getElementById('exerciseTimerBtn').textContent=state.exerciseTimerPaused?'Start':'Pause';
 }
 function setExerciseTimer(seconds){
-  clearExerciseTimer();state.exerciseTimer=Math.max(1,Math.round(Number(seconds)||0));state.exerciseTimerMax=state.exerciseTimer;
+  clearExerciseTimer();resetExerciseTimerCompletionUI();state.exerciseTimer=Math.max(1,Math.round(Number(seconds)||0));state.exerciseTimerMax=state.exerciseTimer;
   document.getElementById('exerciseTimerInput').value=state.exerciseTimer;updateExerciseTimerUI();
 }
 function setExerciseTimerFromInput(){setExerciseTimer(document.getElementById('exerciseTimerInput').value);}
@@ -85,7 +95,7 @@ function completeExerciseTimer(){
   clearExerciseTimer();state.exerciseTimer=0;updateExerciseTimerUI();
   const input=document.getElementById('repInput');
   if(input){input.value=`${Math.max(1,Math.round(state.exerciseTimerMax))} Sek.`;input.dispatchEvent(new Event('input',{bubbles:true}));}
-  notifyPauseEnd();toast(I18n.translate('Zeit übernommen. Satz kann abgeschlossen werden.'));
+  showExerciseTimerConfirmation();notifyPauseEnd();toast(I18n.translate('Zeit übernommen. Satz kann abgeschlossen werden.'));
 }
 function tickExerciseTimer(){
   state.exerciseTimer=exerciseTimerRemaining();updateExerciseTimerUI();

@@ -29,7 +29,7 @@ test('rest timer uses wall time after background throttling and alerts once',()=
 
 test('exercise timer uses wall time and writes the completed duration into the set',()=>{
   let now=200000,notified=0,saved=0,message='';
-  const nodes=new Map();const element=id=>{if(!nodes.has(id))nodes.set(id,{value:'',textContent:'',style:{},classList:{add(){},remove(){},contains(){return false;}},dispatchEvent(){saved++;}});return nodes.get(id)};
+  const nodes=new Map();const element=id=>{if(!nodes.has(id)){const classes=new Set();nodes.set(id,{value:'',textContent:'',style:{},classList:{add:name=>classes.add(name),remove:name=>classes.delete(name),contains:name=>classes.has(name)},dispatchEvent(){saved++;},focus(){this.focused=true;}});}return nodes.get(id)};
   const FakeDate=class extends Date{static now(){return now}};
   const context=vm.createContext({Date:FakeDate,Event:class{},document:{getElementById:element,addEventListener(){}},window:{},navigator:{vibrate(){notified++;return true}},data:{settings:{vibration:true,pauseSound:false}},state:{exerciseTimer:0,exerciseTimerMax:0,exerciseTimerEndsAt:0,exerciseTimerInterval:null,exerciseTimerPaused:true},I18n:{translate:x=>x},fmt:x=>String(x),toast:x=>{message=x},setInterval:()=>1,clearInterval(){}});
   vm.runInContext(read('timer.js'),context);
@@ -37,4 +37,8 @@ test('exercise timer uses wall time and writes the completed duration into the s
   assert.equal(vm.runInContext('state.exerciseTimer',context),40);
   vm.runInContext('toggleExerciseTimer()',context);now+=40000;vm.runInContext('tickExerciseTimer()',context);
   assert.equal(element('repInput').value,'45 Sek.');assert.equal(saved,1);assert.equal(notified,1);assert.match(message,/Zeit übernommen/);
+  assert.equal(element('exerciseTimer').classList.contains('exercise-timer-complete'),true);
+  assert.equal(element('exerciseTimerConfirm').classList.contains('hidden'),false);
+  assert.equal(element('setControls').classList.contains('hidden'),true);
+  assert.equal(element('exerciseTimerConfirm').focused,true);
 });

@@ -112,13 +112,18 @@ function getProgressionSuggestion(exercise){
 }
 function formatProgressionTarget(value,kind){return kind==='seconds'?`${value} Sek.`:`${value} Wdh.`;}
 function targetUpperReps(exercise){return exerciseTargetBounds(exercise)?.max??null;}
+function currentWorkoutStepText(){
+  const exercise=state.day?.ex?.[state.exercise];
+  if(!exercise)return '';
+  return `${I18n.translate('Übung')} ${state.exercise+1} / ${state.day.ex.length} · ${I18n.translate('Satz')} ${state.set+1} / ${exercise[1]}`;
+}
 
 function renderWorkout(){
   let d=state.day, e=d.ex[state.exercise];
   clearExerciseTimer();
   document.getElementById('setControls').appendChild(document.getElementById('undoBtn'));
   document.getElementById("workDay").textContent=I18n.translate(d.name)+" · "+I18n.translate(d.focus);
-  document.getElementById("workStep").textContent=`${I18n.translate('Übung')} ${state.exercise+1} / ${d.ex.length} · ${I18n.translate('Satz')} ${state.set+1} / ${e[1]}`;
+  document.getElementById("workStep").textContent=currentWorkoutStepText();
   document.getElementById("workName").textContent=e[0];
   document.getElementById("workTarget").textContent=I18n.translate('Ziel:')+" "+e[2];
   
@@ -134,6 +139,7 @@ function renderWorkout(){
   const resultLabel=bounds?.kind==='seconds'?'Zeit / Ergebnis':isPerSide?'Wiederholungen pro Seite':bounds?.kind==='reps'?'Wiederholungen':'Wiederholungen / Info',resultUnit=bounds?.kind==='seconds'?'Sek.':bounds?.kind==='reps'?'Wdh.':'';
   const mobileTargets=bounds?`<div class="mobile-target-buttons" aria-label="Ziel direkt eintragen">${bounds.isRange?`<button type="button" onclick="applyWorkoutShortcut('min')"><b>${formatShortcutButton(bounds.min,bounds.kind)}</b><small>${escapeHtml(minKey)} · Satz abschließen</small></button>`:''}<button type="button" onclick="applyWorkoutShortcut('max')"><b>${formatShortcutButton(bounds.max,bounds.kind)}</b><small>${escapeHtml(maxKey)} · Satz abschließen</small></button></div>`:'';
   document.getElementById("setInputs").innerHTML=`<div class="inputs"><label class="workout-entry-field" for="weightInput"><span>Gewicht <b>${weightUnit()}</b></span><input class="input" id="weightInput" type="number" step=".5" value="${isCardio ? 0 : escapeHtml(toDisplayWeight(suggestedWeight))}" placeholder="${weightUnit()}" oninput="saveWorkoutDraftInputs()"></label><label class="workout-entry-field" for="repInput"><span>${resultLabel}${resultUnit?` <b>${resultUnit}</b>`:''}</span><input class="input" id="repInput" type="text" value="${escapeHtml(suggestedResult)}" placeholder="${isPerSide ? 'Wdh. pro Seite' : targetSeconds ? 'Ergebnis / Info' : 'Wdh. / Info'}" oninput="saveWorkoutDraftInputs()">${bounds?`<span class="workout-shortcuts" aria-label="Tastenkürzel"><span><kbd>${escapeHtml(minKey)}</kbd> Minimum &amp; Pause</span><span><kbd>${escapeHtml(maxKey)}</kbd> Maximum &amp; Pause</span></span>`:''}</label></div>${mobileTargets}`;
+  resetExerciseTimerCompletionUI();
   const exerciseTimer=document.getElementById('exerciseTimer');exerciseTimer.classList.toggle('hidden',!targetSeconds);
   if(targetSeconds){state.exerciseTimer=targetSeconds;state.exerciseTimerMax=targetSeconds;state.exerciseTimerPaused=true;document.getElementById('exerciseTimerInput').value=targetSeconds;updateExerciseTimerUI();}
   const suggestionEl=document.getElementById('workSuggestion');suggestionEl.classList.toggle('hidden',!progression);suggestionEl.innerHTML=progression?`<span>↗ ${progression.text}</span>`:'';

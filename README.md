@@ -51,6 +51,13 @@ Der Wochenrückblick im Challenge-Reiter zählt laufende und in dieser Woche bee
 - Gewichte lassen sich in den Einstellungen zwischen kg und lb umschalten. Gespeichert wird intern weiterhin in kg, damit beim Wechsel keine Trainingsdaten verfälscht werden.
 - Auf Handys bleibt die Hauptnavigation erreichbar am unteren Bildschirmrand.
 
+## Version 1.9.0
+
+- Nach Ablauf eines Übungs-Timers erscheint direkt ein eigener Button, um die eingetragene Zeit zu bestätigen und den Satz abzuschließen.
+- Übung und Satz bleiben auch während der Pause sichtbar.
+- Die Trainingshistorie ist standardmäßig nach Jahren und Monaten gegliedert und lässt sich nach einem Tag oder Monat filtern.
+- Die Updateinfos zeigen nur noch die drei neuesten Versionen; kleine Wartungsupdates werden knapp als Fehlerbehebungen zusammengefasst.
+
 ## Version 1.8.2
 
 - Die Hinweise für Minimum- und Maximum-Tastenkürzel stehen nun direkt unter dem Wiederholungs- beziehungsweise Zeitfeld statt unter dem Gewichtsfeld.

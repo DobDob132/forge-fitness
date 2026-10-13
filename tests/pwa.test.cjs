@@ -13,6 +13,24 @@ test('pause screen has exactly one finish button',()=>{
   assert.equal((pause[0].match(/onclick="endPauseEarly\(\)"/g)||[]).length,1);
 });
 
+test('workout progress stays visible during rests',()=>{
+  const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+  const timer=fs.readFileSync(path.join(root,'js/timer.js'),'utf8');
+  assert.match(html,/id="pauseWorkStep"/);
+  assert.match(timer,/pauseWorkStep[\s\S]*currentWorkoutStepText\(\)/);
+});
+
+test('history is grouped and supports day and month filters',()=>{
+  const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+  const progress=fs.readFileSync(path.join(root,'js/progress.js'),'utf8');
+  assert.match(html,/id="historyDayFilter" type="date"/);
+  assert.match(html,/id="historyMonthFilter" type="month"/);
+  assert.match(progress,/class="history-year"/);
+  assert.match(progress,/class="history-month" open/);
+  assert.match(progress,/function filterHistoryByDay/);
+  assert.match(progress,/function filterHistoryByMonth/);
+});
+
 test('inline controls reference existing app functions',()=>{
   const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
   const scripts=fs.readdirSync(path.join(root,'js')).filter(file=>file.endsWith('.js')).map(file=>fs.readFileSync(path.join(root,'js',file),'utf8')).join('\n');

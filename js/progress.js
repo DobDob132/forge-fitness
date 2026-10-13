@@ -145,9 +145,24 @@ function renderProgress(){
   }
   updateBodyChart();
 
-  let html = [...data.logs].reverse().map((l,i)=>`<div class="record" onclick="showHistoryDetail(${data.logs.length-1-i})"><div><b>${new Date(l.date).toLocaleDateString(I18n.locale(),{day:"2-digit",month:"2-digit",year:"numeric"})} · ${escapeHtml(I18n.translate(l.plan))}</b><small style="display:block; color:var(--muted)">${l.type==='activity'?`${Math.round(l.minutes)} ${I18n.translate('Minuten')}${l.distance?` · ${escapeHtml(l.distance)} km`:''}`:`${escapeHtml(l.sets)} ${I18n.translate('Sätze')} · ${Math.round(l.minutes)} Min.`} · ${Math.round(l.calories||0)} kcal</small></div><button class="btn secondary" style="padding:4px 10px; font-size:12px;">${I18n.translate('Ansicht')}</button></div>`).join("");
-  document.getElementById("historyList").innerHTML = html || "<div class='sub'>Noch keine Trainings absolviert.</div>";
+  renderHistory();
 }
+
+function localDateKey(date){const d=new Date(date);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function historyRecord(log,index){
+  return `<div class="record" onclick="showHistoryDetail(${index})"><div><b>${new Date(log.date).toLocaleDateString(I18n.locale(),{day:"2-digit",month:"2-digit",year:"numeric"})} · ${escapeHtml(I18n.translate(log.plan))}</b><small style="display:block; color:var(--muted)">${log.type==='activity'?`${Math.round(log.minutes)} ${I18n.translate('Minuten')}${log.distance?` · ${escapeHtml(log.distance)} km`:''}`:`${escapeHtml(log.sets)} ${I18n.translate('Sätze')} · ${Math.round(log.minutes)} Min.`} · ${Math.round(log.calories||0)} kcal</small></div><button class="btn secondary" style="padding:4px 10px; font-size:12px;">${I18n.translate('Ansicht')}</button></div>`;
+}
+function renderHistory(){
+  const day=document.getElementById('historyDayFilter')?.value||'',month=document.getElementById('historyMonthFilter')?.value||'';
+  const logs=data.logs.map((log,index)=>({log,index,key:localDateKey(log.date)})).filter(item=>day?item.key===day:month?item.key.startsWith(month):true).sort((a,b)=>new Date(b.log.date)-new Date(a.log.date));
+  if(!logs.length){document.getElementById('historyList').innerHTML="<div class='sub history-empty'>Keine Trainings für diesen Zeitraum gefunden.</div>";return;}
+  const years=new Map();
+  logs.forEach(item=>{const date=new Date(item.log.date),year=String(date.getFullYear()),monthKey=`${year}-${String(date.getMonth()+1).padStart(2,'0')}`;if(!years.has(year))years.set(year,new Map());const months=years.get(year);if(!months.has(monthKey))months.set(monthKey,{label:date.toLocaleDateString(I18n.locale(),{month:'long'}),items:[]});months.get(monthKey).items.push(item);});
+  document.getElementById('historyList').innerHTML=[...years].map(([year,months])=>`<section class="history-year"><h3>${year}</h3>${[...months].map(([,group])=>`<details class="history-month" open><summary><span>${escapeHtml(group.label)}</span><small>${group.items.length} ${group.items.length===1?'Training':'Trainings'}</small></summary><div>${group.items.map(item=>historyRecord(item.log,item.index)).join('')}</div></details>`).join('')}</section>`).join('');
+}
+function filterHistoryByDay(value){const month=document.getElementById('historyMonthFilter');if(value&&month)month.value='';renderHistory();}
+function filterHistoryByMonth(value){const day=document.getElementById('historyDayFilter');if(value&&day)day.value='';renderHistory();}
+function clearHistoryFilters(){const day=document.getElementById('historyDayFilter'),month=document.getElementById('historyMonthFilter');if(day)day.value='';if(month)month.value='';renderHistory();}
 
 function showHistoryDetail(idx){
   let l = data.logs[idx];
