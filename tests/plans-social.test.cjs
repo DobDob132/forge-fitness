@@ -27,3 +27,10 @@ test('history deletion explains that statistics are recalculated',()=>{
   assert.match(source,/Statistiken und Rekorde werden aus den verbleibenden Trainings neu berechnet/);
   assert.doesNotMatch(source,/XP und Statistiken bleiben erhalten/);
 });
+
+test('plan list keeps edit visible and moves secondary actions into a menu',()=>{
+  const source=fs.readFileSync(path.join(root,'js/plans.js'),'utf8');
+  assert.match(source,/plan-edit-action/);
+  assert.match(source,/plan-more-trigger/);
+  assert.match(source,/Teilen[\s\S]*Kopieren[\s\S]*Löschen/);
+});

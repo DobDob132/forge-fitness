@@ -17,24 +17,24 @@ function escapeHtml(value){ return String(value ?? '').replace(/[&<>"']/g, c => 
 function normalizeShortcutKey(value,fallback){const key=String(value||'').trim().toLowerCase();return /^[a-z]$/.test(key)?key:fallback;}
 function showInfoModal(title, text){ document.getElementById('infoTitle').textContent=title; document.getElementById('infoText').innerHTML=text; document.getElementById('infoModal').style.display='flex'; }
 const releaseNotes={
-  de:{label:'FORGE 1.9.0 · Updateinfos',title:'FORGE · Version 1.9.0',updates:[
-    ['v1.9.0 · 13.10.2026','Einfacher trainieren und schneller finden','Nach Ablauf eines Übungs-Timers erscheint direkt die passende Zeitbestätigung. Übung und Satz bleiben auch in Pausen sichtbar. Die Trainingshistorie ist nach Jahren und Monaten gegliedert und kann nach Tag oder Monat gefiltert werden.'],
-    ['v1.8.2','Fehlerbehebungen','Kleinere Fehlerbehebungen und Verbesserungen.'],
-    ['v1.8.1','Fehlerbehebungen','Kleinere Fehlerbehebungen und Verbesserungen.']
+  de:{label:'FORGE 1.10.0 · Updateinfos',title:'FORGE · Version 1.10.0',updates:[
+    ['v1.10.0 · 13.10.2026','Natürlichere Bedienung','Filter, Diagrammauswahl, Einstellungssuche und Planaktionen sind jetzt kompakter und arbeiten mit vertrauten Symbolen, Auswahlchips und Menüs. Updateinfos öffnen immer sichtbar im Vordergrund.'],
+    ['v1.9.0 · 13.10.2026','Einfacher trainieren und schneller finden','Direkte Zeitbestätigung, sichtbarer Satzfortschritt in Pausen sowie eine nach Jahren und Monaten gegliederte Trainingshistorie.'],
+    ['v1.8.2','Fehlerbehebungen','Kleinere Fehlerbehebungen und Verbesserungen.']
   ]},
-  en:{label:'FORGE 1.9.0 · Update info',title:'FORGE · Version 1.9.0',updates:[
-    ['v1.9.0 · 13 Oct 2026','Simpler workouts and clearer history','When an exercise timer ends, the matching time confirmation appears immediately. Exercise and set progress remains visible during rests. Workout history is grouped by year and month and can be filtered by day or month.'],
-    ['v1.8.2','Bug fixes','Minor bug fixes and improvements.'],
-    ['v1.8.1','Bug fixes','Minor bug fixes and improvements.']
+  en:{label:'FORGE 1.10.0 · Update info',title:'FORGE · Version 1.10.0',updates:[
+    ['v1.10.0 · 13 Oct 2026','More natural controls','Filters, chart choices, settings search and plan actions now use familiar icons, chips and compact menus. Update information always opens visibly in front.'],
+    ['v1.9.0 · 13 Oct 2026','Simpler workouts and clearer history','Direct time confirmation, visible set progress during rests and workout history grouped by year and month.'],
+    ['v1.8.2','Bug fixes','Minor bug fixes and improvements.']
   ]},
-  el:{label:'FORGE 1.9.0 · Πληροφορίες ενημέρωσης',title:'FORGE · Έκδοση 1.9.0',updates:[
-    ['v1.9.0 · 13.10.2026','Πιο απλή προπόνηση και πιο καθαρό ιστορικό','Όταν τελειώνει ο χρονομέτρης άσκησης, η επιβεβαίωση χρόνου εμφανίζεται αμέσως. Η πρόοδος παραμένει ορατή στα διαλείμματα. Το ιστορικό ομαδοποιείται ανά έτος και μήνα και φιλτράρεται ανά ημέρα ή μήνα.'],
-    ['v1.8.2','Διορθώσεις σφαλμάτων','Μικρές διορθώσεις και βελτιώσεις.'],
-    ['v1.8.1','Διορθώσεις σφαλμάτων','Μικρές διορθώσεις και βελτιώσεις.']
+  el:{label:'FORGE 1.10.0 · Πληροφορίες ενημέρωσης',title:'FORGE · Έκδοση 1.10.0',updates:[
+    ['v1.10.0 · 13.10.2026','Πιο φυσικά στοιχεία ελέγχου','Τα φίλτρα, τα γραφήματα, η αναζήτηση ρυθμίσεων και οι ενέργειες πλάνων χρησιμοποιούν πλέον γνώριμα εικονίδια και μενού. Οι πληροφορίες ενημέρωσης εμφανίζονται πάντα μπροστά.'],
+    ['v1.9.0 · 13.10.2026','Πιο απλή προπόνηση και πιο καθαρό ιστορικό','Άμεση επιβεβαίωση χρόνου, ορατή πρόοδος στα διαλείμματα και ομαδοποιημένο ιστορικό.'],
+    ['v1.8.2','Διορθώσεις σφαλμάτων','Μικρές διορθώσεις και βελτιώσεις.']
   ]}
 };
 function releaseNotesLocale(){const language=window.ForgeI18n?.language?.();return releaseNotes[language]||releaseNotes.de;}
-function updateReleaseNotesLabel(){const button=document.querySelector('.settings-version-badge');if(button)button.textContent=releaseNotesLocale().label;const version=document.querySelector('.version-card strong');if(version)version.textContent='FORGE 1.9.0';}
+function updateReleaseNotesLabel(){const button=document.querySelector('.settings-version-badge');if(button)button.textContent=releaseNotesLocale().label;const version=document.querySelector('.version-card strong');if(version)version.textContent='FORGE 1.10.0';}
 function openReleaseNotes(){const notes=releaseNotesLocale();const items=notes.updates.map(([version,title,text])=>`<article class="release-note"><div class="release-note-version">${version}</div><b>${title}</b><p>${text}</p></article>`).join('');showInfoModal(notes.title,`<div class="release-notes">${items}</div>`);}
 window.addEventListener('forge-language-change',updateReleaseNotesLabel);setTimeout(updateReleaseNotesLabel,0);
 function weightUnit(){return data.settings.unit==='lb'?'lb':'kg'}

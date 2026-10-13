@@ -20,12 +20,18 @@ function openSettings(){
   const profile=calorieProfile();document.getElementById('calorieAge').value=profile.age;document.getElementById('calorieHeight').value=profile.height;document.getElementById('calorieWeight').value=profile.weight;document.getElementById('calorieSex').value=profile.sex;document.getElementById('strengthIntensity').value=data.settings.strengthIntensity||'moderate';document.getElementById('pauseTestStatus').textContent='';
   document.getElementById("languageSetting").value=data.settings.language || 'de';
   document.getElementById("warmupTypeSetting").style.display = (data.settings.warmup === "ja") ? "block" : "none";
-  document.getElementById('settingsSearch').value='';settingsDirty=false;renderSettingsDirty();openSettingsTab('general',true);renderSignalDiagnostics();
+  document.getElementById('settingsSearch').value='';toggleSettingsSearch(false);settingsDirty=false;renderSettingsDirty();openSettingsTab('general',true);renderSignalDiagnostics();
   document.getElementById("settingsModal").style.display="flex";
 }
 function closeSettings(){if(settingsDirty&&!confirm('Es gibt noch nicht gespeicherte Änderungen. Einstellungen trotzdem schließen?'))return;document.getElementById("settingsModal").style.display="none";}
 function renderSettingsDirty(){document.getElementById('settingsUnsaved')?.classList.toggle('hidden',!settingsDirty);const hint=document.getElementById('settingsSaveHint');if(hint)hint.textContent=settingsDirty?'Änderungen noch nicht gespeichert':'Alle Änderungen gespeichert';}
 function markSettingsDirty(){settingsDirty=true;renderSettingsDirty();}
+function toggleSettingsSearch(force){
+  const wrap=document.getElementById('settingsSearchWrap'),toggle=document.getElementById('settingsSearchToggle'),input=document.getElementById('settingsSearch');if(!wrap)return;
+  const open=force===undefined?wrap.classList.contains('hidden'):force;
+  wrap.classList.toggle('hidden',!open);toggle?.setAttribute('aria-expanded',String(open));
+  if(open)setTimeout(()=>input?.focus(),0);else{if(input)input.value='';searchSettings('');}
+}
 function openSettingsTab(name,silent=false){
   if(!silent&&settingsDirty&&name!==settingsActiveTab)toast('Änderungen noch nicht gespeichert');
   settingsActiveTab=name;document.querySelectorAll('[data-settings-tab]').forEach(button=>button.classList.toggle('active',button.dataset.settingsTab===name));

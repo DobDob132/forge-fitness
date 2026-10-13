@@ -145,15 +145,22 @@ function renderPlansList() {
             </div>
             <div class="plan-actions">
                 ${p.id !== data.activePlanId ? `<button class="btn secondary" onclick="activatePlan(${escapeHtml(JSON.stringify(p.id))})">Aktivieren</button>` : '<span class="tag">AKTIV</span>'}
-                <button class="btn secondary" onclick="openPlanEditor(${escapeHtml(JSON.stringify(p.id))})">✏️ Edit</button>
-                <button class="btn secondary" onclick="ForgeSocial.openShare(${escapeHtml(JSON.stringify(p.id))})">👥 Teilen</button>
-                ${p.id !== data.activePlanId ? `<button class="btn secondary" style="border-color:#3a1b1c; color:#ff7272; padding:6px; font-size:13px;" onclick="deleteMyPlan(${escapeHtml(JSON.stringify(p.id))})">🗑️</button>` : ''}
+                <button class="btn secondary plan-edit-action" onclick="openPlanEditor(${escapeHtml(JSON.stringify(p.id))})">✏️ Bearbeiten</button>
+                <div class="plan-more" onclick="event.stopPropagation()"><button class="icon plan-more-trigger" type="button" aria-label="Weitere Planaktionen" aria-expanded="false" onclick="togglePlanMenu(this)">⋯</button><div class="plan-menu"><button type="button" onclick="closePlanMenus();ForgeSocial.openShare(${escapeHtml(JSON.stringify(p.id))})"><span>👥</span> Teilen</button><button type="button" onclick="closePlanMenus();duplicatePlan(${escapeHtml(JSON.stringify(p.id))})"><span>⎘</span> Kopieren</button>${p.id !== data.activePlanId ? `<button type="button" class="danger-option" onclick="closePlanMenus();deleteMyPlan(${escapeHtml(JSON.stringify(p.id))})"><span>🗑️</span> Löschen</button>` : ''}</div></div>
             </div>
         </div>
     `).join("");
     if (!activePlans.length) html += `<div class="sub" style="padding:15px 0;">Keine Pläne vorhanden.</div>`;
     container.innerHTML = html;
 }
+
+function closePlanMenus(){document.querySelectorAll('.plan-menu.open').forEach(menu=>{menu.classList.remove('open');menu.previousElementSibling?.setAttribute('aria-expanded','false');});}
+function togglePlanMenu(button){const menu=button.nextElementSibling,open=!menu.classList.contains('open');closePlanMenus();menu.classList.toggle('open',open);button.setAttribute('aria-expanded',String(open));}
+function duplicatePlan(id){
+    const source=data.allPlans.find(plan=>plan.id===id);if(!source)return;
+    const copy=normalizePlanStructure(JSON.parse(JSON.stringify(source)),{id:'p_copy_'+Date.now(),archived:false});copy.name=`${source.name} · Kopie`.slice(0,80);data.allPlans.push(copy);saveData();renderPlansList();toast('Plan kopiert.');
+}
+globalThis.document?.addEventListener?.('click',closePlanMenus);
 
 function activatePlan(id) {
     data.activePlanId = id; saveData(); renderPlansList(); toast(I18n.translate("Plan aktiviert!"));

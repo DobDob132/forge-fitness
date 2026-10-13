@@ -135,20 +135,27 @@
 <!-- STATISTIK / FORTSCHRITT -->
 <section id="progress" class="hidden">
 <div class="grid">
-<div class="card">
-    <div class="section-title">
+<div class="card chart-card">
+    <div class="section-title natural-heading">
         <span>📊 Übungs-Verlauf</span>
-        <select class="input" id="chartExSelect" style="width:auto; padding:6px; font-size:12px;" onchange="updateExerciseChart()">
+        <button class="selection-chip" id="exerciseChartPickerButton" type="button" onclick="toggleChartPicker('exercise')">🏋️ <span>Wähle Übung</span> <b>▾</b></button>
+        <select class="input native-picker" id="chartExSelect" onchange="updateExerciseChart()">
             <option value="">Wähle Übung...</option>
         </select>
+    </div>
+    <div class="compact-popover chart-picker" id="exerciseChartPicker">
+        <div class="popover-head"><b>Übung auswählen</b><button class="icon" type="button" onclick="toggleChartPicker('exercise',false)">✕</button></div>
+        <label class="picker-search"><span>🔎</span><input id="exerciseChartSearch" type="search" placeholder="Übung suchen" oninput="renderChartPicker('exercise',this.value)"></label>
+        <div class="picker-options" id="exerciseChartOptions"></div>
     </div>
     <div class="sub" style="margin-bottom:10px;">Verfolge dein Volumen & Maximalgewicht pro Übung.</div>
     <div class="chart-container"><canvas id="exChart"></canvas></div>
 </div>
-<div class="card">
-    <div class="section-title">
+<div class="card chart-card">
+    <div class="section-title natural-heading">
         <span>⚖️ Körperdaten</span>
-        <select class="input" id="chartBodySelect" style="width:auto; padding:6px; font-size:12px;" onchange="updateBodyChart()">
+        <button class="selection-chip" id="bodyChartPickerButton" type="button" onclick="toggleChartPicker('body')">⚖️ <span>Gewicht (kg)</span> <b>▾</b></button>
+        <select class="input native-picker" id="chartBodySelect" onchange="updateBodyChart()">
             <option value="weight">Gewicht (kg)</option>
             <option value="bodyfat">Körperfett (%)</option>
             <option value="chest">Brust (cm)</option>
@@ -157,18 +164,28 @@
             <option value="thighs">Beine (cm)</option>
         </select>
     </div>
+    <div class="compact-popover chart-picker" id="bodyChartPicker">
+        <div class="popover-head"><b>Messwert auswählen</b><button class="icon" type="button" onclick="toggleChartPicker('body',false)">✕</button></div>
+        <label class="picker-search"><span>🔎</span><input id="bodyChartSearch" type="search" placeholder="Messwert suchen" oninput="renderChartPicker('body',this.value)"></label>
+        <div class="picker-options" id="bodyChartOptions"></div>
+    </div>
     <div class="chart-container"><canvas id="bodyChart"></canvas></div>
     <button class="btn" style="width:100%; margin-top:15px;" onclick="openBodyModal()">+ Messung eintragen</button>
 </div>
 </div>
 <div class="card" style="margin-top:18px">
 <div class="section-title">🏅 Persönliche Rekorde</div><div class="sub">Dein bestes geschätztes 1RM pro Übung sowie deine besten Ausdauerwerte.</div><div id="personalRecords" class="records-grid"></div></div>
-<div class="card" style="margin-top:18px"><div class="section-title">📜 Trainings-Historie</div>
-<div class="sub" style="margin-bottom:10px;">Nach Jahr und Monat sortiert. Filtere bei Bedarf einen bestimmten Tag oder Monat.</div>
-<div class="history-filters">
- <label><span>Tag</span><input class="input" id="historyDayFilter" type="date" onchange="filterHistoryByDay(this.value)"></label>
- <label><span>Monat</span><input class="input" id="historyMonthFilter" type="month" onchange="filterHistoryByMonth(this.value)"></label>
- <button class="btn secondary" type="button" onclick="clearHistoryFilters()">Filter löschen</button>
+<div class="card history-card" style="margin-top:18px"><div class="section-title natural-heading"><span>📜 Trainings-Historie</span><button class="icon-button filter-trigger" id="historyFilterButton" type="button" onclick="toggleHistoryFilter()" aria-label="Trainingshistorie filtern" aria-expanded="false"><span>☷</span><i class="filter-dot hidden"></i></button></div>
+<div class="sub" style="margin-bottom:10px;">Nach Jahr und Monat sortiert.</div>
+<div class="active-filter-chip hidden" id="historyFilterSummary"></div>
+<div class="compact-popover history-filter-popover" id="historyFilterPopover">
+ <div class="popover-head"><b>☷ Trainings filtern</b><button class="icon" type="button" onclick="toggleHistoryFilter(false)">✕</button></div>
+ <div class="filter-presets"><button type="button" data-history-preset="all" onclick="setHistoryPreset('all')">Alle</button><button type="button" data-history-preset="today" onclick="setHistoryPreset('today')">Heute</button><button type="button" data-history-preset="last7" onclick="setHistoryPreset('last7')">Letzte 7 Tage</button><button type="button" data-history-preset="month" onclick="setHistoryPreset('month')">Dieser Monat</button></div>
+ <div class="history-custom-filters">
+  <label><span>📅 Tag wählen</span><input class="input" id="historyDayFilter" type="date" onchange="filterHistoryByDay(this.value)"></label>
+  <label><span>🗓️ Monat wählen</span><input class="input" id="historyMonthFilter" type="month" onchange="filterHistoryByMonth(this.value)"></label>
+ </div>
+ <button class="btn secondary filter-reset" type="button" onclick="clearHistoryFilters()">↺ Filter zurücksetzen</button>
 </div>
 <div id="historyList"></div>
 </div>
@@ -434,8 +451,8 @@
 
 <!-- Settings -->
 <div class="modal" id="settingsModal"><div class="card settings-card">
-<div class="settings-head"><div><div class="section-title">⚙️ Einstellungen</div><button class="settings-version-badge" type="button" onclick="openReleaseNotes()">FORGE 1.9.0 · Updateinfos</button></div><div class="row"><span class="settings-unsaved hidden" id="settingsUnsaved">Nicht gespeichert</span><button class="icon" onclick="closeSettings()">✕</button></div></div>
-<label class="settings-search"><span>🔎 Einstellungen durchsuchen</span><input class="input" id="settingsSearch" type="search" placeholder="z. B. Vibration, Pause oder Gewicht" oninput="searchSettings(this.value)"></label>
+<div class="settings-head"><div><div class="section-title">⚙️ Einstellungen</div><button class="settings-version-badge" type="button" onclick="openReleaseNotes()">FORGE 1.10.0 · Updateinfos</button></div><div class="settings-head-actions"><span class="settings-unsaved hidden" id="settingsUnsaved">Nicht gespeichert</span><button class="icon" id="settingsSearchToggle" type="button" onclick="toggleSettingsSearch()" aria-label="Einstellungen durchsuchen" aria-expanded="false">🔎</button><button class="icon" onclick="closeSettings()">✕</button></div></div>
+<label class="settings-search hidden" id="settingsSearchWrap"><span>🔎 Einstellungen durchsuchen</span><div class="settings-search-field"><input class="input" id="settingsSearch" type="search" placeholder="z. B. Vibration, Pause oder Gewicht" oninput="searchSettings(this.value)"><button class="icon" type="button" onclick="toggleSettingsSearch(false)" aria-label="Suche schließen">✕</button></div></label>
 <div class="settings-tabs" role="tablist" aria-label="Einstellungsbereiche">
  <button type="button" class="active" data-settings-tab="general" onclick="openSettingsTab('general')">Allgemein</button>
  <button type="button" data-settings-tab="training" onclick="openSettingsTab('training')">Training</button>
@@ -499,7 +516,7 @@
 </section>
 
 <section class="settings-panel hidden" data-settings-panel="data">
- <div class="version-card"><span>Installierte Version</span><strong>FORGE 1.9.0</strong><button class="btn secondary" type="button" onclick="openReleaseNotes()">Updateinfos ansehen</button></div>
+ <div class="version-card"><span>Installierte Version</span><strong>FORGE 1.10.0</strong><button class="btn secondary" type="button" onclick="openReleaseNotes()">Updateinfos ansehen</button></div>
  <div class="setting-group-title">Sicherung &amp; Daten</div>
  <p class="account-note">Exportiere eine Sicherung, importiere vorhandene Daten oder lösche deine Trainingsdaten.</p>
  <div class="controls"><button class="btn secondary" onclick="exportData()">💾 Export</button><button class="btn secondary" onclick="importData()">📥 Import</button><button class="btn danger" onclick="resetData()">Daten löschen</button></div>

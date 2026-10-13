@@ -46,13 +46,13 @@ test('maximum shortcut fills the upper target and completes the set',async()=>{
 
 test('release version is consistent in app metadata',()=>{
   const root=path.join(__dirname,'..'),pkg=require('../package.json'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),utils=fs.readFileSync(path.join(root,'js/utils.js'),'utf8');
-  assert.equal(pkg.version,'1.9.0');assert.match(html,/FORGE 1\.9\.0/);assert.match(utils,/Version 1\.9\.0/);
+  assert.equal(pkg.version,'1.10.0');assert.match(html,/FORGE 1\.10\.0/);assert.match(utils,/Version 1\.10\.0/);
 });
 
 test('release notes only show the latest three updates and summarize maintenance releases',()=>{
   const utils=fs.readFileSync(path.join(__dirname,'../js/utils.js'),'utf8');
-  assert.match(utils,/v1\.9\.0[\s\S]*v1\.8\.2[\s\S]*Fehlerbehebungen[\s\S]*v1\.8\.1/);
-  assert.doesNotMatch(utils,/v1\.8\.0/);
+  assert.match(utils,/v1\.10\.0[\s\S]*v1\.9\.0[\s\S]*v1\.8\.2[\s\S]*Fehlerbehebungen/);
+  assert.doesNotMatch(utils,/v1\.8\.1/);
 });
 
 test('settings keep every control while organizing them into searchable tabs',()=>{

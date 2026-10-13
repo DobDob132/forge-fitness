@@ -143,26 +143,71 @@ function renderProgress(){
       sel.value = Array.from(exMap).sort()[0];
       updateExerciseChart();
   }
+  updateChartPickerLabel('exercise');
   updateBodyChart();
+  updateChartPickerLabel('body');
 
   renderHistory();
 }
 
+function chartPickerElements(kind){
+  const exercise=kind==='exercise';
+  return {select:document.getElementById(exercise?'chartExSelect':'chartBodySelect'),popover:document.getElementById(exercise?'exerciseChartPicker':'bodyChartPicker'),button:document.getElementById(exercise?'exerciseChartPickerButton':'bodyChartPickerButton'),search:document.getElementById(exercise?'exerciseChartSearch':'bodyChartSearch'),options:document.getElementById(exercise?'exerciseChartOptions':'bodyChartOptions')};
+}
+function updateChartPickerLabel(kind){
+  const {select,button}=chartPickerElements(kind);if(!select||!button)return;
+  const label=select.options[select.selectedIndex]?.text|| (kind==='exercise'?'Wähle Übung':'Messwert wählen');
+  const text=button.querySelector('span');if(text)text.textContent=label.replace('...','');
+}
+function renderChartPicker(kind,query=''){
+  const {select,options}=chartPickerElements(kind);if(!select||!options)return;
+  const needle=String(query||'').trim().toLocaleLowerCase();
+  options.innerHTML=[...select.options].filter(option=>option.value&&option.text.toLocaleLowerCase().includes(needle)).map(option=>`<button type="button" class="${option.value===select.value?'active':''}" onclick="chooseChartOption(${escapeHtml(JSON.stringify(kind))},${escapeHtml(JSON.stringify(option.value))})"><span>${kind==='exercise'?'🏋️':'⚖️'}</span><b>${escapeHtml(option.text)}</b>${option.value===select.value?'<i>✓</i>':''}</button>`).join('')||'<div class="sub picker-empty">Keine passende Auswahl gefunden.</div>';
+}
+function toggleChartPicker(kind,force){
+  const current=chartPickerElements(kind),other=chartPickerElements(kind==='exercise'?'body':'exercise');
+  const open=force===undefined?!current.popover.classList.contains('open'):force;
+  other.popover?.classList.remove('open');current.popover?.classList.toggle('open',open);current.button?.setAttribute('aria-expanded',String(open));
+  if(open){current.search.value='';renderChartPicker(kind);setTimeout(()=>current.search.focus(),0);}
+}
+function chooseChartOption(kind,value){
+  const {select}=chartPickerElements(kind);if(!select)return;select.value=value;updateChartPickerLabel(kind);toggleChartPicker(kind,false);if(kind==='exercise')updateExerciseChart();else updateBodyChart();
+}
+
+let historyPreset='all';
 function localDateKey(date){const d=new Date(date);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function historyRecord(log,index){
   return `<div class="record" onclick="showHistoryDetail(${index})"><div><b>${new Date(log.date).toLocaleDateString(I18n.locale(),{day:"2-digit",month:"2-digit",year:"numeric"})} · ${escapeHtml(I18n.translate(log.plan))}</b><small style="display:block; color:var(--muted)">${log.type==='activity'?`${Math.round(log.minutes)} ${I18n.translate('Minuten')}${log.distance?` · ${escapeHtml(log.distance)} km`:''}`:`${escapeHtml(log.sets)} ${I18n.translate('Sätze')} · ${Math.round(log.minutes)} Min.`} · ${Math.round(log.calories||0)} kcal</small></div><button class="btn secondary" style="padding:4px 10px; font-size:12px;">${I18n.translate('Ansicht')}</button></div>`;
 }
 function renderHistory(){
   const day=document.getElementById('historyDayFilter')?.value||'',month=document.getElementById('historyMonthFilter')?.value||'';
-  const logs=data.logs.map((log,index)=>({log,index,key:localDateKey(log.date)})).filter(item=>day?item.key===day:month?item.key.startsWith(month):true).sort((a,b)=>new Date(b.log.date)-new Date(a.log.date));
+  const last7Start=new Date();last7Start.setHours(0,0,0,0);last7Start.setDate(last7Start.getDate()-6);
+  const logs=data.logs.map((log,index)=>({log,index,key:localDateKey(log.date)})).filter(item=>day?item.key===day:month?item.key.startsWith(month):historyPreset==='last7'?new Date(item.log.date)>=last7Start:true).sort((a,b)=>new Date(b.log.date)-new Date(a.log.date));
+  updateHistoryFilterUI();
   if(!logs.length){document.getElementById('historyList').innerHTML="<div class='sub history-empty'>Keine Trainings für diesen Zeitraum gefunden.</div>";return;}
   const years=new Map();
   logs.forEach(item=>{const date=new Date(item.log.date),year=String(date.getFullYear()),monthKey=`${year}-${String(date.getMonth()+1).padStart(2,'0')}`;if(!years.has(year))years.set(year,new Map());const months=years.get(year);if(!months.has(monthKey))months.set(monthKey,{label:date.toLocaleDateString(I18n.locale(),{month:'long'}),items:[]});months.get(monthKey).items.push(item);});
   document.getElementById('historyList').innerHTML=[...years].map(([year,months])=>`<section class="history-year"><h3>${year}</h3>${[...months].map(([,group])=>`<details class="history-month" open><summary><span>${escapeHtml(group.label)}</span><small>${group.items.length} ${group.items.length===1?'Training':'Trainings'}</small></summary><div>${group.items.map(item=>historyRecord(item.log,item.index)).join('')}</div></details>`).join('')}</section>`).join('');
 }
-function filterHistoryByDay(value){const month=document.getElementById('historyMonthFilter');if(value&&month)month.value='';renderHistory();}
-function filterHistoryByMonth(value){const day=document.getElementById('historyDayFilter');if(value&&day)day.value='';renderHistory();}
-function clearHistoryFilters(){const day=document.getElementById('historyDayFilter'),month=document.getElementById('historyMonthFilter');if(day)day.value='';if(month)month.value='';renderHistory();}
+function toggleHistoryFilter(force){const panel=document.getElementById('historyFilterPopover'),button=document.getElementById('historyFilterButton');const open=force===undefined?!panel.classList.contains('open'):force;panel.classList.toggle('open',open);button?.setAttribute('aria-expanded',String(open));}
+function currentLocalInputDate(){return localDateKey(new Date());}
+function setHistoryPreset(preset){
+  const day=document.getElementById('historyDayFilter'),month=document.getElementById('historyMonthFilter');historyPreset=preset;
+  if(day)day.value=preset==='today'?currentLocalInputDate():'';
+  if(month)month.value=preset==='month'?currentLocalInputDate().slice(0,7):'';
+  renderHistory();toggleHistoryFilter(false);
+}
+function updateHistoryFilterUI(){
+  const day=document.getElementById('historyDayFilter')?.value||'',month=document.getElementById('historyMonthFilter')?.value||'',summary=document.getElementById('historyFilterSummary'),button=document.getElementById('historyFilterButton');
+  const active=!!day||!!month||historyPreset==='last7';let label='';
+  if(day)label=`📅 ${new Date(`${day}T12:00:00`).toLocaleDateString(I18n.locale(),{day:'2-digit',month:'long',year:'numeric'})}`;else if(month)label=`🗓️ ${new Date(`${month}-01T12:00:00`).toLocaleDateString(I18n.locale(),{month:'long',year:'numeric'})}`;else if(historyPreset==='last7')label='📅 Letzte 7 Tage';
+  summary?.classList.toggle('hidden',!active);if(summary)summary.innerHTML=active?`<span>${escapeHtml(label)}</span><button type="button" onclick="clearHistoryFilters()" aria-label="Filter entfernen">✕</button>`:'';
+  button?.querySelector('.filter-dot')?.classList.toggle('hidden',!active);
+  document.querySelectorAll('[data-history-preset]').forEach(item=>item.classList.toggle('active',(day&&item.dataset.historyPreset==='today')||(month&&item.dataset.historyPreset==='month')||(!day&&!month&&item.dataset.historyPreset===historyPreset)));
+}
+function filterHistoryByDay(value){const month=document.getElementById('historyMonthFilter');if(value&&month)month.value='';historyPreset=value?'day':'all';renderHistory();}
+function filterHistoryByMonth(value){const day=document.getElementById('historyDayFilter');if(value&&day)day.value='';historyPreset=value?'customMonth':'all';renderHistory();}
+function clearHistoryFilters(){const day=document.getElementById('historyDayFilter'),month=document.getElementById('historyMonthFilter');if(day)day.value='';if(month)month.value='';historyPreset='all';renderHistory();toggleHistoryFilter(false);}
 
 function showHistoryDetail(idx){
   let l = data.logs[idx];
@@ -209,6 +254,7 @@ async function deleteHistoryEntry(idx) {
 function updateExerciseChart() {
     let name = document.getElementById("chartExSelect").value;
     if(!name) return;
+    updateChartPickerLabel('exercise');
     
     let labels = [], volumes = [], maxWeights = [];
     data.logs.forEach(log => {
@@ -311,6 +357,7 @@ function saveBodyData() {
 
 function updateBodyChart() {
     let metric = document.getElementById("chartBodySelect").value;
+    updateChartPickerLabel('body');
     let filtered = data.bodyData.filter(d => d.metric === metric);
     
     let labels = filtered.map(d => new Date(d.date).toLocaleDateString("de-AT", {day:"2-digit", month:"2-digit"}));

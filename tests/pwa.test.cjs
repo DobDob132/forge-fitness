@@ -29,6 +29,25 @@ test('history is grouped and supports day and month filters',()=>{
   assert.match(progress,/class="history-month" open/);
   assert.match(progress,/function filterHistoryByDay/);
   assert.match(progress,/function filterHistoryByMonth/);
+  assert.match(html,/id="historyFilterButton"/);
+  assert.match(html,/data-history-preset="last7"/);
+  assert.match(progress,/function setHistoryPreset/);
+});
+
+test('update information opens above the settings dialog',()=>{
+  const css=fs.readFileSync(path.join(root,'css/style.css'),'utf8');
+  assert.match(css,/#infoModal\{z-index:(?:[2-9]\d\d|\d{4,})\}/);
+});
+
+test('compact controls keep advanced choices behind familiar icons',()=>{
+  const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+  const progress=fs.readFileSync(path.join(root,'js/progress.js'),'utf8');
+  const settings=fs.readFileSync(path.join(root,'js/settings.js'),'utf8');
+  const plans=fs.readFileSync(path.join(root,'js/plans.js'),'utf8');
+  assert.match(html,/id="exerciseChartPickerButton"/);assert.match(html,/id="bodyChartPickerButton"/);
+  assert.match(progress,/function toggleChartPicker/);assert.match(progress,/function chooseChartOption/);
+  assert.match(html,/id="settingsSearchToggle"/);assert.match(settings,/function toggleSettingsSearch/);
+  assert.match(plans,/class="icon plan-more-trigger"/);assert.match(plans,/function duplicatePlan/);
 });
 
 test('inline controls reference existing app functions',()=>{
