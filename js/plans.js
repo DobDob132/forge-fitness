@@ -146,7 +146,7 @@ function renderPlansList() {
             <div class="plan-actions">
                 ${p.id !== data.activePlanId ? `<button class="btn secondary" onclick="activatePlan(${escapeHtml(JSON.stringify(p.id))})">Aktivieren</button>` : '<span class="tag">AKTIV</span>'}
                 <button class="btn secondary plan-edit-action" onclick="openPlanEditor(${escapeHtml(JSON.stringify(p.id))})">✏️ Bearbeiten</button>
-                <div class="plan-more" onclick="event.stopPropagation()"><button class="icon plan-more-trigger" type="button" aria-label="Weitere Planaktionen" aria-expanded="false" onclick="togglePlanMenu(this)">⋯</button><div class="plan-menu"><button type="button" onclick="closePlanMenus();ForgeSocial.openShare(${escapeHtml(JSON.stringify(p.id))})"><span>👥</span> Teilen</button><button type="button" onclick="closePlanMenus();duplicatePlan(${escapeHtml(JSON.stringify(p.id))})"><span>⎘</span> Kopieren</button>${p.id !== data.activePlanId ? `<button type="button" class="danger-option" onclick="closePlanMenus();deleteMyPlan(${escapeHtml(JSON.stringify(p.id))})"><span>🗑️</span> Löschen</button>` : ''}</div></div>
+                <div class="plan-more" onclick="event.stopPropagation()"><button class="icon plan-more-trigger" type="button" aria-label="Weitere Planaktionen" aria-expanded="false" onclick="togglePlanMenu(this)">⋯</button><div class="plan-menu"><button type="button" onclick="closePlanMenus();ForgeSocial.openPublish(${escapeHtml(JSON.stringify(p.id))})"><span>🌐</span> Veröffentlichen</button><button type="button" onclick="closePlanMenus();duplicatePlan(${escapeHtml(JSON.stringify(p.id))})"><span>⎘</span> Kopieren</button>${p.id !== data.activePlanId ? `<button type="button" class="danger-option" onclick="closePlanMenus();deleteMyPlan(${escapeHtml(JSON.stringify(p.id))})"><span>🗑️</span> Löschen</button>` : ''}</div></div>
             </div>
         </div>
     `).join("");
@@ -179,22 +179,17 @@ function deleteMyPlan(id) {
 
 function switchPlanTab(tab) {
     document.getElementById("tabMyPlans").classList.remove("active");
-    document.getElementById("tabCommunity").classList.remove("active");
-    document.getElementById("tabShared").classList.remove("active");
+    document.getElementById("tabPublished").classList.remove("active");
     document.getElementById("myPlansList").classList.add("hidden");
-    document.getElementById("communityList").classList.add("hidden");
-    document.getElementById("sharedPlansList").classList.add("hidden");
+    document.getElementById("publishedPlansPanel").classList.add("hidden");
     
     if(tab === 'my') {
         document.getElementById("tabMyPlans").classList.add("active");
         document.getElementById("myPlansList").classList.remove("hidden");
-    } else if(tab==='com') {
-        document.getElementById("tabCommunity").classList.add("active");
-        document.getElementById("communityList").classList.remove("hidden");
     } else {
-        document.getElementById("tabShared").classList.add("active");
-        document.getElementById("sharedPlansList").classList.remove("hidden");
-        ForgeSocial.refreshShares();
+        document.getElementById("tabPublished").classList.add("active");
+        document.getElementById("publishedPlansPanel").classList.remove("hidden");
+        ForgeSocial.refreshPublishedPlans();
     }
 }
 

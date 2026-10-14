@@ -5,7 +5,7 @@ function show(id,btn){
   if(id!=="workout") releaseWakeLock();
   if(id==="home") renderHome();
   if(id==="plan") renderPlan();
-  if(id==="plans"){renderPlansList();ForgeSocial.refreshShares();}
+  if(id==="plans")renderPlansList();
   if(id==="progress") renderProgress();
   if(id==="trophies") renderTrophies();
   if(id==="friends") ForgeSocial.refreshFriendsPage();

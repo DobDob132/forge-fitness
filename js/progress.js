@@ -330,7 +330,7 @@ function openBodyModal() {
     document.getElementById("bodyModal").style.display = "flex";
 }
 
-function saveBodyData() {
+async function saveBodyData() {
     let date = new Date().toISOString();
     let metrics = ["weight", "bodyfat", "chest", "waist", "arms", "thighs"];
     let added = false;
@@ -345,7 +345,8 @@ function saveBodyData() {
     });
     
     if(added) {
-        saveData();
+        await saveData();
+        await ForgeCloud.flush();
         checkMilestones();
         document.getElementById("bodyModal").style.display = "none";
         toast(I18n.translate("Körperdaten gespeichert! ⚖️"));

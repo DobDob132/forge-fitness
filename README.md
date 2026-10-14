@@ -51,6 +51,14 @@ Der Wochenrückblick im Challenge-Reiter zählt laufende und in dieser Woche bee
 - Gewichte lassen sich in den Einstellungen zwischen kg und lb umschalten. Gespeichert wird intern weiterhin in kg, damit beim Wechsel keine Trainingsdaten verfälscht werden.
 - Auf Handys bleibt die Hauptnavigation erreichbar am unteren Bildschirmrand.
 
+## Version 1.11.0
+
+- Trainingspläne können öffentlich veröffentlicht, gesucht, gefiltert, sortiert, angesehen und als eigene Kopie übernommen werden.
+- Meilensteine besitzen individuelle Symbole, eine Erreicht-Anzeige, anklickbare Erklärungen und sind im Freundevergleich sichtbar.
+- Das XP-Protokoll ist standardmäßig eingeklappt; Freunde und Challenges bleiben in getrennten Ansichten.
+- Körperdaten werden beim Öffnen beziehungsweise Fokussieren der App automatisch mit dem aktuellen Kontostand abgeglichen.
+- Planmenüs und das Entfernen eines Historienfilters sind auf Maus und Touch dauerhaft lesbar gestaltet.
+
 ## Version 1.10.0
 
 - Verlauf, Diagrammauswahl, Einstellungssuche und Planaktionen verwenden kompakte Symbole, Chips und kontextbezogene Menüs.

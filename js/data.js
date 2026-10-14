@@ -44,17 +44,26 @@ let bodyChartInstance=null;
 let summaryChartInstance=null;
 
 const MILESTONES = [
-    { id: "w1", title: "Der erste Schritt", desc: "Absolviere dein erstes Training.", req: 1, type: "workouts", xp: 100 },
-    { id: "w10", title: "Routinier", desc: "Absolviere 10 Trainings.", req: 10, type: "workouts", xp: 500 },
-    { id: "w50", title: "Eisenfresser", desc: "Absolviere 50 Trainings.", req: 50, type: "workouts", xp: 2000 },
-    { id: "w100", title: "FORGE Meister", desc: "Absolviere 100 Trainings.", req: 100, type: "workouts", xp: 5000 },
-    { id: "str3", title: "Feuer gefangen", desc: "Erreiche einen 3-Tage Streak.", req: 3, type: "streak", xp: 200 },
-    { id: "str14", title: "Unaufhaltsam", desc: "Erreiche einen 14-Tage Streak.", req: 14, type: "streak", xp: 1000 },
-    { id: "set100", title: "Rep für Rep", desc: "Beende insgesamt 100 Sätze.", req: 100, type: "sets", xp: 300 },
-    { id: "set1k", title: "Maschine", desc: "Beende insgesamt 1.000 Sätze.", req: 1000, type: "sets", xp: 2500 },
-    { id: "vol10k", title: "Tonnen-Beweger", desc: "Bewege 10.000 kg insgesamt.", req: 10000, type: "volume", xp: 1000 },
-    { id: "vol50k", title: "Schwerkraft besiegt", desc: "Bewege 50.000 kg insgesamt.", req: 50000, type: "volume", xp: 3000 },
-    { id: "body5", title: "Daten-Analyst", desc: "Trage 5x Körperdaten ein.", req: 5, type: "body", xp: 150 }
+    { id:"w1",icon:"👟",title:"Der erste Schritt",desc:"Absolviere dein erstes Training.",req:1,type:"workouts",xp:100 },
+    { id:"w5",icon:"🖐️",title:"Drangeblieben",desc:"Absolviere 5 Trainings.",req:5,type:"workouts",xp:250 },
+    { id:"w10",icon:"🏋️",title:"Routinier",desc:"Absolviere 10 Trainings.",req:10,type:"workouts",xp:500 },
+    { id:"w25",icon:"🛡️",title:"Beständig",desc:"Absolviere 25 Trainings.",req:25,type:"workouts",xp:1000 },
+    { id:"w50",icon:"⚒️",title:"Eisenfresser",desc:"Absolviere 50 Trainings.",req:50,type:"workouts",xp:2000 },
+    { id:"w100",icon:"👑",title:"FORGE Meister",desc:"Absolviere 100 Trainings.",req:100,type:"workouts",xp:5000 },
+    { id:"str3",icon:"🔥",title:"Feuer gefangen",desc:"Erreiche einen 3-Tage-Streak.",req:3,type:"streak",xp:200 },
+    { id:"str7",icon:"🌋",title:"Eine starke Woche",desc:"Erreiche einen 7-Tage-Streak.",req:7,type:"streak",xp:500 },
+    { id:"str14",icon:"☄️",title:"Unaufhaltsam",desc:"Erreiche einen 14-Tage-Streak.",req:14,type:"streak",xp:1000 },
+    { id:"set50",icon:"🔩",title:"Solide Basis",desc:"Beende insgesamt 50 Sätze.",req:50,type:"sets",xp:150 },
+    { id:"set100",icon:"🔨",title:"Rep für Rep",desc:"Beende insgesamt 100 Sätze.",req:100,type:"sets",xp:300 },
+    { id:"set500",icon:"⚙️",title:"Werk in Bewegung",desc:"Beende insgesamt 500 Sätze.",req:500,type:"sets",xp:1200 },
+    { id:"set1k",icon:"🤖",title:"Maschine",desc:"Beende insgesamt 1.000 Sätze.",req:1000,type:"sets",xp:2500 },
+    { id:"vol10k",icon:"🚚",title:"Tonnen-Beweger",desc:"Bewege 10.000 kg insgesamt.",req:10000,type:"volume",xp:1000 },
+    { id:"vol50k",icon:"🏗️",title:"Schwerkraft besiegt",desc:"Bewege 50.000 kg insgesamt.",req:50000,type:"volume",xp:3000 },
+    { id:"min300",icon:"⏱️",title:"Fünf Stunden Fokus",desc:"Sammle insgesamt 300 Trainingsminuten.",req:300,type:"minutes",xp:500 },
+    { id:"min1k",icon:"⌛",title:"Zeit investiert",desc:"Sammle insgesamt 1.000 Trainingsminuten.",req:1000,type:"minutes",xp:1500 },
+    { id:"rec5",icon:"📈",title:"Rekordjäger",desc:"Erreiche persönliche Rekorde in 5 Disziplinen.",req:5,type:"records",xp:500 },
+    { id:"body5",icon:"📏",title:"Daten-Analyst",desc:"Dokumentiere an 5 Terminen Körperdaten.",req:5,type:"body",xp:150 },
+    { id:"body20",icon:"🧬",title:"Fortschrittsforscher",desc:"Dokumentiere an 20 Terminen Körperdaten.",req:20,type:"body",xp:750 }
 ];
 
 let editPlanCopy = null;

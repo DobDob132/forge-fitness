@@ -302,6 +302,12 @@ const ForgeCloud = (() => {
     const response=await client.rpc('forge_social',{p_action:action,p_id:id,p_friend:friend,p_payload:payload,p_value:value});
     if(response.error)throw response.error;return response.data;
   }
+  async function publicPlans(action,{id=null,plan=null,metadata=null,query=null,category=null,difficulty=null,days=null,sort='newest',limit=50,offset=0}={}){
+    if((action==='publish'||action==='unpublish')&&(!user||!ready))throw Error('Bitte melde dich zuerst an.');
+    const response=await client.rpc('forge_public_plans',{p_action:action,p_id:id,p_plan:plan,p_metadata:metadata,p_query:query||null,p_category:category||null,p_difficulty:difficulty||null,p_days:days,p_sort:sort,p_limit:limit,p_offset:offset});
+    if(response.error)throw response.error;return response.data;
+  }
+  async function friendMilestones(){if(!user||!ready)return[];const response=await client.rpc('forge_friend_milestones');if(response.error)throw response.error;return response.data||[];}
   async function boot() {
     client=forgeSupabase.createClient(FORGE_CONFIG.supabaseUrl,FORGE_CONFIG.supabaseKey,{auth:{storageKey:'forgeAuth',persistSession:true,autoRefreshToken:true,detectSessionInUrl:false},global:{fetch:(url,options={})=>fetch(url,{...options,signal:options.signal || AbortSignal.timeout(15000)})}});
     $('authForm').addEventListener('submit',submit);
@@ -326,10 +332,12 @@ const ForgeCloud = (() => {
       if(r.data.session)await connect(r.data.session);
       else{mode('login');gate(true);status('Lokal · ohne Konto');}
     }catch(error){gate(true);message(explain(error),true);}
-    window.addEventListener('online',()=>flush());
+    window.addEventListener('online',()=>syncNow());
     window.addEventListener('offline',()=>status(user?'Offline · lokal gespeichert':'Nur auf diesem Gerät'));
-    setInterval(()=>flush(),30000);
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncNow();});
+    window.addEventListener('focus',()=>syncNow());
+    setInterval(()=>{if(document.visibilityState==='visible')syncNow();else flush();},60000);
   }
-  return {boot,save,flush,syncNow,open,guest,logout,importPayload,reset,normalize,defaults,resolveConflict,social,refreshFriends:async()=>{await profile();await friends();},isSignedIn:()=>!!user&&ready,
+  return {boot,save,flush,syncNow,open,guest,logout,importPayload,reset,normalize,defaults,resolveConflict,social,publicPlans,friendMilestones,refreshFriends:async()=>{await profile();await friends();},isSignedIn:()=>!!user&&ready,
     diagnostics:()=>({userId:user?.id || null,ready,version,syncing,conflict:!!conflict})};
 })();

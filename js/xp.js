@@ -47,7 +47,9 @@ function checkMilestones() {
         streak: streak(),
         sets: data.logs.reduce((a, l) => a + (l.sets || 0), 0),
         volume: vol,
-        body: data.bodyData.length
+        minutes: Math.round(data.logs.reduce((a,l)=>a+(Number(l.minutes)||0),0)),
+        records: countRecords(),
+        body: new Set(data.bodyData.map(item=>String(item.date||'').slice(0,10))).size
     };
     
     let earned = false;
@@ -67,7 +69,7 @@ function checkMilestones() {
 
 function renderTrophies() {
     let vol = data.logs.reduce((sum, log) => sum + (log.entries||[]).reduce((s, e) => s + ((e.weight||0) * (e.reps||0)), 0), 0);
-    let stats = { workouts: data.logs.length, streak: streak(), sets: data.logs.reduce((a, l) => a + (l.sets || 0), 0), volume: vol, body: data.bodyData.length };
+    let stats = { workouts:data.logs.length,streak:streak(),sets:data.logs.reduce((a,l)=>a+(l.sets||0),0),volume:vol,minutes:Math.round(data.logs.reduce((a,l)=>a+(Number(l.minutes)||0),0)),records:countRecords(),body:new Set(data.bodyData.map(item=>String(item.date||'').slice(0,10))).size };
     
     let html = "";
     MILESTONES.forEach(m => {
@@ -77,7 +79,7 @@ function renderTrophies() {
         
         html += `
         <div class="ms-card ${unlocked ? 'unlocked' : ''}">
-            <div class="ms-icon">${unlocked ? '🏆' : '🔒'}</div>
+            <button type="button" class="ms-icon" aria-label="${escapeHtml(m.title)} erklären" onclick="showInfoModal(${escapeHtml(JSON.stringify(`${m.icon} ${m.title}`))},${escapeHtml(JSON.stringify(`${m.desc}<br><br>Fortschritt: ${Math.round(current)} von ${m.req}. Belohnung: ${m.xp} XP.`))})">${m.icon}</button>
             <div class="ms-info">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                     <div class="ms-title">${escapeHtml(I18n.translate(m.title))}</div>
@@ -90,6 +92,8 @@ function renderTrophies() {
         </div>`;
     });
     document.getElementById("milestonesList").innerHTML = html;
+    const achieved=MILESTONES.filter(m=>data.claimedMilestones.includes(m.id)).length;
+    document.getElementById('milestoneCount').textContent=`${achieved} von ${MILESTONES.length} erreicht`;
     
     let histHtml = data.xpHistory.map(h => {
         let d = new Date(h.date).toLocaleDateString(I18n.locale(), {day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit"});

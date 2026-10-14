@@ -111,8 +111,7 @@
 <section id="plans" class="hidden"><div class="card">
     <div class="plan-tabs">
         <button class="active" id="tabMyPlans" onclick="switchPlanTab('my')">Meine Pläne</button>
-        <button id="tabCommunity" onclick="switchPlanTab('com')">🌐 Entdecken</button>
-        <button id="tabShared" onclick="switchPlanTab('shared')">👥 Geteilte Pläne</button>
+        <button id="tabPublished" onclick="switchPlanTab('published')">🌐 Veröffentlichte Pläne</button>
     </div>
     
     <div id="myPlansList">
@@ -123,13 +122,17 @@
         <div id="plansContainer"></div>
     </div>
     
-    <div id="communityList" class="hidden">
-        <div class="sub" style="margin-bottom:15px;">Entdecke veröffentlichte Pläne. Du kannst sie ansehen oder als eigene Kopie auswählen und sofort damit trainieren.</div>
-        <div class="record"><div><b>Arnold's Split</b><small style="display:block; color:var(--muted)">6 Tage · Fokus: Volumen</small></div><div class="plan-actions"><button class="btn secondary" onclick="previewCommunityPlan(0)">Vorschau</button><button class="btn" onclick="useCommunityPlan(0)">Auswählen</button></div></div>
-        <div class="record"><div><b>Home Workout Essentials</b><small style="display:block; color:var(--muted)">3 Tage · Körpergewicht</small></div><div class="plan-actions"><button class="btn secondary" onclick="previewCommunityPlan(1)">Vorschau</button><button class="btn" onclick="useCommunityPlan(1)">Auswählen</button></div></div>
-        <div class="record"><div><b>Ruder-Cardio Hybrid</b><small style="display:block; color:var(--muted)">5 Tage · Fokus: Ausdauer</small></div><div class="plan-actions"><button class="btn secondary" onclick="previewCommunityPlan(2)">Vorschau</button><button class="btn" onclick="useCommunityPlan(2)">Auswählen</button></div></div>
+    <div id="publishedPlansPanel" class="hidden">
+        <div class="published-head"><div><div class="section-title">Öffentliche Planbibliothek</div><div class="sub">Von der Community veröffentlichte Pläne ansehen und als eigene Kopie übernehmen.</div></div><button class="btn secondary" type="button" onclick="ForgeSocial.refreshPublishedPlans()">↻ Aktualisieren</button></div>
+        <div class="published-filters">
+            <label><span>Suche</span><input class="input" id="publishedQuery" type="search" placeholder="Name, Beschreibung oder Autor" oninput="ForgeSocial.schedulePublishedRefresh()"></label>
+            <label><span>Kategorie</span><select class="input" id="publishedCategory" onchange="ForgeSocial.refreshPublishedPlans()"><option value="">Alle</option><option value="strength">Kraft</option><option value="muscle">Muskelaufbau</option><option value="fitness">Fitness</option><option value="endurance">Ausdauer</option><option value="mobility">Mobilität</option><option value="home">Zuhause</option></select></label>
+            <label><span>Level</span><select class="input" id="publishedDifficulty" onchange="ForgeSocial.refreshPublishedPlans()"><option value="">Alle</option><option value="beginner">Einsteiger</option><option value="intermediate">Fortgeschritten</option><option value="advanced">Erfahren</option></select></label>
+            <label><span>Trainingstage</span><select class="input" id="publishedDays" onchange="ForgeSocial.refreshPublishedPlans()"><option value="">Alle</option><option value="1">1 Tag</option><option value="2">2 Tage</option><option value="3">3 Tage</option><option value="4">4 Tage</option><option value="5">5 Tage</option><option value="6">6 Tage</option><option value="7">7 Tage</option></select></label>
+            <label><span>Sortierung</span><select class="input" id="publishedSort" onchange="ForgeSocial.refreshPublishedPlans()"><option value="newest">Neueste</option><option value="popular">Am häufigsten übernommen</option><option value="name">Name A–Z</option></select></label>
+        </div>
+        <div class="published-results-meta" id="publishedResultsMeta"></div><div class="published-plans" id="publishedPlansList"><div class="sub">Pläne werden geladen …</div></div>
     </div>
-    <div id="sharedPlansList" class="hidden"><div class="sub">Melde dich an, um geteilte Pläne zu sehen.</div></div>
 </div></section>
 
 <!-- STATISTIK / FORTSCHRITT -->
@@ -199,17 +202,10 @@
         <span>🔥 Meilensteine</span>
         <button class="icon" style="padding:4px 8px; font-size:14px; border-radius:50%;" onclick="showInfoModal('Meilensteine', 'Verdiene XP und schalte Meilensteine frei, indem du regelmäßig trainierst, deinen Streak hältst oder viel Gewicht bewegst. Cardio-Übungen zählen zur Trainingsanzahl dazu!')">i</button>
     </div>
-    <div class="sub">Erreiche Ziele, um Bonus-XP zu sammeln!</div>
+    <div class="milestone-summary"><span>Erreiche Ziele, um Bonus-XP zu sammeln!</span><b id="milestoneCount">0 von 0 erreicht</b></div>
     <div class="ms-grid" id="milestonesList"></div>
 </div>
-<div class="card">
-    <div class="section-title">
-        <span>⭐ XP Protokoll</span>
-        <button class="icon" style="padding:4px 8px; font-size:14px; border-radius:50%;" onclick="showInfoModal('Wie bekomme ich XP?', '• Satz abgeschlossen: +10 XP<br>• Cardio/Eigenübung: +10 XP pro Satz/Eintrag<br>• Training beendet: +50 XP<br>• Persönlicher Rekord: +25 XP<br>• Meilensteine: 100 - 5000 XP')">i</button>
-    </div>
-    <div class="sub" style="margin-bottom:15px;">Deine zuletzt verdienten Erfahrungspunkte.</div>
-    <div id="xpHistoryList" style="max-height:500px; overflow-y:auto; padding-right:10px;"></div>
-</div>
+<details class="card xp-log-card"><summary><span>⭐ XP Protokoll</span><small>Details anzeigen</small></summary><div class="xp-log-content"><div class="row between"><div class="sub">Deine zuletzt verdienten Erfahrungspunkte.</div><button class="icon" style="padding:4px 8px; font-size:14px; border-radius:50%;" onclick="showInfoModal('Wie bekomme ich XP?', '• Satz abgeschlossen: +10 XP<br>• Cardio/Eigenübung: +10 XP pro Satz/Eintrag<br>• Training beendet: +50 XP<br>• Persönlicher Rekord: +25 XP<br>• Meilensteine: 100 - 5000 XP')">i</button></div><div id="xpHistoryList"></div></div></details>
 </div>
 </section>
 
@@ -396,7 +392,7 @@
 
 <!-- Preview Modal -->
 <div class="modal" id="previewModal"><div class="card">
-    <div class="row between"><div class="section-title">Plan Vorschau</div><button class="icon" onclick="document.getElementById('previewModal').style.display='none'">✕</button></div>
+    <div class="row between"><div class="section-title" id="previewModalTitle">Plan Vorschau</div><button class="icon" onclick="document.getElementById('previewModal').style.display='none'">✕</button></div>
     <div id="previewModalBody" style="margin-top:10px; max-height: 60vh; overflow-y:auto; padding-right:5px;"></div>
 </div></div>
 
@@ -451,7 +447,7 @@
 
 <!-- Settings -->
 <div class="modal" id="settingsModal"><div class="card settings-card">
-<div class="settings-head"><div><div class="section-title">⚙️ Einstellungen</div><button class="settings-version-badge" type="button" onclick="openReleaseNotes()">FORGE 1.10.0 · Updateinfos</button></div><div class="settings-head-actions"><span class="settings-unsaved hidden" id="settingsUnsaved">Nicht gespeichert</span><button class="icon" id="settingsSearchToggle" type="button" onclick="toggleSettingsSearch()" aria-label="Einstellungen durchsuchen" aria-expanded="false">🔎</button><button class="icon" onclick="closeSettings()">✕</button></div></div>
+<div class="settings-head"><div><div class="section-title">⚙️ Einstellungen</div><button class="settings-version-badge" type="button" onclick="openReleaseNotes()">FORGE 1.11.0 · Updateinfos</button></div><div class="settings-head-actions"><span class="settings-unsaved hidden" id="settingsUnsaved">Nicht gespeichert</span><button class="icon" id="settingsSearchToggle" type="button" onclick="toggleSettingsSearch()" aria-label="Einstellungen durchsuchen" aria-expanded="false">🔎</button><button class="icon" onclick="closeSettings()">✕</button></div></div>
 <label class="settings-search hidden" id="settingsSearchWrap"><span>🔎 Einstellungen durchsuchen</span><div class="settings-search-field"><input class="input" id="settingsSearch" type="search" placeholder="z. B. Vibration, Pause oder Gewicht" oninput="searchSettings(this.value)"><button class="icon" type="button" onclick="toggleSettingsSearch(false)" aria-label="Suche schließen">✕</button></div></label>
 <div class="settings-tabs" role="tablist" aria-label="Einstellungsbereiche">
  <button type="button" class="active" data-settings-tab="general" onclick="openSettingsTab('general')">Allgemein</button>
@@ -516,7 +512,7 @@
 </section>
 
 <section class="settings-panel hidden" data-settings-panel="data">
- <div class="version-card"><span>Installierte Version</span><strong>FORGE 1.10.0</strong><button class="btn secondary" type="button" onclick="openReleaseNotes()">Updateinfos ansehen</button></div>
+ <div class="version-card"><span>Installierte Version</span><strong>FORGE 1.11.0</strong><button class="btn secondary" type="button" onclick="openReleaseNotes()">Updateinfos ansehen</button></div>
  <div class="setting-group-title">Sicherung &amp; Daten</div>
  <p class="account-note">Exportiere eine Sicherung, importiere vorhandene Daten oder lösche deine Trainingsdaten.</p>
  <div class="controls"><button class="btn secondary" onclick="exportData()">💾 Export</button><button class="btn secondary" onclick="importData()">📥 Import</button><button class="btn danger" onclick="resetData()">Daten löschen</button></div>
@@ -565,11 +561,14 @@
  </div><button class="btn secondary install-button" type="button">📲 App installieren</button>
 </div></div>
 
-<div class="modal" id="sharePlanModal"><div class="card">
- <div class="row between"><div class="section-title">👥 Plan teilen</div><button class="icon" onclick="ForgeSocial.closeShare()">✕</button></div>
- <p class="sub" id="sharePlanName"></p><label for="shareFriendSelect">Freund auswählen</label><select class="input" id="shareFriendSelect"></select>
- <p class="account-note">Der Empfänger erhält eine unabhängige Kopie. Spätere Änderungen werden nicht automatisch geteilt.</p>
- <button class="btn" id="sharePlanSend" style="width:100%">PLAN SENDEN</button>
+<div class="modal" id="publishPlanModal"><div class="card">
+ <div class="row between"><div class="section-title">🌐 Plan veröffentlichen</div><button class="icon" onclick="ForgeSocial.closePublish()">✕</button></div>
+ <p class="sub" id="publishPlanName"></p><label for="publishTitle">Öffentlicher Titel</label><input class="input" id="publishTitle" maxlength="80">
+ <label for="publishDescription">Kurzbeschreibung</label><textarea class="input" id="publishDescription" maxlength="500" placeholder="Für wen ist der Plan gedacht?"></textarea>
+ <div class="publish-form-grid"><label><span>Kategorie</span><select class="input" id="publishCategory"><option value="strength">Kraft</option><option value="muscle">Muskelaufbau</option><option value="fitness">Fitness</option><option value="endurance">Ausdauer</option><option value="mobility">Mobilität</option><option value="home">Zuhause</option></select></label><label><span>Level</span><select class="input" id="publishDifficulty"><option value="beginner">Einsteiger</option><option value="intermediate">Fortgeschritten</option><option value="advanced">Erfahren</option></select></label></div>
+ <label for="publishEquipment">Ausrüstung</label><input class="input" id="publishEquipment" maxlength="120" placeholder="z. B. Fitnessstudio, Kurzhanteln oder keine">
+ <p class="account-note">Veröffentlicht werden nur dieser Trainingsplan und dein Benutzername. Trainingsverlauf und Körperdaten bleiben privat. Erneutes Veröffentlichen aktualisiert deinen bestehenden Eintrag.</p>
+ <button class="btn" id="publishPlanSend" style="width:100%">PLAN VERÖFFENTLICHEN</button>
 </div></div>
 
 <script src="vendor/supabase.js"></script>
