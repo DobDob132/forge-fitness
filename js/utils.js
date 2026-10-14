@@ -17,24 +17,24 @@ function escapeHtml(value){ return String(value ?? '').replace(/[&<>"']/g, c => 
 function normalizeShortcutKey(value,fallback){const key=String(value||'').trim().toLowerCase();return /^[a-z]$/.test(key)?key:fallback;}
 function showInfoModal(title, text){ document.getElementById('infoTitle').textContent=title; document.getElementById('infoText').innerHTML=text; document.getElementById('infoModal').style.display='flex'; }
 const releaseNotes={
-  de:{label:'FORGE 1.11.0 · Updateinfos',title:'FORGE · Version 1.11.0',updates:[
+  de:{label:'FORGE 1.12.0 · Updateinfos',title:'FORGE · Version 1.12.0',updates:[
+    ['v1.12.0 · 14.10.2026','FORGE und Freundschaftseinladungen teilen','Die App lässt sich jetzt direkt über das System-Teilen-Menü oder per kopiertem Link weiterempfehlen. Im Freunde-Reiter kannst du außerdem einen persönlichen Einladungslink teilen; nach dem Öffnen wird der Freundescode sicher vorausgefüllt und die empfangende Person bestätigt die Anfrage selbst.'],
     ['v1.11.0 · 14.10.2026','Pläne veröffentlichen und gemeinsam Fortschritt sehen','Öffentliche Trainingspläne lassen sich veröffentlichen, filtern, ansehen und übernehmen. Meilensteine wurden erweitert, neu gestaltet und sind im Freundevergleich sichtbar. Körperdaten gleichen sich beim Öffnen der App automatisch ab.'],
     ['v1.10.0 · 13.10.2026','Natürlichere Bedienung','Filter, Diagrammauswahl, Einstellungssuche und Planaktionen sind jetzt kompakter und arbeiten mit vertrauten Symbolen, Auswahlchips und Menüs.'],
-    ['v1.9.0 · 13.10.2026','Einfacher trainieren und schneller finden','Direkte Zeitbestätigung, sichtbarer Satzfortschritt in Pausen sowie eine nach Jahren und Monaten gegliederte Trainingshistorie.'],
   ]},
-  en:{label:'FORGE 1.11.0 · Update info',title:'FORGE · Version 1.11.0',updates:[
+  en:{label:'FORGE 1.12.0 · Update info',title:'FORGE · Version 1.12.0',updates:[
+    ['v1.12.0 · 14 Oct 2026','Share FORGE and friend invitations','You can now recommend the app through the system share menu or a copied link. The Friends tab also provides a personal invitation link; opening it safely prefills the friend code and the recipient confirms the request.'],
     ['v1.11.0 · 14 Oct 2026','Publish plans and compare progress','Public workout plans can be published, filtered, previewed and copied. Milestones are expanded, redesigned and visible to friends. Body data syncs automatically when the app opens.'],
     ['v1.10.0 · 13 Oct 2026','More natural controls','Filters, chart choices, settings search and plan actions now use familiar icons, chips and compact menus.'],
-    ['v1.9.0 · 13 Oct 2026','Simpler workouts and clearer history','Direct time confirmation, visible set progress during rests and workout history grouped by year and month.'],
   ]},
-  el:{label:'FORGE 1.11.0 · Πληροφορίες ενημέρωσης',title:'FORGE · Έκδοση 1.11.0',updates:[
+  el:{label:'FORGE 1.12.0 · Πληροφορίες ενημέρωσης',title:'FORGE · Έκδοση 1.12.0',updates:[
+    ['v1.12.0 · 14.10.2026','Κοινοποίηση FORGE και προσκλήσεων φιλίας','Η εφαρμογή κοινοποιείται πλέον από το μενού κοινοποίησης ή με αντιγραφή συνδέσμου. Στην καρτέλα φίλων μπορείς επίσης να μοιραστείς προσωπικό σύνδεσμο πρόσκλησης· ο κωδικός συμπληρώνεται με ασφάλεια και ο παραλήπτης επιβεβαιώνει το αίτημα.'],
     ['v1.11.0 · 14.10.2026','Δημοσίευση πλάνων και σύγκριση προόδου','Τα δημόσια πλάνα μπορούν να δημοσιευτούν, να φιλτραριστούν και να αντιγραφούν. Τα ορόσημα επεκτάθηκαν και εμφανίζονται στους φίλους.'],
     ['v1.10.0 · 13.10.2026','Πιο φυσικά στοιχεία ελέγχου','Τα φίλτρα, τα γραφήματα, η αναζήτηση ρυθμίσεων και οι ενέργειες πλάνων χρησιμοποιούν πλέον γνώριμα εικονίδια και μενού.'],
-    ['v1.9.0 · 13.10.2026','Πιο απλή προπόνηση και πιο καθαρό ιστορικό','Άμεση επιβεβαίωση χρόνου, ορατή πρόοδος στα διαλείμματα και ομαδοποιημένο ιστορικό.'],
   ]}
 };
-function releaseNotesLocale(){const language=window.ForgeI18n?.language?.();return releaseNotes[language]||releaseNotes.de;}
-function updateReleaseNotesLabel(){const button=document.querySelector('.settings-version-badge');if(button)button.textContent=releaseNotesLocale().label;const version=document.querySelector('.version-card strong');if(version)version.textContent='FORGE 1.11.0';}
+function releaseNotesLocale(){const language=I18n.language();return releaseNotes[language]||releaseNotes.de;}
+function updateReleaseNotesLabel(){const button=document.querySelector('.settings-version-badge');if(button)button.textContent=releaseNotesLocale().label;const version=document.querySelector('.version-card strong');if(version)version.textContent='FORGE 1.12.0';}
 function openReleaseNotes(){const notes=releaseNotesLocale();const items=notes.updates.map(([version,title,text])=>`<article class="release-note"><div class="release-note-version">${version}</div><b>${title}</b><p>${text}</p></article>`).join('');showInfoModal(notes.title,`<div class="release-notes">${items}</div>`);}
 window.addEventListener('forge-language-change',updateReleaseNotesLabel);setTimeout(updateReleaseNotesLabel,0);
 function weightUnit(){return data.settings.unit==='lb'?'lb':'kg'}

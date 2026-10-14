@@ -46,13 +46,13 @@ test('maximum shortcut fills the upper target and completes the set',async()=>{
 
 test('release version is consistent in app metadata',()=>{
   const root=path.join(__dirname,'..'),pkg=require('../package.json'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),utils=fs.readFileSync(path.join(root,'js/utils.js'),'utf8');
-  assert.equal(pkg.version,'1.11.0');assert.match(html,/FORGE 1\.11\.0/);assert.match(utils,/Version 1\.11\.0/);
+  assert.equal(pkg.version,'1.12.0');assert.match(html,/FORGE 1\.12\.0/);assert.match(utils,/Version 1\.12\.0/);
 });
 
 test('release notes only show the latest three updates and summarize maintenance releases',()=>{
   const utils=fs.readFileSync(path.join(__dirname,'../js/utils.js'),'utf8');
-  assert.match(utils,/v1\.11\.0[\s\S]*v1\.10\.0[\s\S]*v1\.9\.0/);
-  assert.doesNotMatch(utils,/v1\.8\.2/);
+  assert.match(utils,/v1\.12\.0[\s\S]*v1\.11\.0[\s\S]*v1\.10\.0/);
+  assert.doesNotMatch(utils,/v1\.9\.0/);
 });
 
 test('settings keep every control while organizing them into searchable tabs',()=>{

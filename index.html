@@ -21,6 +21,7 @@
     <div class="brand">FORGE<small>BUILD. TRAIN. PROGRESS.</small></div>
     <div style="display:flex; gap:8px;">
         <span class="cloud-state" id="cloudStatus" role="status">Konto wird geladen …</span>
+        <button class="icon" type="button" data-share-app aria-label="FORGE teilen" title="FORGE teilen">↗</button>
         <button class="icon" id="accountButton" aria-label="Konto" title="Konto">👤</button>
         <button class="icon" onclick="open1RM()">🏋️</button>
         <button class="icon" onclick="openSettings()">⚙️</button>
@@ -80,8 +81,9 @@
    <div class="friend-leaderboard" id="friendLeaderboard"></div>
    <div class="section-title friends-list-title">👥 Deine Freunde</div>
    <p class="account-note">Kontakte sehen nur deinen Benutzernamen. Trainings- und Körperdaten werden nicht geteilt.</p>
-   <h3>Dein Freundescode</h3><p class="account-note">Teile diesen Code nur mit Personen, die dich hinzufügen dürfen.</p><code class="friend-code" id="friendCode"></code><button class="btn secondary" id="copyFriendCode" style="margin-top:8px">Code kopieren</button>
+   <h3>Deine Freundschaftseinladung</h3><p class="account-note">Der Einladungslink enthält deinen privaten Freundescode. Teile ihn nur mit Personen, die dich hinzufügen dürfen.</p><code class="friend-code" id="friendCode"></code><div class="account-buttons" style="margin-top:8px"><button class="btn" id="shareFriendLink">🔗 Einladungslink teilen</button><button class="btn secondary" id="copyFriendCode">Code kopieren</button></div>
    <h3>Freund hinzufügen</h3><label for="friendInput">Freundescode einfügen</label><div class="row"><input class="input" id="friendInput" autocomplete="off" placeholder="Freundescode"><button class="btn" id="friendAdd">Anfragen</button></div>
+   <div id="friendInviteNotice" class="invite-notice hidden" role="status"><b>Einladungslink erkannt</b><span>Prüfe den Freundescode und sende die Anfrage anschließend selbst ab.</span></div>
    <div id="friendsList" style="margin-top:12px"></div><button class="btn secondary" id="friendRefresh" style="margin-top:12px">Aktualisieren</button>
   </div>
   <div class="card social-panel hidden" id="friendsChallengesPanel">
@@ -447,7 +449,7 @@
 
 <!-- Settings -->
 <div class="modal" id="settingsModal"><div class="card settings-card">
-<div class="settings-head"><div><div class="section-title">⚙️ Einstellungen</div><button class="settings-version-badge" type="button" onclick="openReleaseNotes()">FORGE 1.11.0 · Updateinfos</button></div><div class="settings-head-actions"><span class="settings-unsaved hidden" id="settingsUnsaved">Nicht gespeichert</span><button class="icon" id="settingsSearchToggle" type="button" onclick="toggleSettingsSearch()" aria-label="Einstellungen durchsuchen" aria-expanded="false">🔎</button><button class="icon" onclick="closeSettings()">✕</button></div></div>
+<div class="settings-head"><div><div class="section-title">⚙️ Einstellungen</div><button class="settings-version-badge" type="button" onclick="openReleaseNotes()">FORGE 1.12.0 · Updateinfos</button></div><div class="settings-head-actions"><span class="settings-unsaved hidden" id="settingsUnsaved">Nicht gespeichert</span><button class="icon" id="settingsSearchToggle" type="button" onclick="toggleSettingsSearch()" aria-label="Einstellungen durchsuchen" aria-expanded="false">🔎</button><button class="icon" onclick="closeSettings()">✕</button></div></div>
 <label class="settings-search hidden" id="settingsSearchWrap"><span>🔎 Einstellungen durchsuchen</span><div class="settings-search-field"><input class="input" id="settingsSearch" type="search" placeholder="z. B. Vibration, Pause oder Gewicht" oninput="searchSettings(this.value)"><button class="icon" type="button" onclick="toggleSettingsSearch(false)" aria-label="Suche schließen">✕</button></div></label>
 <div class="settings-tabs" role="tablist" aria-label="Einstellungsbereiche">
  <button type="button" class="active" data-settings-tab="general" onclick="openSettingsTab('general')">Allgemein</button>
@@ -512,7 +514,7 @@
 </section>
 
 <section class="settings-panel hidden" data-settings-panel="data">
- <div class="version-card"><span>Installierte Version</span><strong>FORGE 1.11.0</strong><button class="btn secondary" type="button" onclick="openReleaseNotes()">Updateinfos ansehen</button></div>
+ <div class="version-card"><span>Installierte Version</span><strong>FORGE 1.12.0</strong><button class="btn secondary" type="button" onclick="openReleaseNotes()">Updateinfos ansehen</button></div>
  <div class="setting-group-title">Sicherung &amp; Daten</div>
  <p class="account-note">Exportiere eine Sicherung, importiere vorhandene Daten oder lösche deine Trainingsdaten.</p>
  <div class="controls"><button class="btn secondary" onclick="exportData()">💾 Export</button><button class="btn secondary" onclick="importData()">📥 Import</button><button class="btn danger" onclick="resetData()">Daten löschen</button></div>
@@ -547,7 +549,8 @@
   <div id="accountMessage" class="account-status" role="status" aria-live="polite"></div>
   <button class="btn secondary" type="button" id="guestButton">OHNE KONTO LOKAL TRAINIEREN</button>
   <p class="account-note">Vorhandene Daten aus deiner bisherigen FORGE-Version kannst du nach dem Anmelden über Einstellungen → Import übernehmen.</p>
-  <button class="btn secondary install-button" type="button">📲 App installieren</button>
+  <div class="account-buttons welcome-actions"><button class="btn secondary install-button" type="button">📲 App installieren</button><button class="btn secondary" type="button" data-share-app>↗ FORGE teilen</button></div>
+  <div id="friendInviteGate" class="invite-notice hidden" role="status"><b>Freundschaftseinladung geöffnet</b><span>Melde dich an oder registriere dich, um die Anfrage zu senden.</span></div>
  </div>
 </div>
 <div class="modal account-modal" id="accountModal" role="dialog" aria-modal="true" aria-labelledby="accountTitle"><div class="card">
@@ -586,6 +589,7 @@
 <script src="js/progress.js"></script>
 <script src="js/settings.js"></script>
 <script src="js/community.js"></script>
+<script src="js/share.js"></script>
 <script src="js/cloud.js"></script>
 <script src="js/social.js"></script>
 <script src="js/app.js"></script>

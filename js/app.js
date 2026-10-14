@@ -45,5 +45,6 @@ function renderHome(){
 
 function showHome(){show("home")}
 
+ForgeShare.init();
 ForgeCloud.boot();
 window.addEventListener('forge-language-change',()=>{renderHome();if(!document.getElementById('trophies').classList.contains('hidden'))renderTrophies();});

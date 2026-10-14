@@ -27,7 +27,9 @@ Browserdaten löschen entfernt Gastdaten und lokale Sicherungen. Abgemeldete Kon
 
 ## Freunde
 
-Im eigenen Freunde-Reiter den privaten Freundescode teilen oder erhaltenen Code eingeben. Anfragen können angenommen/abgelehnt und Kontakte entfernt werden. Freunde sehen nur Anzeigenamen und Beziehungsstatus, keine E-Mail-, Körper- oder Trainingsdaten. Veröffentlichte Pläne unter „Entdecken“ lassen sich ansehen, als eigene Kopie übernehmen und direkt als aktiver Trainingsplan verwenden.
+Im eigenen Freunde-Reiter den privaten Freundescode oder direkt einen Freundschaftslink teilen. Beim Öffnen eines solchen Links wird der Code vorausgefüllt; die empfangende Person bestätigt das Senden der Anfrage immer selbst. Anfragen können angenommen/abgelehnt und Kontakte entfernt werden. Freunde sehen nur Anzeigenamen und Beziehungsstatus, keine E-Mail-, Körper- oder Trainingsdaten. Veröffentlichte Pläne unter „Entdecken“ lassen sich ansehen, als eigene Kopie übernehmen und direkt als aktiver Trainingsplan verwenden.
+
+Die App selbst kann über den Teilen-Button in der Kopfzeile oder auf dem Willkommensbildschirm per System-Teilen-Menü weiterempfohlen werden. Falls dieses vom Browser nicht unterstützt wird, kopiert FORGE den Link in die Zwischenablage.
 
 Eigene Trainingspläne lassen sich an angenommene Freunde senden. Der Empfänger übernimmt sie als unabhängige Kopie und kann sie ändern, ohne den Plan des Absenders zu verändern. Challenges laufen 7, 14 oder 30 Tage und können Trainings, Sätze, Minuten, Kalorien oder bewegtes Gewicht zählen. Einladungen, laufende Challenges und Verlauf sind getrennt. Sichtbar sind nur der aggregierte Challenge-Fortschritt und Anzeigenamen; Trainingsdetails bleiben privat.
 
@@ -50,6 +52,13 @@ Der Wochenrückblick im Challenge-Reiter zählt laufende und in dieser Woche bee
 - Das Wochenziel ist zwischen 1 und 14 Trainings einstellbar und wird auf der Startseite angezeigt.
 - Gewichte lassen sich in den Einstellungen zwischen kg und lb umschalten. Gespeichert wird intern weiterhin in kg, damit beim Wechsel keine Trainingsdaten verfälscht werden.
 - Auf Handys bleibt die Hauptnavigation erreichbar am unteren Bildschirmrand.
+
+## Version 1.12.0
+
+- FORGE kann über einen dauerhaft erreichbaren Button direkt geteilt werden; ohne System-Teilen-Menü wird der App-Link kopiert.
+- Im Freunde-Reiter lässt sich ein persönlicher Freundschaftslink teilen.
+- Ein geöffneter Freundschaftslink führt nach Anmeldung zum Freunde-Reiter, füllt den Code voraus und wartet auf die bewusste Bestätigung der Anfrage.
+- Private Freundescodes werden nach dem Öffnen aus der sichtbaren Adresse entfernt und beim allgemeinen Teilen der App nicht weitergegeben.
 
 ## Version 1.11.0
 

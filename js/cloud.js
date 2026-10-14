@@ -166,6 +166,7 @@ const ForgeCloud = (() => {
         ready=true;gate(false);status('In der Cloud gespeichert');
         if(conflict)showConflict();else await flush();
         try{await profile();}catch(error){$('accountDetailsMessage').textContent=explain(error);}
+        ForgeShare.presentPendingInvite();
       } catch(error){
         if(epoch!==generation)return;
         if(cached){version=cached.version;renderData(cached.payload);ready=true;gate(false);status('Offline · lokaler Kontostand');}
@@ -260,8 +261,9 @@ const ForgeCloud = (() => {
   async function friendAction(action,id=null) {
     try{
       if(action==='remove'&&!confirm('Diesen Kontakt oder diese Anfrage entfernen?'))return;
-      const r=await client.rpc('forge_friends',{p_action:action,p_id:id,p_code:action==='request'?$('friendInput').value.trim():null});
-      if(r.error)throw r.error;$('friendInput').value='';await friends();await ForgeSocial.refreshFriendsPage();$('accountDetailsMessage').textContent='Gespeichert.';toast('Gespeichert.');
+      const requestedCode=action==='request'?$('friendInput').value.trim():null;
+      const r=await client.rpc('forge_friends',{p_action:action,p_id:id,p_code:requestedCode});
+      if(r.error)throw r.error;ForgeShare.completeInvite(requestedCode);$('friendInput').value='';await friends();await ForgeSocial.refreshFriendsPage();$('accountDetailsMessage').textContent=action==='request'?'Freundschaftsanfrage gesendet.':'Gespeichert.';toast(action==='request'?'Freundschaftsanfrage gesendet.':'Gespeichert.');
     }catch(error){$('accountDetailsMessage').textContent=explain(error);toast(explain(error));}
   }
   async function importPayload(payload) {
