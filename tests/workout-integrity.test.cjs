@@ -5,7 +5,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 const read=file=>fs.readFileSync(path.join(__dirname,'..','js',file),'utf8');
 
-function setup(){
+function setup(preserveSnapshot=false){
   const elements={weightInput:{value:'20'},repInput:{value:'8'},undoBtn:{style:{}},workout:{classList:{contains:()=>false}},complete:{classList:{contains:()=>true}}};
   const context=vm.createContext({
     console,Date,Math,JSON,setTimeout,clearTimeout,setInterval:()=>1,clearInterval(){},
@@ -15,7 +15,7 @@ function setup(){
     fromDisplayWeight:x=>x,estimated1RM:()=>null,best1RM:()=>0,saveData:async()=>{},toast(){},ForgeSocial:{syncProgress(){}},checkMilestones(){},releaseWakeLock(){},show(){},I18n:{translate:x=>x}
   });
   vm.runInContext(read('xp.js'),context);vm.runInContext(read('workout.js'),context);
-  vm.runInContext('clearExerciseTimer=()=>{};snapshotWorkout=()=>{};renderWorkout=()=>{};preparePauseSignals=()=>{};startPause=()=>{}',context);
+  vm.runInContext('clearExerciseTimer=()=>{};renderWorkout=()=>{};preparePauseSignals=()=>{};startPause=()=>{}',context);if(!preserveSnapshot)vm.runInContext('snapshotWorkout=()=>{}',context);
   return {context,elements,run:code=>vm.runInContext(code,context)};
 }
 
@@ -35,4 +35,15 @@ test('completion screen uses the XP actually earned by the workout',()=>{
   const source=read('workout.js');
   assert.match(source,/Math\.round\(state\.workoutXp\|\|0\)/);
   assert.doesNotMatch(source,/\(state\.setsDone\*10\)\+50/);
+});
+
+test('double clicking a set while storage is pending records it only once',async()=>{
+  const {run,context}=setup();let release;const waiting=new Promise(r=>release=r);context.saveData=()=>waiting;
+  const first=run('finishSet()'),second=run('finishSet()');release();await Promise.all([first,second]);assert.equal(run('data.current.length'),1);assert.equal(run('data.xp'),10);
+});
+test('undoing during rest stops the old pause timer',async()=>{
+  const {run,context}=setup();const cleared=[];context.clearInterval=id=>cleared.push(id);await run('finishSet()');run('state.interval=42;state.timerEndsAt=1000');await run('undoLastSet()');assert.ok(cleared.includes(42));assert.equal(run('state.timerEndsAt'),0);
+});
+test('resuming uses the saved day and excludes time spent outside the workout',()=>{
+  const {run}=setup(true);run("state.day.id='mo';state.day.name='Montag';state.day.focus='Kraft';state.started=Date.now()-60000;data.activePlanId='plan';data.allPlans=[];data.settings.keepAwake=false;snapshotWorkout();data.activeWorkout.started=Date.now()-86400000;resumeWorkout()");assert.equal(run('state.day.ex[0][0]'),'Bankdrücken');assert.ok(run('Date.now()-state.started')<65000);assert.equal(run('data.activeWorkout.day.ex.length'),1);
 });
