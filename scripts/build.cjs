@@ -2,8 +2,10 @@ const fs=require('fs'),path=require('path'),crypto=require('crypto');
 (async()=>{
  const root=path.resolve(__dirname,'..');process.chdir(root);
  fs.mkdirSync('vendor',{recursive:true});
+ if(!process.argv.includes('--use-vendor')){
  fs.writeFileSync('vendor/supabase.js',fs.readFileSync('node_modules/@supabase/supabase-js/dist/umd/supabase.js','utf8')+'\nwindow.forgeSupabase=window.supabase;\n');
  fs.copyFileSync('node_modules/chart.js/dist/chart.umd.js','vendor/chart.umd.js');
+ }
  const files=['index.html','manifest.webmanifest'];
  function list(dir){for(const f of fs.readdirSync(dir,{withFileTypes:true})){const p=dir+'/'+f.name;if(f.isDirectory())list(p);else files.push(p);}}
  for(const d of ['css','js','vendor','assets'])list(d);

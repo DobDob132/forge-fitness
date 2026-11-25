@@ -2,8 +2,8 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
-<meta name="theme-color" content="#090b10">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101512">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="FORGE">
@@ -11,6 +11,7 @@
 <script src="vendor/chart.umd.js"></script>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/account.css">
+<link rel="stylesheet" href="css/human.css">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -38,35 +39,49 @@
 
 <!-- HOME -->
 <section id="home">
-<div class="xp-banner">
-    <div class="lvl-badge" id="levelBadge">1</div>
-    <div style="flex-grow:1;">
-        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px;">
-            <span>Level <span id="levelText">1</span></span>
-            <span style="color:var(--accent2);"><span id="xpText">0</span> / <span id="nextXpText">1000</span> XP</span>
-        </div>
-        <div class="xp-bar-bg"><div class="xp-bar-fill" id="xpBarFill"></div></div>
-    </div>
+<div class="home-welcome">
+    <div><h1 id="homeGreeting">Schön, dass du da bist.</h1><p>Dein Training. In deinem Tempo.</p></div>
+    <div class="welcome-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="6" stroke="currentColor" stroke-width="1.8"/><path d="M16 3v3m0 20v3M3 16h3m20 0h3M7 7l2 2m14 14 2 2M7 25l2-2M23 9l2-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
 </div>
-
 <div class="card resume-card hidden" id="resumeWorkoutCard">
     <div><div class="eyebrow">Gespeichertes Training</div><b id="resumeWorkoutText">Training fortsetzen</b></div>
     <div class="row"><button class="btn" onclick="resumeWorkout()">FORTSETZEN</button><button class="btn secondary" onclick="discardWorkout()">Verwerfen</button></div>
 </div>
-
-<div class="card weekly-goal" id="weeklyGoalCard">
-    <div class="row between"><div><div class="eyebrow">Wochenziel</div><b id="weeklyGoalText">0 von 3 Trainings</b></div><span class="goal-percent" id="weeklyGoalPercent">0%</span></div>
-    <div class="progressbar"><i id="weeklyGoalBar"></i></div>
+<div class="grid home-grid">
+    <div class="card hero home-hero">
+        <div class="hero-copy">
+            <div class="hero-kicker">Ein Moment für dich</div>
+            <h2 class="hero-message" id="homeHeroMessage">Kleine Schritte.<br>Dein Fortschritt.</h2>
+            <div class="eyebrow" id="todayLabel"></div>
+            <div class="title" id="todayTitle"></div><div class="sub" id="todaySub"></div>
+            <div class="home-actions"><button class="btn" id="homeStartWorkout" onclick="startWorkoutFlow()">TRAINING STARTEN</button><button class="btn secondary" onclick="openActivityModal()">Freies Training</button></div>
+        </div>
+        <img class="hero-art" id="homeHeroArt" src="assets/illustrations/training.svg" width="560" height="400" alt="Illustration: entspanntes Training mit einer Kurzhantel">
+    </div>
+    <div class="card weekly-goal home-goal" id="weeklyGoalCard">
+        <div>
+            <div class="row between"><div><div class="eyebrow">Deine Woche</div><b id="weeklyGoalText">0 von 3 Trainings</b></div><span class="goal-percent" id="weeklyGoalPercent">0%</span></div>
+            <div class="progressbar"><i id="weeklyGoalBar"></i></div>
+        </div>
+        <div><div class="week-pips" id="weekPips" aria-label="Deine Trainingswoche"></div><p class="goal-caption" id="homeGoalCaption">Jede Einheit zählt. Auch in deinem Tempo.</p></div>
+    </div>
+    <div class="card home-overview"><div class="eyebrow">Dein Überblick</div><div class="stats" style="margin-top:14px"><div class="stat"><b id="streak">0</b><span>🔥 Streak</span></div><div class="stat"><b id="sessions">0</b><span>Trainings</span></div><div class="stat"><b id="sets">0</b><span>Sätze</span></div><div class="stat"><b id="minutes">0</b><span>Minuten</span></div><div class="stat"><b id="calories">0</b><span>kcal geschätzt</span></div><div class="stat"><b id="records">0</b><span>Rekorde</span></div></div></div>
+    <div class="home-insights">
+        <div class="card insight-card">
+            <img src="assets/illustrations/recovery.svg" width="240" height="180" alt="" loading="lazy">
+            <div><h2>Auch Pausen bringen dich weiter.</h2><p>Durchatmen, erholen, wieder loslegen. Dein Plan lässt dir Raum dafür.</p><button class="text-action" onclick="show('plan',document.querySelectorAll('#nav button')[1])">Meine Woche ansehen <span aria-hidden="true">→</span></button></div>
+        </div>
+        <div class="card insight-card">
+            <img src="assets/illustrations/together.svg" width="240" height="180" alt="" loading="lazy">
+            <div><h2>Zusammen geht's leichter.</h2><p>Teile kleine Erfolge und bleibt gemeinsam dran.</p><button class="text-action" onclick="show('friends',document.querySelectorAll('#nav button')[5])">Zu deinen Freunden <span aria-hidden="true">→</span></button></div>
+        </div>
+    </div>
+    <div class="card week"><div class="week-heading"><h2 class="section-title">Diese Woche</h2><button class="text-action" onclick="show('plan',document.querySelectorAll('#nav button')[1])">Plan ansehen <span aria-hidden="true">→</span></button></div><div id="weekList"></div></div>
+    <div class="card" id="activityTemplatesCard" style="display:none"><div class="section-title">⚡ Deine Vorlagen</div><div class="activity-types" id="activityTemplateShortcuts"></div></div>
 </div>
-
-<div class="grid">
-<div class="card hero">
-    <div><div class="eyebrow" id="todayLabel"></div><div class="flame">🔥</div><div class="title" id="todayTitle"></div><div class="sub" id="todaySub"></div></div>
-    <div class="home-actions"><button class="btn" id="homeStartWorkout" onclick="startWorkoutFlow()">TRAINING STARTEN</button><button class="btn secondary" onclick="openActivityModal()">🏃 FREIES TRAINING</button></div>
-</div>
-<div class="card"><div class="eyebrow">Dein Überblick</div><div class="stats" style="margin-top:14px"><div class="stat"><b id="streak">0</b><span>🔥 Streak</span></div><div class="stat"><b id="sessions">0</b><span>Trainings</span></div><div class="stat"><b id="sets">0</b><span>Sätze</span></div><div class="stat"><b id="minutes">0</b><span>Minuten</span></div><div class="stat"><b id="calories">0</b><span>kcal geschätzt</span></div><div class="stat"><b id="records">0</b><span>Rekorde</span></div></div></div>
-<div class="card week"><div class="section-title">Diese Woche</div><div id="weekList"></div></div>
-<div class="card" id="activityTemplatesCard" style="display:none"><div class="section-title">⚡ Deine Vorlagen</div><div class="activity-types" id="activityTemplateShortcuts"></div></div>
+<div class="xp-banner home-level">
+    <div class="lvl-badge" id="levelBadge">1</div>
+    <div class="level-copy"><div class="level-label"><span>Level <span id="levelText">1</span></span><span><span id="xpText">0</span> / <span id="nextXpText">1000</span> XP</span></div><div class="xp-bar-bg"><div class="xp-bar-fill" id="xpBarFill"></div></div></div>
 </div>
 </section>
 
@@ -449,7 +464,7 @@
 
 <!-- Settings -->
 <div class="modal" id="settingsModal"><div class="card settings-card">
-<div class="settings-head"><div><div class="section-title">⚙️ Einstellungen</div><button class="settings-version-badge" type="button" onclick="openReleaseNotes()">FORGE 1.12.0 · Updateinfos</button></div><div class="settings-head-actions"><span class="settings-unsaved hidden" id="settingsUnsaved">Nicht gespeichert</span><button class="icon" id="settingsSearchToggle" type="button" onclick="toggleSettingsSearch()" aria-label="Einstellungen durchsuchen" aria-expanded="false">🔎</button><button class="icon" onclick="closeSettings()">✕</button></div></div>
+<div class="settings-head"><div><div class="section-title">⚙️ Einstellungen</div><button class="settings-version-badge" type="button" onclick="openReleaseNotes()">FORGE 1.13.0 · Updateinfos</button></div><div class="settings-head-actions"><span class="settings-unsaved hidden" id="settingsUnsaved">Nicht gespeichert</span><button class="icon" id="settingsSearchToggle" type="button" onclick="toggleSettingsSearch()" aria-label="Einstellungen durchsuchen" aria-expanded="false">🔎</button><button class="icon" onclick="closeSettings()">✕</button></div></div>
 <label class="settings-search hidden" id="settingsSearchWrap"><span>🔎 Einstellungen durchsuchen</span><div class="settings-search-field"><input class="input" id="settingsSearch" type="search" placeholder="z. B. Vibration, Pause oder Gewicht" oninput="searchSettings(this.value)"><button class="icon" type="button" onclick="toggleSettingsSearch(false)" aria-label="Suche schließen">✕</button></div></label>
 <div class="settings-tabs" role="tablist" aria-label="Einstellungsbereiche">
  <button type="button" class="active" data-settings-tab="general" onclick="openSettingsTab('general')">Allgemein</button>
@@ -514,7 +529,7 @@
 </section>
 
 <section class="settings-panel hidden" data-settings-panel="data">
- <div class="version-card"><span>Installierte Version</span><strong>FORGE 1.12.0</strong><button class="btn secondary" type="button" onclick="openReleaseNotes()">Updateinfos ansehen</button></div>
+ <div class="version-card"><span>Installierte Version</span><strong>FORGE 1.13.0</strong><button class="btn secondary" type="button" onclick="openReleaseNotes()">Updateinfos ansehen</button></div>
  <div class="setting-group-title">Sicherung &amp; Daten</div>
  <p class="account-note">Exportiere eine Sicherung, importiere vorhandene Daten oder lösche deine Trainingsdaten.</p>
  <div class="controls"><button class="btn secondary" onclick="exportData()">💾 Export</button><button class="btn secondary" onclick="importData()">📥 Import</button><button class="btn danger" onclick="resetData()">Daten löschen</button></div>
@@ -532,6 +547,7 @@
 <div id="accountGate" class="account-gate">
  <div class="card account-panel">
   <div class="brand">FORGE<small>BUILD. TRAIN. PROGRESS.</small></div>
+  <img class="welcome-art" src="assets/illustrations/training.svg" width="560" height="400" alt="" aria-hidden="true">
   <h1 id="authTitle">Willkommen bei FORGE</h1>
   <p class="sub">Dein Training. Dein Fortschritt. Auf deinen Geräten.</p>
   <div class="account-tabs" role="tablist" aria-label="Konto">
@@ -579,6 +595,7 @@
 <script src="js/storage.js"></script>
 <script src="js/calories.js"></script>
 <script src="js/data.js"></script>
+<script src="js/validation.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/xp.js"></script>
@@ -592,6 +609,7 @@
 <script src="js/share.js"></script>
 <script src="js/cloud.js"></script>
 <script src="js/social.js"></script>
+<script src="js/welcome.js"></script>
 <script src="js/app.js"></script>
 <script src="js/install.js"></script>
 </body>

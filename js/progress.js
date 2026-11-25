@@ -59,9 +59,9 @@ function streak(){
 }
 
 function estimated1RM(weight,reps){
-  const kg=Number(weight),match=String(reps??'').trim().replace(',','.').match(/^\d+(?:\.\d+)?/),count=match?Number(match[0]):NaN;
+  const kg=Number(weight),match=String(reps??'').trim().replace(',','.').match(/^(\d+(?:\.\d+)?)(?:\s+(?:pro|je)\s+(?:Seite|Arm|Bein))?$/i),count=match?Number(match[1]):NaN;
   if(!Number.isFinite(kg)||kg<=0||!Number.isFinite(count)||count<1||count>30)return null;
-  return kg*(1+count/30);
+  return count===1?kg:kg*(1+count/30);
 }
 function best1RM(logs,name){
   return logs.flatMap(log=>log.entries||[]).filter(entry=>entry.name===name).reduce((best,entry)=>Math.max(best,estimated1RM(entry.weight,entry.reps)||0),0);
@@ -98,7 +98,7 @@ function renderSummaryChart() {
     let currentLog = data.logs[data.logs.length - 1];
     if(!currentLog || !currentLog.entries) return;
     
-    let volumePerEx = {};
+    let volumePerEx = Object.create(null);
     currentLog.entries.forEach(e => {
         if(e.weight && !isNaN(e.reps)) {
             volumePerEx[e.name] = (volumePerEx[e.name] || 0) + (e.weight * Number(e.reps));
@@ -214,7 +214,7 @@ function showHistoryDetail(idx){
   let d = new Date(l.date).toLocaleDateString(I18n.locale(),{day:"2-digit",month:"2-digit",year:"numeric", hour:"2-digit", minute:"2-digit"});
   document.getElementById("histTitle").textContent = `${I18n.translate(l.plan)} (${I18n.translate(l.focus)})`;
   
-  let map = {};
+  let map = Object.create(null);
   (l.entries||[]).forEach(e => { if(!map[e.name]) map[e.name]=[]; map[e.name].push(e); });
   
   let html = `<div class="history-summary"><div><b>${Math.round(l.minutes)}</b><span>${I18n.translate('Minuten')}</span></div><div><b>${Math.round(l.calories||0)}</b><span>${I18n.translate('kcal geschätzt')}</span></div>${l.distance?`<div><b>${escapeHtml(l.distance)} km</b><span>${I18n.translate('Distanz')}</span></div>`:`<div><b>${escapeHtml(l.sets)}</b><span>${I18n.translate('Sätze')}</span></div>`}</div><div class="sub" style="margin:12px 0;">${I18n.translate('Absolviert am')} ${d}${l.note?`<br>📝 ${escapeHtml(l.note)}`:''}</div>`;

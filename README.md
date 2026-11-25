@@ -37,6 +37,10 @@ Der Wochenrückblick im Challenge-Reiter zählt laufende und in dieser Woche bee
 
 ## Training und Darstellung
 
+Die Startseite verwendet eine wärmere dunkle Farbpalette mit Salbeigrün und Apricot, eigene lokale Trainingsillustrationen und eine tageszeitabhängige Begrüßung. Die Wochenpunkte zeigen gespeicherte Trainings und geplante Pausentage; der aktuelle Tag ist umrandet. Auch Anmeldung und Freunde erhalten passende Illustrationen. Die neuen Texte sind auf Deutsch, Englisch und Griechisch verfügbar.
+
+Sanfte Einblendungen und Rückmeldungen auf Schaltflächen berücksichtigen die Systemeinstellung „Bewegung reduzieren“. Alle Illustrationen gehören zum Offline-Paket. Die Gestaltung liegt in `css/human.css`, die zusätzliche Startseitenanzeige in `js/welcome.js`.
+
 - Freie Aktivitäten können als Vorlagen gespeichert und direkt von der Startseite aus wieder geöffnet werden. Die Vorlage enthält Art, Dauer, Distanz, Belastung und Notiz.
 - Eine Belastungsskala von 1 bis 10 verfeinert nach dem Training die Kalorien-Schätzung. Diese bleibt ein Schätzwert, keine Messung.
 - Die Statistik zeigt persönliche Rekorde für Maximalgewicht je Übung, längste Distanz je Aktivität und beste Laufpace.
@@ -52,6 +56,18 @@ Der Wochenrückblick im Challenge-Reiter zählt laufende und in dieser Woche bee
 - Das Wochenziel ist zwischen 1 und 14 Trainings einstellbar und wird auf der Startseite angezeigt.
 - Gewichte lassen sich in den Einstellungen zwischen kg und lb umschalten. Gespeichert wird intern weiterhin in kg, damit beim Wechsel keine Trainingsdaten verfälscht werden.
 - Auf Handys bleibt die Hauptnavigation erreichbar am unteren Bildschirmrand.
+
+## Version 1.13.0
+
+- Wärmere Gestaltung mit eigenen Illustrationen für Training, Erholung und Freunde.
+- Neue Begrüßung, grafische Trainingswoche und freundlichere Texte auf Deutsch, Englisch und Griechisch.
+- Sanfte Animationen mit Unterstützung für „Bewegung reduzieren“. Alle Grafiken funktionieren auch offline.
+
+- Kontowechsel und Cloud-Synchronisierung gegen veraltete Antworten abgesichert.
+- Importprüfung, lokale Sicherungen und Datenbank-Planprüfung gehärtet.
+- Fortsetzen, Satz-Rückgängig, 1RM und Kalorienberechnung korrigiert.
+- Kontolöschung widerruft Sitzungen; Veröffentlichung prüft Tests und liefert nur App-Dateien aus.
+- Details und verbleibende Grenzen stehen in PRUEFBERICHT.md.
 
 ## Version 1.12.0
 

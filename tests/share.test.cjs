@@ -44,7 +44,7 @@ test('release version and visible update information stay aligned',()=>{
   const pkg=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
   const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
   const utils=fs.readFileSync(path.join(root,'js/utils.js'),'utf8');
-  assert.equal(pkg.version,'1.12.0');
-  assert.match(html,/FORGE 1\.12\.0 · Updateinfos/);
-  assert.match(utils,/v1\.12\.0 · 14\.10\.2026/);
+  assert.equal(pkg.version,'1.13.0');
+  assert.match(html,/FORGE 1\.13\.0 · Updateinfos/);
+  assert.match(utils,/v1\.13\.0 · 25\.11\.2026/);
 });

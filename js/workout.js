@@ -59,29 +59,36 @@ function beginLifting() {
 function snapshotWorkout(phase='lifting'){
   if(!state.day)return;
   data.activeWorkout={planId:data.activePlanId,dayId:state.day.id,dayName:state.day.name,focus:state.day.focus,exercise:state.exercise,set:state.set,setsDone:state.setsDone,started:state.started,phase,nextWeight:state.nextWeight,draftWeight:document.getElementById('weightInput')?.value||'',draftReps:document.getElementById('repInput')?.value||'',workoutXp:state.workoutXp||0,xpBaseline:state.xpBaseline};
+  data.activeWorkout.day=JSON.parse(JSON.stringify(state.day));
+  data.activeWorkout.elapsedMs=Math.max(0,Date.now()-state.started);
   saveData();
 }
 function saveWorkoutDraftInputs(){snapshotWorkout('lifting')}
 function resumeWorkout(){
   const saved=data.activeWorkout;if(!saved)return startWorkoutFlow();
   preparePauseSignals();
-  const plan=data.allPlans.find(p=>p.id===saved.planId)||data.allPlans.find(p=>p.id===data.activePlanId),day=plan?.days.find(d=>d.id===saved.dayId);
+  const plan=data.allPlans.find(p=>p.id===saved.planId),day=saved.day||plan?.days.find(d=>d.id===saved.dayId);
   if(!day){discardWorkout(true);toast('Der gespeicherte Plan ist nicht mehr vorhanden.');return;}
   state={day:JSON.parse(JSON.stringify(day)),exercise:saved.exercise||0,set:saved.set||0,setsDone:saved.setsDone||0,started:saved.started||Date.now(),timer:data.settings.pause,timerMax:data.settings.pause,timerEndsAt:0,interval:null,paused:false,finishing:false,nextWeight:null,exerciseTimer:0,exerciseTimerMax:0,exerciseTimerEndsAt:0,exerciseTimerInterval:null,exerciseTimerPaused:true,workoutXp:Number(saved.workoutXp)||0,xpBaseline:saved.xpBaseline||captureXPState()};
+  if(Number.isFinite(saved.elapsedMs))state.started=Date.now()-saved.elapsedMs;
+  state.nextWeight=saved.nextWeight??null;
+  lastSetBackup=null;document.getElementById('undoBtn').style.display='none';
+  if(state.exercise>=day.ex.length){finishWorkout();return;}
   show('workout');if(data.settings.keepAwake!==false)requestWakeLock();
   if(saved.phase==='warmup'){document.getElementById('activePhase').classList.add('hidden');document.getElementById('pausePhase').classList.add('hidden');document.getElementById('warmupPhase').classList.remove('hidden');document.getElementById('warmupMethodText').textContent=data.settings.warmupType;}
   else{document.getElementById('warmupPhase').classList.add('hidden');beginLifting();if(saved.draftWeight!=='')document.getElementById('weightInput').value=saved.draftWeight;if(saved.draftReps)document.getElementById('repInput').value=saved.draftReps;}
+  snapshotWorkout(saved.phase==='warmup'?'warmup':'lifting');
   toast('Training fortgesetzt.');
 }
 function discardWorkout(silent=false){
   if(!silent&&!confirm('Gespeichertes Training wirklich verwerfen?'))return;
-  clearInterval(state.interval);clearExerciseTimer();restoreXPState(state.xpBaseline);data.activeWorkout=null;data.current=[];state.day=null;state.finishing=false;saveData();renderHome();
+  clearInterval(state.interval);clearExerciseTimer();restoreXPState(data.activeWorkout?.xpBaseline||state.xpBaseline);data.activeWorkout=null;data.current=[];state.day=null;state.finishing=false;releaseWakeLock();saveData();renderHome();
 }
 
 function getSmartWeight(name, startWeight) {
     let allLogs = [...data.logs].reverse().flatMap(l=>l.entries||[]);
     let lastSet = allLogs.find(x=>x.name===name);
-    return lastSet ? (lastSet.weight || startWeight) : startWeight;
+    return lastSet ? (lastSet.weight ?? startWeight) : startWeight;
 }
 
 function exerciseTargetBounds(exercise){
@@ -185,9 +192,15 @@ function toggleFullscreen() {
     else { document.exitFullscreen().catch(()=>{}); btn.textContent = "⛶ Vollbild"; }
 }
 
+let setSubmitting=false;
 async function finishSet(){
+  if(setSubmitting||state.finishing||!state.day||state.exercise>=state.day.ex.length)return;
+  setSubmitting=true;
+  const workout=state;
+  try{
   let e=state.day.ex[state.exercise], w=fromDisplayWeight(+document.getElementById("weightInput").value||0), r=document.getElementById("repInput").value||"";
   if(!r){toast("Bitte Ausführung eintragen");return}
+  if(!Number.isFinite(w)||w<0||w>10000||r.length>500){toast('Bitte ein gültiges Gewicht und Satzergebnis eingeben.');return;}
   data.current=data.current||[];
   lastSetBackup={ kind:'completed', exercise:state.exercise, set:state.set, setsDone:state.setsDone, nextWeight:state.nextWeight, currentLength:data.current.length, xpState:captureXPState(), workoutXp:state.workoutXp||0 };
   const xpBefore=Number(data.xp)||0;
@@ -207,13 +220,16 @@ async function finishSet(){
   
   const completed=state.exercise>=state.day.ex.length;
   if(!completed){snapshotWorkout('lifting');await saveData();}
+  if(state!==workout)return;
   document.getElementById("undoBtn").style.display="inline-block";
   if(completed){ await finishWorkout(); }
   else{ preparePauseSignals();startPause(isExerciseDone ? data.settings.pause + 30 : data.settings.pause); }
+  }finally{setSubmitting=false;}
 }
 
 async function undoLastSet(){
   if(!lastSetBackup){toast("Nichts zum Rückgängig machen");return}
+  clearInterval(state.interval);state.timerEndsAt=0;
   data.current=data.current||[];data.current.length=Math.min(data.current.length,lastSetBackup.currentLength);
   if(lastSetBackup.kind==='completed')restoreXPState(lastSetBackup.xpState);
   state.exercise=lastSetBackup.exercise; state.set=lastSetBackup.set; state.setsDone=lastSetBackup.setsDone; state.nextWeight=lastSetBackup.nextWeight??null;
@@ -225,6 +241,7 @@ async function undoLastSet(){
 }
 
 function skipSet(){
+  if(setSubmitting||state.finishing||!state.day||state.exercise>=state.day.ex.length)return;
   clearExerciseTimer();
   lastSetBackup={ kind:'skipped', exercise:state.exercise, set:state.set, setsDone:state.setsDone, nextWeight:state.nextWeight, currentLength:(data.current||[]).length, workoutXp:state.workoutXp||0 };
   state.set++;
@@ -236,7 +253,7 @@ function skipSet(){
 
 let completedWorkoutLog=null;
 async function finishWorkout(){
-  if(state.finishing)return;state.finishing=true;clearInterval(state.interval);clearExerciseTimer();
+  if(state.finishing||!state.day)return;const workout=state;state.finishing=true;clearInterval(state.interval);state.timerEndsAt=0;clearExerciseTimer();
   completedWorkoutLog=null;
   const finishedDay=state.day,mins=Math.max(1,(Date.now()-state.started)/60000),effort=5,calories=(data.current||[]).length?estimateCalories({activity:'strength',effort,minutes:mins}):0,entries=distributeCalories(data.current||[],calories);
   data.activeWorkout=null;
@@ -246,7 +263,8 @@ async function finishWorkout(){
     const xpBefore=Number(data.xp)||0;addXP(50, "Training beendet!");state.workoutXp=(state.workoutXp||0)+((Number(data.xp)||0)-xpBefore);
   }
   data.current=[];await saveData();
-  ForgeSocial.syncProgress();
+  if(state!==workout)return;
+  Promise.resolve(ForgeSocial.syncProgress()).catch(()=>{});
   checkMilestones();
   releaseWakeLock();
   if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
@@ -271,5 +289,5 @@ async function updateWorkoutEffort(){
 }
 
 function saveAndExit(){
-  if(confirm("Training speichern und später fortsetzen?")){clearInterval(state.interval);clearExerciseTimer();snapshotWorkout('lifting');releaseWakeLock();showHome();toast('Training gespeichert.');}
+  if(confirm("Training speichern und später fortsetzen?")){const phase=document.getElementById('warmupPhase').classList.contains('hidden')?'lifting':'warmup';clearInterval(state.interval);state.timerEndsAt=0;clearExerciseTimer();snapshotWorkout(phase);releaseWakeLock();showHome();toast('Training gespeichert.');}
 }

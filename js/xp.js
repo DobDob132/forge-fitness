@@ -41,7 +41,7 @@ function renderXP() {
 }
 
 function checkMilestones() {
-    let vol = data.logs.reduce((sum, log) => sum + (log.entries||[]).reduce((s, e) => s + ((e.weight||0) * (e.reps||0)), 0), 0);
+    let vol = data.logs.reduce((sum, log) => sum + (log.entries||[]).reduce((s, e) => s + ((Number(e.weight)||0) * (Number(e.reps)||0)), 0), 0);
     let stats = {
         workouts: data.logs.length,
         streak: streak(),
@@ -68,7 +68,7 @@ function checkMilestones() {
 }
 
 function renderTrophies() {
-    let vol = data.logs.reduce((sum, log) => sum + (log.entries||[]).reduce((s, e) => s + ((e.weight||0) * (e.reps||0)), 0), 0);
+    let vol = data.logs.reduce((sum, log) => sum + (log.entries||[]).reduce((s, e) => s + ((Number(e.weight)||0) * (Number(e.reps)||0)), 0), 0);
     let stats = { workouts:data.logs.length,streak:streak(),sets:data.logs.reduce((a,l)=>a+(l.sets||0),0),volume:vol,minutes:Math.round(data.logs.reduce((a,l)=>a+(Number(l.minutes)||0),0)),records:countRecords(),body:new Set(data.bodyData.map(item=>String(item.date||'').slice(0,10))).size };
     
     let html = "";

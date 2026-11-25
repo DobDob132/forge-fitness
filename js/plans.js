@@ -10,6 +10,7 @@ function normalizePlanStructure(plan,{id=plan?.id,archived=plan?.archived===true
         const dayName=String(day.name||template[dayIndex].name).trim().slice(0,40)||template[dayIndex].name;
         const focus=String(day.focus||template[dayIndex].focus).trim().slice(0,80)||template[dayIndex].focus;
         const color=['red','blue','green','yellow'].includes(day.color)?day.color:template[dayIndex].color;
+        if(day.ex.length>100)throw Error('Ein Trainingstag darf höchstens 100 Übungen enthalten.');
         const ex=day.ex.map((exercise,exerciseIndex)=>{
             if(!Array.isArray(exercise)||exercise.length<4)throw Error(`${dayName}: Übung ${exerciseIndex+1} ist unvollständig.`);
             const exerciseName=String(exercise[0]||'').trim(),sets=Number(exercise[1]),target=String(exercise[2]??'').trim(),weight=Number(exercise[3]);

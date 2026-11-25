@@ -1,26 +1,35 @@
-# FORGE Prüfbericht
+# FORGE – Code- und Sicherheitsprüfung
 
-Stand: 20. September 2026.
+Stand: 25. November 2026, Version 1.13.0.
 
-## Erfolgreiche Prüfungen
+Geprüft: alle eigenen JavaScript-Module der aktuellen GitHub-Fassung, HTML, Installation/Service Worker, Build, Veröffentlichung, SQL-Schema sowie beide tatsächlich bereitgestellten Edge Functions. Der Hauptordner enthielt noch einen älteren Stand; die aktuelle Fassung bildet die Grundlage der Reparaturen.
 
-- 31 Vergleichspunkte gegen die ursprüngliche FORGE.html: Trainingsdaten, Pläne, Workout-Abschluss, XP, Einstellungen, Import/Export und Diagramm-Konfigurationen stimmen abzüglich der ausdrücklich entfernten Farbauswahl und der neuen Geräteeinstellungen im Gastmodus überein. 70 weiterhin benötigte ursprüngliche globale Funktionen vorhanden; nur `applyThemeColor` wurde mit der Farbauswahl entfernt. Chart.js zusätzlich tatsächlich ausgeführt.
-- 4 lokale Speichertests: Gastdaten erhalten, Konten getrennt, Sicherung und Kontowechsel ohne fremde Gastdaten zu verändern.
-- 22 Prüfungen mit echten temporären Supabase-Konten: Login, eigene Daten, fremde/ anonyme Zugriffe abgewiesen, Eigentümermanipulation abgewiesen, Profile nicht frei auflistbar, Freunde und Berechtigungen, keine Freigabe von Trainingsdaten, zweites Gerät, Versionskonflikt samt Auflösung, Offline-Speicherung und Synchronisierung, Kontowechsel, Offline-App/Diagramme, Manifest und Entfernen von Freunden.
-- 10 zusätzliche Prüfungen: falscher Login, Registrierungs-/Reset-Oberfläche, manuelles Laden neuerer Cloud-Daten, Offline-Konto, HTML-Einschleusung über importierte Pläne verhindert, kontobezogener Cloud-Reset, mobile/Desktop-Layouts, Recovery-Rücksprung mit echter Passwortänderung, keine JavaScript-Laufzeitfehler.
-- Aktualisierungsprüfung: Registrierung wechselt zum sechsstelligen Bestätigungscode, erneutes Senden funktioniert, falsche/abgelaufene Codes werden verständlich erklärt, die drei neuen Trainingseinstellungen werden gespeichert, mobile Darstellung bleibt ohne Laufzeitfehler.
-- 11 Datenbankprüfungen für die neuen Freunde-Funktionen: Planfreigabe mit Notiz, einmalige Übernahme, Challenge-Einladung, Annahme, Fortschrittsbegrenzung und Entfernen. Ein drittes Konto konnte weder fremde Freigaben noch Challenges lesen oder verändern.
-- 8 Oberflächenprüfungen für die neuen Trainingsfunktionen: Wochenziel, kg/lb-Umrechnung, Progressionsvorschlag, Übungsnotizen, Speichern und Fortsetzen eines Trainings sowie feste mobile Navigation. Keine JavaScript-Laufzeitfehler.
+## Reparaturen
 
-Mail-Endpunkte für Registrierung, Codeprüfung, erneutes Senden und Reset-Anforderung wurden in Oberflächentests simuliert. Login, Datenbank, Freundschaften und Passwortänderung verwendeten echte Backend-Zugriffe. Vorübergehende Testkonten sind nicht Bestandteil der ausgelieferten App.
+- Veraltete Cloud-Antworten werden nach Kontowechsel/Abmeldung verworfen. Fehlgeschlagenes Abmelden sperrt das Konto nicht mehr. Laufende Übungstimer werden beim Datenwechsel beendet.
+- Gemeinsame Prüfung für importierte und heruntergeladene Kontodaten: Pläne, Logs, Sätze, Körperdaten, Einstellungen, XP, Aktivitätsvorlagen und gespeicherte Trainings. Beschädigtes JSON wird im Original gesichert; Start bleibt möglich.
+- Sicherungen mit gleichem Zeitstempel bleiben getrennt. Fehlgeschlagenes lokales Speichern wird angezeigt.
+- Doppelklick auf einen Satz kann ihn nicht doppelt erfassen. Rückgängig beendet den laufenden Pausentimer.
+- Gespeicherte Trainings enthalten ihre ursprünglichen Übungen und reine Trainingszeit. Planänderungen und spätere Fortsetzung verfälschen den Ablauf nicht mehr. Aufwärmphase/Eingaben bleiben erhalten; Verwerfen kann die gespeicherte XP-Ausgangslage nach Neustart wiederherstellen.
+- Übungsnamen wie __proto__, constructor und toString bringen Verlauf und Zusammenfassung nicht mehr zum Absturz. Wörterbücher werden ohne geerbte Einträge verwendet.
+- Kalorienverteilung enthält keine negativen Einzelwerte und erhält die Summe. Zeitangaben lösen keine falschen 1RM-Rekorde aus; eine Wiederholung entspricht dem tatsächlichen Gewicht. Cardio-Ergebnisse erzeugen kein NaN beim Volumen.
+- SQL-Planprüfung weist fehlende Felder und null-Satz-/Gewichtswerte ab, auch bei alten Freigabe-Endpunkten. Extreme Level-Werte können die Freundesrangliste nicht mehr blockieren.
+- Kontolöschung prüft serverseitig die Bestätigung und widerruft Refresh-Sitzungen. Lokale Kontosicherungen werden entfernt. Bereits ausgestellte Access-Tokens laufen grundsätzlich erst mit ihrer JWT-Laufzeit aus; private Daten bleiben durch RLS, Fremdschlüssel und Benutzerprüfungen geschützt.
+- GitHub Pages führt Tests/Build aus und veröffentlicht ausschließlich dist/. Die versionierten Browserbibliotheken ermöglichen den CI-Build ohne Paketinstallation.
+
+## Verifikation
+
+- Automatisierte Node-Tests einschließlich neuer Regressionsfälle für Sitzungswechsel, Imports, beschädigten Speicher, Doppelklick, Rückgängig, Fortsetzen, 1RM, Kalorien und Kontolöschung.
+- Build, JavaScript-Syntaxprüfung und Kontrolle referenzierter App-Dateien.
+- Echte Supabase-Tests in zurückgerollter Transaktion: eigenes Speichern, Versionszähler/-konflikt, fremde Eigentümer/Datensätze/Profile, Freundschaften und fremde Annahmeversuche, anonyme Zugriffe und extreme Level-Werte. Keine Testkonten bleiben zurück. Wiederholbar mit tests/database-audit.sql.
+- Reale SQL-Prüfung akzeptiert gültige Pläne und weist fehlende/null-Felder ab; vorhandener öffentlicher Plan bleibt gültig.
+- FORGE aus pausiertem Zustand wiederhergestellt; ACTIVE_HEALTHY bestätigt. Alle sechs öffentlichen Tabellen besitzen RLS. Health-Check ohne Hinweise. Acht Hinweise auf bisher ungenutzte Indizes wurden geprüft; Indizes bleiben erhalten.
 
 ## Grenzen
 
-- Echte Mailzustellung noch nicht eingerichtet/geprüft. EINRICHTUNG.md beschreibt SMTP, die Code-Mailvorlage sowie noch einzutragende Site URL und Redirect-Freigabe.
-- Mobile Ansicht bei 390 Pixeln, Desktop bei 1200 Pixeln mit Chromium/Edge geprüft. Keine Installation auf physischen iPhones/Android-Geräten behauptet; auf euren Geräten abschließend erproben.
-- Supabase-Sicherheitscheck: keine offenen Tabellen/RLS-Probleme. Hinweis auf deaktivierten Schutz gegen bereits geleakte Passwörter; kein kostenpflichtiges Upgrade vorgenommen.
-- Bestehende Community-Demodaten bleiben Demo.
-
-## Änderungen
-
-Konto-Oberfläche, kontogetrennte Speicherung, Synchronisierung mit Versionsprüfung, Freunde, Installation und Offline-Bibliotheken ergänzt. Die Registrierung bestätigt neue Konten mit einem Code direkt in der App. Planfreigaben und private Wochen-Challenges ergänzen die Freunde-Funktion. Unterbrochene Trainings, Wochenziele, Progressionsvorschläge, Übungsnotizen, kg/lb und eine mobile Navigation wurden ergänzt. Die freie Theme-Farbe wurde entfernt; Display-Sperre, Vibration und optionaler Pausenton sind einstellbar. Die dunkel-orange Gestaltung erhielt dezente Tiefen-, Fokus- und Berührungseffekte. Importierter/Cloud-Text wird sicher vor HTML-Darstellung maskiert. Trainingsberechnungen und XP-Regeln wurden beibehalten. Die ursprüngliche einzelne HTML-Datei wurde nicht überschrieben.
+- Supabase-Schutz gegen geleakte Passwörter bleibt deaktiviert. Kein kostenpflichtiger Tarif wurde aktiviert. https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
+- SMTP-/E-Mail-Bestätigung unverändert; keine neue Prüfung echter Mailzustellung.
+- Kein Login mit einem echten Benutzerpasswort. Auth-/Sitzungsabläufe automatisiert simuliert; Datenbankberechtigungen gegen echtes Backend geprüft.
+- Lokale Browserprüfung durch nicht erreichbare Entwicklungsadresse blockiert. Keine physische Android-/iPhone-Installation getestet.
+- npm-Sicherheitsabfrage durch DNS-/Netzwerkbeschränkung blockiert. Bestehende exakt gepinnte Bibliotheken und Lockdatei beibehalten; kein vollständiger aktueller Abhängigkeits-Audit behauptet.
+- Eine Codeprüfung garantiert keine vollständige Fehler- oder Sicherheitslückenfreiheit.

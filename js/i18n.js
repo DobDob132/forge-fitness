@@ -82,6 +82,32 @@ const I18n = (() => {
     '⚙️ Einstellungen':'⚙️ Ρυθμίσεις','Nicht gespeichert':'Δεν αποθηκεύτηκε','🔎 Einstellungen durchsuchen':'🔎 Αναζήτηση ρυθμίσεων','Einstellungsbereiche':'Ενότητες ρυθμίσεων','Allgemein':'Γενικά','Progression':'Πρόοδος','Signale':'Ειδοποιήσεις','Daten & Info':'Δεδομένα & πληροφορίες','Tastenkürzel & Steigerung':'Συντομεύσεις & πρόοδος','Taste für Minimum':'Πλήκτρο ελάχιστου','Taste für Maximum':'Πλήκτρο μέγιστου','Vibrationsmuster':'Μοτίβο δόνησης','Kurz':'Σύντομο','Doppelt':'Διπλό','Kräftig':'Ισχυρό','Ton als Ersatz verwenden':'Ήχος ως εφεδρεία','Visueller Pausenhinweis':'Οπτική ειδοποίηση διαλείμματος','Geräte-Diagnose':'Διάγνωση συσκευής','Installierter App-Modus':'Εγκατεστημένη εφαρμογή','Verfügbar':'Διαθέσιμο','Nicht verfügbar':'Μη διαθέσιμο','Aktiv':'Ενεργό','Im Browser geöffnet':'Άνοιγμα στον browser','Sicherung & Daten':'Αντίγραφο & δεδομένα','Installierte Version':'Εγκατεστημένη έκδοση','Updateinfos ansehen':'Προβολή ενημέρωσης','Alle Änderungen gespeichert':'Όλες οι αλλαγές αποθηκεύτηκαν','Änderungen noch nicht gespeichert':'Οι αλλαγές δεν αποθηκεύτηκαν','Pause beendet':'Το διάλειμμα τελείωσε','Bereit für den nächsten Satz':'Έτοιμος για το επόμενο σετ','Vibrationssignal wurde an das Gerät gesendet.':'Το σήμα δόνησης στάλθηκε στη συσκευή.','Gewicht':'Βάρος','Wiederholungen pro Seite':'Επαναλήψεις ανά πλευρά','Zeit / Ergebnis':'Χρόνος / αποτέλεσμα','Wiederholungen / Info':'Επαναλήψεις / πληροφορίες'
   });
   let language = languages.includes(data?.settings?.language) ? data.settings.language : (localStorage.getItem('forgeLanguage') || 'de');
+  Object.assign(en,{
+    'Schön, dass du da bist.':'Good to see you.','Guten Morgen.':'Good morning.','Zeit, durchzuatmen.':'Time to take a breath.',
+    'Dein Training. In deinem Tempo.':'Your training. At your pace.','Ein Moment für dich':'A moment for yourself',
+    'Kleine Schritte. Dein Fortschritt.':'Small steps. Your progress.','Heute darf es ruhiger sein.':'Take it easy today.',
+    'Heute ist Zeit zum Erholen. Du entscheidest, was dir guttut.':'Time to recover. Choose what feels good for you.',
+    'Deine Woche':'Your week','Jede Einheit zählt. Auch in deinem Tempo.':'Every session counts. At your own pace.',
+    'Dein Wochenziel ist geschafft. Schön, dass du dir Zeit genommen hast.':'Weekly goal reached. Glad you made time for yourself.',
+    'Auch Pausen bringen dich weiter.':'Rest helps you move forward, too.','Durchatmen, erholen, wieder loslegen. Dein Plan lässt dir Raum dafür.':'Breathe, recover, start again. Your plan makes room for it.',
+    'Meine Woche ansehen':'View my week',"Zusammen geht's leichter.":'Better together.',
+    'Teile kleine Erfolge und bleibt gemeinsam dran.':'Share small wins and keep going together.','Zu deinen Freunden':'See your friends','Plan ansehen':'View plan',
+    'Deine Trainingswoche':'Your training week','Training gespeichert':'Workout saved','Pausentag':'Rest day','Training geplant':'Workout planned',
+    'Illustration: entspanntes Training mit einer Kurzhantel':'Illustration: relaxed dumbbell training','Illustration: eine ruhige Pause zum Durchatmen':'Illustration: a quiet moment to breathe'
+  });
+  Object.assign(el,{
+    'Schön, dass du da bist.':'Χαιρόμαστε που είσαι εδώ.','Guten Morgen.':'Καλημέρα.','Zeit, durchzuatmen.':'Ώρα για μια ανάσα.',
+    'Dein Training. In deinem Tempo.':'Η προπόνησή σου. Στον ρυθμό σου.','Ein Moment für dich':'Μια στιγμή για σένα',
+    'Kleine Schritte. Dein Fortschritt.':'Μικρά βήματα. Η πρόοδός σου.','Heute darf es ruhiger sein.':'Σήμερα μπορείς να χαλαρώσεις.',
+    'Heute ist Zeit zum Erholen. Du entscheidest, was dir guttut.':'Ώρα για ξεκούραση. Εσύ αποφασίζεις τι σου κάνει καλό.',
+    'Deine Woche':'Η εβδομάδα σου','Jede Einheit zählt. Auch in deinem Tempo.':'Κάθε προπόνηση μετράει. Στον δικό σου ρυθμό.',
+    'Dein Wochenziel ist geschafft. Schön, dass du dir Zeit genommen hast.':'Πέτυχες τον εβδομαδιαίο στόχο. Μπράβο που αφιέρωσες χρόνο στον εαυτό σου.',
+    'Auch Pausen bringen dich weiter.':'Και η ξεκούραση σε βοηθά να προχωράς.','Durchatmen, erholen, wieder loslegen. Dein Plan lässt dir Raum dafür.':'Πάρε ανάσα, ξεκουράσου, ξεκίνα ξανά. Το πλάνο σου αφήνει χώρο γι’ αυτό.',
+    'Meine Woche ansehen':'Δες την εβδομάδα μου',"Zusammen geht's leichter.":'Μαζί είναι πιο εύκολο.',
+    'Teile kleine Erfolge und bleibt gemeinsam dran.':'Μοιραστείτε μικρές επιτυχίες και συνεχίστε μαζί.','Zu deinen Freunden':'Δες τους φίλους σου','Plan ansehen':'Δες το πλάνο',
+    'Deine Trainingswoche':'Η εβδομάδα προπόνησής σου','Training gespeichert':'Η προπόνηση αποθηκεύτηκε','Pausentag':'Ημέρα ξεκούρασης','Training geplant':'Προγραμματισμένη προπόνηση',
+    'Illustration: entspanntes Training mit einer Kurzhantel':'Εικονογράφηση: χαλαρή προπόνηση με αλτήρα','Illustration: eine ruhige Pause zum Durchatmen':'Εικονογράφηση: μια ήρεμη στιγμή ξεκούρασης'
+  });
   const originals = new WeakMap();
   const attributeOriginals = new WeakMap();
   let observer;
@@ -90,7 +116,7 @@ const I18n = (() => {
   function translate(raw){
     if(language==='de' || typeof raw!=='string')return raw;
     const dict=dictionary(), trimmed=raw.trim();
-    let value=dict[trimmed];
+    let value=Object.hasOwn(dict,trimmed)?dict[trimmed]:null;
     if(!value&&trimmed.startsWith('Meilenstein: '))value=`${language==='el'?'Ορόσημο':'Milestone'}: ${translate(trimmed.slice(13))}`;
     if(!value){const levelUp=trimmed.match(/^🎉 LEVEL UP! Du bist jetzt Level (\d+)!$/);if(levelUp)value=language==='el'?`🎉 ΝΕΟ ΕΠΙΠΕΔΟ! Είσαι τώρα επίπεδο ${levelUp[1]}!`:`🎉 LEVEL UP! You are now level ${levelUp[1]}!`;}
     if(!value){

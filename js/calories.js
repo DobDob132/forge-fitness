@@ -18,6 +18,6 @@ function estimateCalories({activity='strength',intensity='moderate',effort,minut
   return Math.max(0,Math.round(oneMetPerMinute*met*Math.max(0,Number(minutes)||0)));
 }
 function distributeCalories(entries,total){
-  if(!entries?.length)return entries||[];let remaining=Math.max(0,Math.round(total));
-  return entries.map((entry,index)=>{const calories=index===entries.length-1?remaining:Math.round(total/entries.length);remaining-=calories;return {...entry,calories};});
+  if(!entries?.length)return entries||[];const safeTotal=Number.isFinite(total)?Math.max(0,Math.round(total)):0;
+  return entries.map((entry,index)=>({...entry,calories:Math.round(safeTotal*(index+1)/entries.length)-Math.round(safeTotal*index/entries.length)}));
 }
