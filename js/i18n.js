@@ -90,7 +90,7 @@ const I18n = (() => {
   function translate(raw){
     if(language==='de' || typeof raw!=='string')return raw;
     const dict=dictionary(), trimmed=raw.trim();
-    let value=dict[trimmed];
+    let value=Object.hasOwn(dict,trimmed)?dict[trimmed]:null;
     if(!value&&trimmed.startsWith('Meilenstein: '))value=`${language==='el'?'Ορόσημο':'Milestone'}: ${translate(trimmed.slice(13))}`;
     if(!value){const levelUp=trimmed.match(/^🎉 LEVEL UP! Du bist jetzt Level (\d+)!$/);if(levelUp)value=language==='el'?`🎉 ΝΕΟ ΕΠΙΠΕΔΟ! Είσαι τώρα επίπεδο ${levelUp[1]}!`:`🎉 LEVEL UP! You are now level ${levelUp[1]}!`;}
     if(!value){

@@ -53,6 +53,14 @@ Der Wochenrückblick im Challenge-Reiter zählt laufende und in dieser Woche bee
 - Gewichte lassen sich in den Einstellungen zwischen kg und lb umschalten. Gespeichert wird intern weiterhin in kg, damit beim Wechsel keine Trainingsdaten verfälscht werden.
 - Auf Handys bleibt die Hauptnavigation erreichbar am unteren Bildschirmrand.
 
+## Version 1.12.1
+
+- Kontowechsel und Cloud-Synchronisierung gegen veraltete Antworten abgesichert.
+- Importprüfung, lokale Sicherungen und Datenbank-Planprüfung gehärtet.
+- Fortsetzen, Satz-Rückgängig, 1RM und Kalorienberechnung korrigiert.
+- Kontolöschung widerruft Sitzungen; Veröffentlichung prüft Tests und liefert nur App-Dateien aus.
+- Details und verbleibende Grenzen stehen in PRUEFBERICHT.md.
+
 ## Version 1.12.0
 
 - FORGE kann über einen dauerhaft erreichbaren Button direkt geteilt werden; ohne System-Teilen-Menü wird der App-Link kopiert.
